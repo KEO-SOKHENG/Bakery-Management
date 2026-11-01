@@ -73,7 +73,16 @@ class SettingController extends Controller
             abort(401);
         }
 
-        // 1. Password update check
+        // Normalize potential alias parameter names
+        if ($request->filled('password') && !$request->filled('new_password')) {
+            $request->merge(['new_password' => $request->input('password')]);
+        }
+        if ($request->filled('password_confirmation') && !$request->filled('new_password_confirmation')) {
+            $request->merge(['new_password_confirmation' => $request->input('password_confirmation')]);
+        }
+
+        // 1. Optional Password update check (handles standalone or combined with profile update)
+        $passwordUpdated = false;
         if ($request->filled('current_password') || $request->filled('new_password') || $request->filled('new_password_confirmation')) {
             $request->validate([
                 'current_password'          => 'required|string',
@@ -91,6 +100,7 @@ class SettingController extends Controller
             $user->password = Hash::make($request->new_password);
             $user->must_change_password = false;
             $user->save();
+            $passwordUpdated = true;
 
             AuditLogService::log(
                 'password_update',
@@ -98,10 +108,13 @@ class SettingController extends Controller
                 $user
             );
 
-            if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'message' => 'Account password updated successfully!']);
+            // If only password was submitted, return early with confirmation
+            if (!$request->filled('shop_name') && !$request->filled('name') && !$request->filled('shop_phone') && !$request->filled('shop_email') && !$request->hasFile('shop_logo') && !$request->hasFile('avatar')) {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => true, 'message' => 'Account password updated successfully!']);
+                }
+                return redirect()->back()->with('success', 'Account password updated successfully!');
             }
-            return redirect()->back()->with('success', 'Account password updated successfully!');
         }
 
         // Check general settings management permission
@@ -112,10 +125,13 @@ class SettingController extends Controller
             abort(403, 'Unauthorized: You do not have permission to modify system settings.');
         }
 
-        // 2. Validate configuration input
+        // 2. Validate configuration input (supports both Profile and Store branding)
         $validated = $request->validate([
+            'name'                     => 'nullable|string|max:255',
             'shop_name'                => 'nullable|string|max:255',
+            'phone'                    => 'nullable|string|max:50',
             'shop_phone'               => 'nullable|string|max:50',
+            'email'                    => 'nullable|email|max:255',
             'shop_email'               => 'nullable|email|max:255',
             'shop_address'             => 'nullable|string|max:500',
             'tax_rate'                 => 'nullable|numeric|min:0|max:100',
@@ -132,18 +148,36 @@ class SettingController extends Controller
             'expiry_alerts_enabled'    => 'nullable|in:0,1',
             'date_format'              => 'nullable|string|in:DD/MM/YYYY,MM/DD/YYYY,YYYY-MM-DD',
             'language'                 => 'nullable|string|in:EN,KM,en,km',
-            'theme_mode'               => 'nullable|string|in:light,dark,glass',
+            'theme_mode'               => 'nullable|string|in:light,dark',
             'shop_logo'                => 'nullable|image|max:2048',
+            'avatar'                   => 'nullable|image|max:2048',
         ]);
 
-        // Handle shop logo upload if provided
+        $uploadedImageUrl = null;
+        // Handle shop logo or profile avatar upload if provided
         if ($request->hasFile('shop_logo')) {
             $logoFile = $request->file('shop_logo');
             $logoFilename = 'bakery_logo_' . time() . '.' . $logoFile->getClientOriginalExtension();
             $destinationPath = public_path('images');
             File::ensureDirectoryExists($destinationPath);
             $logoFile->move($destinationPath, $logoFilename);
-            SettingsService::set('shop_logo', '/images/' . $logoFilename);
+            $logoPath = '/images/' . $logoFilename;
+            SettingsService::set('shop_logo', $logoPath);
+            SettingsService::set('user_avatar_' . $user->id, $logoPath);
+            SettingsService::set('admin_avatar', $logoPath);
+            $uploadedImageUrl = $logoPath;
+        }
+
+        if ($request->hasFile('avatar')) {
+            $avatarFile = $request->file('avatar');
+            $avatarFilename = 'avatar_' . $user->id . '_' . time() . '.' . $avatarFile->getClientOriginalExtension();
+            $destinationPath = public_path('images/avatars');
+            File::ensureDirectoryExists($destinationPath);
+            $avatarFile->move($destinationPath, $avatarFilename);
+            $avatarPath = '/images/avatars/' . $avatarFilename;
+            SettingsService::set('user_avatar_' . $user->id, $avatarPath);
+            SettingsService::set('admin_avatar', $avatarPath);
+            $uploadedImageUrl = $avatarPath;
         }
 
         $fieldsToUpdate = [
@@ -163,6 +197,30 @@ class SettingController extends Controller
             }
         }
 
+        // Synchronize authenticated user profile fields
+        $userUpdated = false;
+        if ($request->filled('name')) {
+            $user->name = $request->input('name');
+            $userUpdated = true;
+        }
+        if ($request->filled('email')) {
+            $user->email = $request->input('email');
+            $userUpdated = true;
+        } elseif ($request->filled('shop_email')) {
+            $user->email = $request->input('shop_email');
+            $userUpdated = true;
+        }
+        if ($request->filled('phone')) {
+            $user->phone = $request->input('phone');
+            $userUpdated = true;
+        } elseif ($request->filled('shop_phone')) {
+            $user->phone = $request->input('shop_phone');
+            $userUpdated = true;
+        }
+        if ($userUpdated) {
+            $user->save();
+        }
+
         if ($request->filled('language')) {
             $lang = strtolower($request->language);
             Session::put('locale', $lang);
@@ -178,10 +236,18 @@ class SettingController extends Controller
         );
 
         if ($request->expectsJson()) {
+            $successMsg = $passwordUpdated 
+                ? 'Profile, password, and settings saved successfully!' 
+                : 'Profile and store settings saved successfully!';
             return response()->json([
                 'success' => true,
-                'message' => 'System settings saved successfully!',
-                'settings' => $updatedKeys
+                'message' => $successMsg,
+                'settings' => $updatedKeys,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'user_phone' => $user->phone,
+                'avatar_url' => $uploadedImageUrl,
+                'logo_url' => $uploadedImageUrl,
             ]);
         }
 

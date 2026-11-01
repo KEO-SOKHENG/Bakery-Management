@@ -218,11 +218,7 @@
             <div class="profile-info-row">
                 <span class="profile-info-label">Password Policy</span>
                 <span class="profile-info-value">
-                    @if($user->must_change_password)
-                        <span style="color: #d97706; font-weight: 800;">Pending Force Change</span>
-                    @else
-                        <span style="color: #16a34a; font-weight: 700;">Active & Verified</span>
-                    @endif
+                    <span style="color: #16a34a; font-weight: 700;">Active & Verified</span>
                 </span>
             </div>
             @if(!empty($user->custom_permissions))

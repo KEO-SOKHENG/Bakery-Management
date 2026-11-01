@@ -71,4 +71,50 @@ class CategorySafetyTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('categories', ['id' => $category->id]);
     }
+
+    public function test_category_can_be_updated()
+    {
+        $category = Category::create([
+            'name' => 'Original Breads',
+            'description' => 'Original Description',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.categories.update', $category), [
+            'name' => 'Updated Breads',
+            'description' => 'Updated Description',
+            'status' => 'inactive',
+        ]);
+
+        $response->assertRedirect(route('admin.categories'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('categories', [
+            'id' => $category->id,
+            'name' => 'Updated Breads',
+            'description' => 'Updated Description',
+            'status' => 'inactive',
+        ]);
+    }
+
+    public function test_categories_can_be_searched()
+    {
+        Category::create(['name' => 'Artisan Bagels', 'status' => 'active']);
+        Category::create(['name' => 'Sourdough Delights', 'status' => 'active']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.categories', ['search' => 'Bagels']));
+        $response->assertStatus(200);
+        $response->assertSee('Artisan Bagels');
+        $response->assertDontSee('Sourdough Delights');
+    }
+
+    public function test_category_view_renders_edit_and_search_ui()
+    {
+        $category = Category::create(['name' => 'Gluten Free', 'status' => 'active']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.categories'));
+        $response->assertStatus(200);
+        $response->assertSee('id="category_search_input"', false);
+        $response->assertSee('id="edit_category_modal"', false);
+        $response->assertSee('btn-edit-category', false);
+    }
 }

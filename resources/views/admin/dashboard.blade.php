@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Admin Analytics & Dashboard - Bakery Management System')
+@section('body_class', 'is-catalog-page is-dashboard-page')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}?v={{ @filemtime(public_path('css/admin-dashboard.css')) ?: '1.0' }}">
@@ -19,6 +20,8 @@
 @endsection
 
 @section('content')
+<div class="dash-page-container">
+    <div class="dash-scrollable-body" id="dash_scrollable_body">
 <!-- 8 Core KPI Stat Cards Grid (Real Database Metrics Only) -->
 <div class="dash-stat-row">
     <!-- 1. Today's Orders (Primary Card 0) -->
@@ -156,27 +159,27 @@
     <h2 class="section-title">Quick Actions</h2>
     <div class="quick-actions-grid">
         <!-- Add Product -->
-        <a href="{{ route('admin.products') }}" class="quick-action-btn cream">
+        <a href="{{ route('admin.products') }}" class="quick-action-btn cream" id="quick_action_add_product">
             <div class="quick-action-icon-circle">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </div>
             <span>Add Product</span>
         </a>
 
-        <!-- New Walk-in Order -->
-        <a href="{{ route('cashier.dashboard') }}" class="quick-action-btn blue">
+        <!-- POS Terminal -->
+        <a href="{{ route('cashier.dashboard') }}" class="quick-action-btn blue" id="quick_action_pos">
             <div class="quick-action-icon-circle">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             </div>
-            <span>New Walk-in Order</span>
+            <span>POS Terminal</span>
         </a>
 
-        <!-- New Booking Order -->
-        <a href="{{ route('admin.orders') }}" class="quick-action-btn purple">
+        <!-- View Orders -->
+        <a href="{{ route('admin.orders') }}" class="quick-action-btn purple" id="quick_action_orders">
             <div class="quick-action-icon-circle">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </div>
-            <span>New Booking Order</span>
+            <span>View Orders</span>
         </a>
     </div>
 </div>
@@ -532,9 +535,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 @if($statusReady > 0)
                     <div style="width: {{ ($statusReady / $totalAllOrders) * 100 }}%; background: #9333ea;" title="Ready: {{ $statusReady }}"></div>
                 @endif
-                @if($statusDelivery > 0)
-                    <div style="width: {{ ($statusDelivery / $totalAllOrders) * 100 }}%; background: #4f46e5;" title="Delivery: {{ $statusDelivery }}"></div>
-                @endif
                 @if($statusCompleted > 0)
                     <div style="width: {{ ($statusCompleted / $totalAllOrders) * 100 }}%; background: #16a34a;" title="Completed: {{ $statusCompleted }}"></div>
                 @endif
@@ -556,10 +556,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="status-dist-box">
                 <span class="status-dist-label">Ready</span>
                 <span class="status-dist-val" style="color: #9333ea;">{{ number_format($statusReady) }}</span>
-            </div>
-            <div class="status-dist-box">
-                <span class="status-dist-label">Out for Delivery</span>
-                <span class="status-dist-val" style="color: #4f46e5;">{{ number_format($statusDelivery) }}</span>
             </div>
             <div class="status-dist-box">
                 <span class="status-dist-label">Completed</span>
@@ -760,7 +756,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             'completed' => '<span class="status-pill completed">Completed</span>',
                             'preparing', 'baking', 'in progress', 'processing' => '<span class="status-pill inprogress">In Baking</span>',
                             'ready_for_pickup', 'ready' => '<span class="status-pill completed">Ready</span>',
-                            'out_for_delivery' => '<span class="status-pill inprogress">Delivering</span>',
                             'cancelled' => '<span class="status-pill danger" style="background:#fee2e2; color:#dc2626;">Cancelled</span>',
                             default => '<span class="status-pill pending">Pending</span>',
                         };
@@ -795,6 +790,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="card-bottom-action-container">
         <a href="{{ route('admin.orders') }}" class="btn-card-outline" data-lang-key="view_all_orders">{{ __('messages.view_all_orders') }}</a>
+    </div>
+</div>
     </div>
 </div>
 

@@ -38,6 +38,7 @@ class OrderController extends Controller
                       $cq->where('name', $like, "%{$search}%")
                          ->orWhere('phone', $like, "%{$search}%");
                   });
+
                 if (is_numeric($cleanSearch)) {
                     $q->orWhere('id', (int) $cleanSearch);
                 }
@@ -89,7 +90,7 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $orders = $query->orderBy('id', 'desc')->get();
 
         // Summary KPI Metrics (Consolidated single aggregation query)
         $summary = Order::query()
@@ -98,7 +99,6 @@ class OrderController extends Controller
                 COUNT(CASE WHEN order_status = 'pending' THEN 1 END) as pending_count,
                 COUNT(CASE WHEN order_status IN ('preparing', 'baking') THEN 1 END) as preparing_count,
                 COUNT(CASE WHEN order_status IN ('ready_for_pickup', 'ready') THEN 1 END) as ready_count,
-                COUNT(CASE WHEN order_status = 'out_for_delivery' THEN 1 END) as out_for_delivery_count,
                 COUNT(CASE WHEN order_status = 'completed' THEN 1 END) as completed_count,
                 COUNT(CASE WHEN order_status = 'cancelled' THEN 1 END) as cancelled_count,
                 COALESCE(SUM(CASE WHEN order_status = 'completed' THEN total ELSE 0 END), 0) as total_revenue,
@@ -110,7 +110,6 @@ class OrderController extends Controller
         $pendingCount        = (int) ($summary->pending_count ?? 0);
         $preparingCount      = (int) ($summary->preparing_count ?? 0);
         $readyCount          = (int) ($summary->ready_count ?? 0);
-        $outForDeliveryCount = (int) ($summary->out_for_delivery_count ?? 0);
         $completedCount      = (int) ($summary->completed_count ?? 0);
         $cancelledCount      = (int) ($summary->cancelled_count ?? 0);
         $totalRevenue        = (float) ($summary->total_revenue ?? 0.0);
@@ -126,7 +125,6 @@ class OrderController extends Controller
             'pendingCount',
             'preparingCount',
             'readyCount',
-            'outForDeliveryCount',
             'completedCount',
             'cancelledCount',
             'totalRevenue',
@@ -282,7 +280,16 @@ class OrderController extends Controller
                     // Loyalty points
                     if ($customer) {
                         $pointsEarned = (int) floor($grandTotal);
+                        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'loyalty_points_awarded')) {
+                            $order->loyalty_points_awarded = $pointsEarned;
+                            $order->save();
+                        }
                         $customer->addLoyaltyPoints($pointsEarned);
+                    }
+                } else {
+                    if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'loyalty_points_awarded')) {
+                        $order->loyalty_points_awarded = 0;
+                        $order->save();
                     }
                 }
 
@@ -526,13 +533,18 @@ class OrderController extends Controller
                         ]);
                     }
 
-                    // Ensure Payment record exists
-                    if ($lockedOrder->payments()->count() === 0) {
+                    // Ensure Payment record exists for outstanding balance
+                    $alreadyPaidAmount = (float) $lockedOrder->payments()
+                        ->where('payment_status', 'completed')
+                        ->sum('amount');
+                    $outstandingBalance = max(0.0, round((float) $lockedOrder->total - $alreadyPaidAmount, 2));
+
+                    if ($outstandingBalance > 0) {
                         Payment::create([
                             'order_id'          => $lockedOrder->id,
                             'user_id'           => Auth::id(),
                             'payment_method'    => $lockedOrder->payment_method,
-                            'amount'            => $lockedOrder->total,
+                            'amount'            => $outstandingBalance,
                             'payment_status'    => 'completed',
                             'payment_reference' => 'PAY-' . strtoupper(uniqid()),
                             'payment_date'      => now(),
@@ -540,10 +552,17 @@ class OrderController extends Controller
                         ]);
                     }
 
-                    // Award loyalty points if customer attached and not already awarded
-                    if ($lockedOrder->customer) {
+                    // Award loyalty points strictly if customer attached and not already awarded
+                    // Note: Legacy orders with NULL are grandfathered and will not be re-awarded.
+                    if ($lockedOrder->customer_id && $lockedOrder->loyalty_points_awarded === 0) {
                         $points = (int) floor($lockedOrder->total);
-                        $lockedOrder->customer->addLoyaltyPoints($points);
+                        if ($points > 0) {
+                            $lockedOrder->loyalty_points_awarded = $points;
+                            $customer = Customer::lockForUpdate()->find($lockedOrder->customer_id);
+                            if ($customer) {
+                                $customer->addLoyaltyPoints($points);
+                            }
+                        }
                     }
                 } else {
                     $lockedOrder->order_status = $targetStatus;
@@ -631,6 +650,7 @@ class OrderController extends Controller
             }
             return redirect()->back()->with('error', $msg);
         }
+
 
         try {
             DB::transaction(function () use ($order) {

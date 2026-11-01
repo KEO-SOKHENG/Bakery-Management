@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'System Settings - Bakery Management System')
+@section('body_class', 'is-catalog-page is-settings-page')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
@@ -24,6 +25,8 @@
 @endsection
 
 @section('content')
+<div class="settings-page-container">
+    <div class="settings-scrollable-body" id="settings_scrollable_body">
 
 @if(!$canManage)
     <x-alert type="warning">
@@ -44,45 +47,119 @@
      ========================================================================== -->
 <div class="settings-primary-grid">
     
-    <!-- SECTION 1: SHOP INFORMATION -->
-    <x-card title="Shop Information" subtitle="Store details and branding.">
+    <!-- SECTION 1: PROFILE & SHOP INFORMATION -->
+    <x-card id="profile_info" title="Profile & Shop Information">
+        <x-slot:actions>
+            <span class="badge" style="background: rgba(217, 119, 6, 0.12); color: #d97706; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(217, 119, 6, 0.25); text-transform: uppercase;">
+                {{ auth()->check() ? ucfirst(auth()->user()->role) : 'Admin' }}
+            </span>
+        </x-slot:actions>
+
         <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="settings-form" id="form_shop_info">
             @csrf
             <div class="settings-card-body">
-                <x-input name="shop_name" id="input_shop_name" label="Shop Name" :value="$settings['shop_name'] ?? 'Sweet Delights Bakery'" placeholder="Enter bakery name" required :disabled="!$canManage" />
-                <x-input name="shop_phone" id="input_shop_phone" label="Phone Number" :value="$settings['shop_phone'] ?? '+855 23 123 456'" placeholder="+855 ..." required :disabled="!$canManage" />
-                <x-input type="email" name="shop_email" id="input_shop_email" label="Email" :value="$settings['shop_email'] ?? 'info@sweetdelights.com'" placeholder="info@sweetdelights.com" required :disabled="!$canManage" />
-                <x-input name="shop_address" id="input_shop_address" label="Address" :value="$settings['shop_address'] ?? 'Monivong Blvd, Phnom Penh, Cambodia'" placeholder="Full store address" required :disabled="!$canManage" />
+                <!-- User Profile & Account Name -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <x-input name="name" id="input_user_name" label="Full Name" :value="auth()->check() ? auth()->user()->name : 'Admin'" placeholder="Enter full name" required :disabled="!$canManage" />
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                            <span>Login Username</span>
+                            <span class="username-locked-badge">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Read Only
+                            </span>
+                        </label>
+                        <div class="username-locked-wrap">
+                            <input type="text" class="form-control-input username-locked-input" value="{{ auth()->check() ? auth()->user()->username : 'admin' }}" disabled readonly>
+                            <span class="username-locked-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Store Name & Phone -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <x-input name="shop_name" id="input_shop_name" label="Shop Name" :value="$settings['shop_name'] ?? 'Sweet Delights Bakery'" placeholder="Enter bakery name" required :disabled="!$canManage" />
+                    <x-input name="shop_phone" id="input_shop_phone" label="Phone Number" :value="auth()->check() && !empty(auth()->user()->phone) ? auth()->user()->phone : ($settings['shop_phone'] ?? '+855 23 123 456')" placeholder="+855 ..." required :disabled="!$canManage" />
+                </div>
+
+                <!-- Email & Address -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <x-input type="email" name="shop_email" id="input_shop_email" label="Email Address" :value="auth()->check() && !empty(auth()->user()->email) ? auth()->user()->email : ($settings['shop_email'] ?? 'info@sweetdelights.com')" placeholder="user@bakery.com" required :disabled="!$canManage" />
+                    <x-input name="shop_address" id="input_shop_address" label="Address" :value="$settings['shop_address'] ?? 'Siemreap, Cambodia'" placeholder="Full store address" required :disabled="!$canManage" />
+                </div>
+
+                <!-- Avatar / Logo Upload -->
                 <div class="form-group">
-                    <label class="form-label" data-lang-key="shop_logo">Shop Logo</label>
+                    <label class="form-label" data-lang-key="shop_logo">Profile Avatar & Shop Logo</label>
                     <div class="logo-upload-box">
-                        <div class="logo-preview-img" id="logo_preview_box">
-                            @if(!empty($settings['shop_logo']))
-                                <img src="{{ asset($settings['shop_logo']) }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="Logo">
+                        @php
+                            $currentLogoOrAvatar = \App\Services\SettingsService::getString('user_avatar_' . auth()->id(), '')
+                                ?: \App\Services\SettingsService::getString('admin_avatar', '')
+                                ?: ($settings['shop_logo'] ?? '');
+                        @endphp
+                        <div class="logo-preview-img" id="logo_preview_box" style="border-radius: 50%; width: 64px; height: 64px; border: 2px solid rgba(217, 119, 6, 0.35); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.03);">
+                            @if(!empty($currentLogoOrAvatar))
+                                <img src="{{ asset($currentLogoOrAvatar) }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Avatar / Logo">
                             @else
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             @endif
                         </div>
                         <div class="logo-upload-info">
                             @if($canManage)
                                 <label for="shop_logo_input" class="btn btn-sm btn-outline" style="cursor: pointer; margin-bottom: 0.25rem; display: inline-flex; align-items: center; gap: 0.35rem;">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                    <span data-lang-key="upload_new_logo">Upload Logo</span>
+                                    <span data-lang-key="upload_new_logo">Upload Avatar / Logo</span>
                                 </label>
                                 <input type="file" name="shop_logo" id="shop_logo_input" accept="image/*" style="display: none;">
                             @endif
-                            <span style="font-size: 0.75rem; color: var(--text-muted, #9ca3af);">PNG, JPG or SVG (Max 2MB)</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted, #9ca3af);">PNG, JPG, WEBP (Max 2MB)</span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Password Change Drawer (Optional) -->
+                @if($canManage)
+                    <div style="background: rgba(217, 119, 6, 0.05); border: 1px solid rgba(217, 119, 6, 0.2); border-radius: 12px; padding: 0.85rem 1rem; margin-top: 0.25rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" id="btn_toggle_profile_pwd">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(217, 119, 6, 0.15); color: #d97706; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </div>
+                                <div style="font-size: 0.875rem; font-weight: 700; color: var(--text-title, #29150d);">Change Password</div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" style="border-radius: 20px; font-size: 0.75rem; padding: 4px 12px; display: inline-flex; align-items: center; gap: 4px;" id="btn_pwd_toggle_label">
+                                <span id="pwd_toggle_text">Set Password</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="pwd_toggle_arrow" style="transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                        </div>
+                        
+                        <div id="profile_pwd_fields" style="display: none; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px dashed rgba(217, 119, 6, 0.25);">
+                            <div class="form-group" style="margin-bottom: 0.85rem;">
+                                <label class="form-label" for="input_current_password" style="font-size: 0.825rem; font-weight: 600;">Current Password</label>
+                                <input type="password" name="current_password" id="input_current_password" class="form-control-input" placeholder="Enter current password" autocomplete="current-password">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="input_new_password" style="font-size: 0.825rem; font-weight: 600;">New Password</label>
+                                    <input type="password" name="new_password" id="input_new_password" class="form-control-input" placeholder="Min 6 characters" autocomplete="new-password">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="input_new_password_confirmation" style="font-size: 0.825rem; font-weight: 600;">Confirm Password</label>
+                                    <input type="password" name="new_password_confirmation" id="input_new_password_confirmation" class="form-control-input" placeholder="Repeat new password" autocomplete="new-password">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             @if($canManage)
                 <div class="card-footer" style="padding: 1rem 0 0 0; border-top: 1px solid var(--border-color, #eee9e0); margin-top: auto; display: flex; justify-content: flex-end;">
                     <x-button type="submit" variant="primary" id="btn_save_shop_info">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                        <span data-lang-key="save_changes">Save Changes</span>
+                        <span data-lang-key="save_changes">Save Profile & Settings</span>
                     </x-button>
                 </div>
             @endif
@@ -90,7 +167,7 @@
     </x-card>
 
     <!-- SECTION 2: TAX & DISCOUNT -->
-    <x-card title="Tax & Discount" subtitle="Default tax and promotional discount settings.">
+    <x-card title="Tax & Discount">
         <form action="{{ route('admin.settings.update') }}" method="POST" class="settings-form" id="form_tax_discount">
             @csrf
             <div class="settings-card-body">
@@ -117,7 +194,7 @@
 <div class="settings-secondary-grid">
 
     <!-- Card 3: Receipt Configuration -->
-    <x-card title="Receipt Configuration" subtitle="Custom receipt header and footer messages">
+    <x-card title="Receipt Configuration">
         <form action="{{ route('admin.settings.update') }}" method="POST" class="settings-form" id="form_receipt">
             @csrf
             <div class="settings-card-body">
@@ -143,7 +220,7 @@
     </x-card>
 
     <!-- Card 4: General Preferences -->
-    <x-card title="General Preferences" subtitle="Currency, date formats, and language settings">
+    <x-card title="General Preferences">
         <form action="{{ route('admin.settings.update') }}" method="POST" class="settings-form" id="form_general">
             @csrf
             <div class="settings-card-body">
@@ -176,7 +253,7 @@
     </x-card>
 
     <!-- Card 5: Business Hours & Operations -->
-    <x-card title="Business Hours & Operations" subtitle="Store operating schedule and inventory reorder warnings">
+    <x-card title="Business Hours & Operations">
         <form action="{{ route('admin.settings.update') }}" method="POST" class="settings-form" id="form_operations">
             @csrf
             <div class="settings-card-body">
@@ -185,8 +262,8 @@
                     <x-input type="time" name="closing_time" id="input_closing_time" label="Closing Time" :value="$settings['closing_time'] ?? '20:00'" required :disabled="!$canManage" />
                 </div>
 
-                <x-input type="number" name="low_stock_threshold" id="input_low_stock_threshold" label="Default Low-Stock Threshold" step="0.5" min="0" max="10000" :value="$settings['low_stock_threshold'] ?? '5'" help="Fallback threshold for raw ingredients without specific minimum levels." required :disabled="!$canManage" />
-                <x-input type="number" name="expiry_warning_days" id="input_expiry_warning_days" label="Expiry Warning Window (Days)" min="1" max="90" :value="$settings['expiry_warning_days'] ?? '3'" help="Days before ingredient expiration to trigger proactive notifications." required :disabled="!$canManage" />
+                <x-input type="number" name="low_stock_threshold" id="input_low_stock_threshold" label="Default Low-Stock Threshold" step="0.5" min="0" max="10000" :value="$settings['low_stock_threshold'] ?? '5'"  required :disabled="!$canManage" />
+                <x-input type="number" name="expiry_warning_days" id="input_expiry_warning_days" label="Expiry Warning Window (Days)" min="1" max="90" :value="$settings['expiry_warning_days'] ?? '3'"  required :disabled="!$canManage" />
             </div>
 
             @if($canManage)
@@ -201,7 +278,7 @@
     </x-card>
 
     <!-- Card 6: Appearance & Alerts -->
-    <x-card title="Appearance & Display" subtitle="Application visual theme and notification alert preferences">
+    <x-card title="Appearance & Display">
         <form action="{{ route('admin.settings.update') }}" method="POST" class="settings-form" id="form_appearance">
             @csrf
             <input type="hidden" name="theme_mode" id="theme_mode_hidden_input" value="{{ $settings['theme_mode'] ?? 'light' }}">
@@ -218,17 +295,13 @@
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                             <span data-lang-key="dark">Dark</span>
                         </button>
-                        <button type="button" class="segmented-option {{ ($settings['theme_mode'] ?? '') === 'glass' ? 'active' : '' }}" data-theme="glass">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                            <span data-lang-key="glass">Glass</span>
-                        </button>
                     </div>
                 </div>
 
                 <div class="ios-switch-row" style="margin-top: 0.5rem;">
                     <div>
                         <div class="ios-switch-label" data-lang-key="system_notifications">System Notifications</div>
-                        <div class="ios-switch-subtitle" data-lang-key="notifications_sub">Enable low stock & new order alert popups</div>
+                        
                     </div>
                     <label class="ios-switch">
                         <input type="checkbox" name="notifications_enabled" value="1" id="notifications_toggle" {{ ($settings['notifications_enabled'] ?? '1') == '1' ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
@@ -239,7 +312,7 @@
                 <div class="ios-switch-row">
                     <div>
                         <div class="ios-switch-label" data-lang-key="low_stock_alerts">Low Stock Alerts</div>
-                        <div class="ios-switch-subtitle" data-lang-key="low_stock_alerts_sub">Alert when ingredients fall below reorder level</div>
+                        
                     </div>
                     <label class="ios-switch">
                         <input type="checkbox" name="low_stock_alerts_enabled" value="1" id="low_stock_toggle" {{ ($settings['low_stock_alerts_enabled'] ?? '1') == '1' ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
@@ -250,7 +323,7 @@
                 <div class="ios-switch-row">
                     <div>
                         <div class="ios-switch-label" data-lang-key="expiry_alerts">Expiry Date Alerts</div>
-                        <div class="ios-switch-subtitle" data-lang-key="expiry_alerts_sub">Alert when ingredients near their expiration date</div>
+                        
                     </div>
                     <label class="ios-switch">
                         <input type="checkbox" name="expiry_alerts_enabled" value="1" id="expiry_alerts_toggle" {{ ($settings['expiry_alerts_enabled'] ?? '1') == '1' ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
@@ -272,14 +345,14 @@
 
     <!-- Card 7: System Backup & Restore (Admin Only) -->
     @if($isAdmin)
-        <x-card title="System Backup & Restore" subtitle="Export store configuration backups or restore settings" id="card_backup_restore">
+        <x-card title="System Backup & Restore" id="card_backup_restore">
             <div class="settings-card-body">
                 <!-- Backup Creation -->
                 <div style="padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-color, #eee9e0);">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
                         <div>
                             <div style="font-size: 0.875rem; font-weight: 700; color: var(--text-title);" data-lang-key="download_backup">System Configuration Backup</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted, #71717a);" data-lang-key="backup_description">Downloads verified JSON containing store settings, categories, and catalog metadata.</div>
+                            
                         </div>
                         <form action="{{ route('admin.settings.backup') }}" method="POST" id="form_backup">
                             @csrf
@@ -300,9 +373,9 @@
                     </div>
 
                     <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-                        <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" name="confirm_restore" id="checkbox_confirm_restore" value="1" required style="margin-top: 0.2rem;">
-                            <span style="font-size: 0.75rem; font-weight: 600; color: #dc2626;" data-lang-key="restore_warning">I confirm that I want to restore system configurations. Current store parameters will be overwritten.</span>
+                        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; margin: 0;">
+                            <input type="checkbox" name="confirm_restore" id="checkbox_confirm_restore" value="1" required style="cursor: pointer; flex-shrink: 0; width: 16px; height: 16px;">
+                            <span style="font-size: 0.78rem; font-weight: 600; color: #dc2626;" data-lang-key="restore_warning">I confirm that I want to restore system configurations. Current store parameters will be overwritten.</span>
                         </label>
                     </div>
 
@@ -317,6 +390,8 @@
         </x-card>
     @endif
 
+</div>
+    </div>
 </div>
 @endsection
 

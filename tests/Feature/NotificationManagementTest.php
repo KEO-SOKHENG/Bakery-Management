@@ -602,7 +602,6 @@ class NotificationManagementTest extends TestCase
         $this->assertEquals('Order Ready', __('messages.order_ready'));
         $this->assertEquals('Production Completed', __('messages.production_completed'));
         $this->assertEquals('Purchase Order Received', __('messages.purchase_order_received'));
-        $this->assertEquals('Delivery Reminder', __('messages.delivery_reminder'));
         $this->assertEquals('Promotion', __('messages.promotion'));
         $this->assertEquals('Mark as unread', __('messages.mark_as_unread'));
 
@@ -617,7 +616,6 @@ class NotificationManagementTest extends TestCase
         $this->assertEquals('ការបញ្ជាទិញរួចរាល់', __('messages.order_ready'));
         $this->assertEquals('ការផលិតបានបញ្ចប់', __('messages.production_completed'));
         $this->assertEquals('បានទទួលការបញ្ជាទិញទំនិញចូល', __('messages.purchase_order_received'));
-        $this->assertEquals('ការរំលឹកការដឹកជញ្ជូន', __('messages.delivery_reminder'));
         $this->assertEquals('ការផ្សព្វផ្សាយ', __('messages.promotion'));
         $this->assertEquals('កំណត់ថាមិនទាន់អាន', __('messages.mark_as_unread'));
     }

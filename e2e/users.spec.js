@@ -73,8 +73,8 @@ test.describe('User & Staff Management + Roles & Permissions Module', () => {
     test('4. Admin can open permissions modal and view effective permissions', async ({ page }) => {
         await page.goto('/admin/users');
 
-        // Click permissions icon on the first non-admin user row or cashier
-        await page.locator('.btn-more-toggle').first().click();
+        // Click edit on the first user row and open permissions
+        await page.locator('.btn-edit-user').first().click();
         const permBtn = page.locator('.btn-permissions-user').first();
         await expect(permBtn).toBeVisible();
         await permBtn.click();
@@ -92,8 +92,8 @@ test.describe('User & Staff Management + Roles & Permissions Module', () => {
     test('5. Admin can open reset password modal', async ({ page }) => {
         await page.goto('/admin/users');
 
-        // Click reset password on first user
-        await page.locator('.btn-more-toggle').first().click();
+        // Click edit on first user and open reset password modal
+        await page.locator('.btn-edit-user').first().click();
         const resetBtn = page.locator('.btn-reset-pwd-user').first();
         await expect(resetBtn).toBeVisible();
         await resetBtn.click();

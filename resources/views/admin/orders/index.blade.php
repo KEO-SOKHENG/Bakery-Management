@@ -129,7 +129,6 @@
                             'completed' => '<span class="status-badge status-completed"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Completed</span>',
                             'preparing' => '<span class="status-badge status-preparing"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/></svg> Preparing</span>',
                             'ready_for_pickup' => '<span class="status-badge status-ready"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> Ready</span>',
-                            'out_for_delivery' => '<span class="status-badge status-delivery"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Delivery</span>',
                             'cancelled' => '<span class="status-badge status-cancelled"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancelled</span>',
                             default => '<span class="status-badge status-pending"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending</span>',
                         };
@@ -228,12 +227,7 @@
         </table>
         </div>
 
-        <!-- Pagination -->
-        @if($orders->hasPages())
-            <div class="orders-pagination-wrapper">
-                {{ $orders->links() }}
-            </div>
-        @endif
+
     </div>
 
     <!-- Simple Order Detail Modal Card ("Cart") -->
@@ -307,8 +301,12 @@
                     </div>
                 </div>
 
-                <!-- Actions: Simple Close Button -->
-                <div class="order-detail-modal-actions">
+                <!-- Actions: Print Receipt & Close Buttons -->
+                <div class="order-detail-modal-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+                    <button type="button" id="btn_print_order_receipt" onclick="printOrderReceipt()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.15rem; font-size: 0.875rem; font-weight: 600; border-radius: 8px; cursor: pointer;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        <span>Print Receipt</span>
+                    </button>
                     <button type="button" onclick="closeOrderDetailModal()" class="btn-order-detail-close">
                         Close
                     </button>
@@ -317,12 +315,121 @@
         </div>
     </div>
 
+    <!-- Isolated Thermal Receipt Print Container (Used exclusively when printing an order receipt) -->
+    <div id="thermal_slip_print_area" style="display: none;">
+        <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.35; color: #000; width: 72mm; margin: 0 auto; padding: 12px 6px;">
+            <div style="text-align: center; margin-bottom: 8px;">
+                <div style="font-size: 15px; font-weight: bold; text-transform: uppercase;" id="thermal_bakery_name">{{ \App\Models\Setting::get('shop_name', 'Moon Cake Bakery') }}</div>
+                <div style="font-size: 10.5px;" id="thermal_bakery_address">{{ \App\Models\Setting::get('shop_address', 'Phnom Penh, Cambodia') }}</div>
+                <div style="font-size: 10.5px;" id="thermal_bakery_phone">Tel: {{ \App\Models\Setting::get('shop_phone', '+855 12 345 678') }}</div>
+                <div style="font-size: 10.5px; margin-top: 2px; font-style: italic;">Official Customer Receipt</div>
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>Order: <strong id="thermal_order_num">#0</strong></span>
+                <span id="thermal_order_code">ORD-0000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>Date: <span id="thermal_order_date"></span></span>
+            </div>
+            <div style="font-size: 11px;">
+                <span>Customer: <strong id="thermal_customer_name">Walk-in Customer</strong></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>Payment: <strong id="thermal_payment_method">CASH</strong></span>
+                <span>Status: <strong id="thermal_payment_status">PAID</strong></span>
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="border-bottom: 1px dashed #000;">
+                        <th style="text-align: left; padding: 2px 0;">Item</th>
+                        <th style="text-align: center; padding: 2px 0;">Qty</th>
+                        <th style="text-align: right; padding: 2px 0;">Price</th>
+                        <th style="text-align: right; padding: 2px 0;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="thermal_items_body">
+                </tbody>
+            </table>
+            <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>Subtotal:</span>
+                <span id="thermal_subtotal">$0.00</span>
+            </div>
+            <div id="thermal_discount_row" style="display: none; justify-content: space-between; font-size: 11px;">
+                <span>Discount:</span>
+                <span id="thermal_discount">-$0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span>Tax:</span>
+                <span id="thermal_tax">+$0.00</span>
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold;">
+                <span>Total Amount:</span>
+                <span id="thermal_total">$0.00</span>
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+            <div style="text-align: center; font-size: 10.5px; margin-top: 8px;">
+                Thank you for your purchase!<br>Please visit us again.
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentModalOrder = null;
+
+        function printOrderReceipt() {
+            if (!currentModalOrder) return;
+
+            document.getElementById('thermal_order_num').textContent = currentModalOrder.order_number || `#${currentModalOrder.id}`;
+            document.getElementById('thermal_order_code').textContent = currentModalOrder.order_code || '';
+            document.getElementById('thermal_order_date').textContent = currentModalOrder.date || '';
+            document.getElementById('thermal_customer_name').textContent = currentModalOrder.customer_name || 'Walk-in Customer';
+            document.getElementById('thermal_payment_method').textContent = (currentModalOrder.payment_method || 'CASH').toUpperCase();
+            document.getElementById('thermal_payment_status').textContent = (currentModalOrder.payment_status || 'PAID').toUpperCase();
+
+            const tbody = document.getElementById('thermal_items_body');
+            tbody.innerHTML = '';
+            if (currentModalOrder.items && currentModalOrder.items.length > 0) {
+                currentModalOrder.items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="text-align: left; padding: 2px 0;">${item.name}</td>
+                        <td style="text-align: center; padding: 2px 0;">${item.quantity}</td>
+                        <td style="text-align: right; padding: 2px 0;">${item.price}</td>
+                        <td style="text-align: right; padding: 2px 0;">${item.subtotal}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('thermal_subtotal').textContent = currentModalOrder.subtotal || '$0.00';
+            const discRow = document.getElementById('thermal_discount_row');
+            if (currentModalOrder.discount && currentModalOrder.discount > 0) {
+                document.getElementById('thermal_discount').textContent = `-${currentModalOrder.discount_formatted}`;
+                discRow.style.display = 'flex';
+            } else {
+                discRow.style.display = 'none';
+            }
+            document.getElementById('thermal_tax').textContent = currentModalOrder.tax || '$0.00';
+            document.getElementById('thermal_total').textContent = currentModalOrder.total || '$0.00';
+
+            const printArea = document.getElementById('thermal_slip_print_area');
+            if (printArea) {
+                printArea.style.display = 'block';
+                window.print();
+                printArea.style.display = 'none';
+            }
+        }
+
         function openOrderDetailModal(rowEl) {
             const rawData = rowEl.getAttribute('data-order');
             if (!rawData) return;
             try {
                 const order = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+                currentModalOrder = order;
                 
                 document.getElementById('modal_order_number').textContent = order.order_number || `#${order.id}`;
                 document.getElementById('modal_order_date').textContent = order.date || '';
@@ -476,7 +583,7 @@
                         <strong id="preview_orders_count" class="purge-preview-count">Loading...</strong>
                     </div>
                     <div class="purge-preview-sub">
-                        <span>Includes linked items & sales records</span>
+                        <span>Includes linked items and sales records</span>
                         <span id="preview_sub_counts">...</span>
                     </div>
                 </div>

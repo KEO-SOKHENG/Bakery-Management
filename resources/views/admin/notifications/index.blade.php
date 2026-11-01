@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Notification Center - Bakery Management')
+@section('body_class', 'is-catalog-page is-settings-page')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/notifications.css') }}?v={{ @filemtime(public_path('css/notifications.css')) ?: '1.0' }}">
@@ -98,12 +99,6 @@
     <div class="notif-feed-card">
         <div class="notif-feed-header">
             <div class="notif-feed-header-left">
-                <label class="notif-select-all-label" title="Select all on this page">
-                    <input type="checkbox" id="select_all_checkbox" onchange="toggleSelectAll(this.checked);">
-                    <span class="custom-checkbox"></span>
-                    <span class="select-all-text" data-lang-key="select_all">{{ __('messages.select_all') ?? 'Select All' }}</span>
-                </label>
-                <span class="notif-feed-divider"></span>
                 <span class="notif-feed-title" data-lang-key="notification_activity">{{ __('messages.notification_activity') ?? 'Notification Activity' }}</span>
             </div>
             <div class="notif-feed-header-right">
@@ -130,11 +125,6 @@
                      data-url="{{ $notif->action_url ?: '' }}"
                      onclick="handleCardClick(event, {{ $notif->id }}, '{{ $notif->action_url ?: '' }}');">
                     
-                    <!-- Multi-select Checkbox -->
-                    <label class="notif-check-label" onclick="event.stopPropagation();" title="Select for bulk action">
-                        <input type="checkbox" class="notif-row-checkbox" value="{{ $notif->id }}" onchange="handleRowSelect();">
-                        <span class="custom-checkbox"></span>
-                    </label>
 
                     <!-- Category / Severity Icon Box -->
                     <div class="notif-row-icon {{ $sev }} {{ $typeClass }}">
@@ -212,31 +202,7 @@
             @endforelse
         </div>
 
-        <!-- Sticky / Floating Bulk Action Toolbar -->
-        <div class="notif-bulk-toolbar" id="notif_bulk_toolbar" style="display: none;">
-            <div class="bulk-toolbar-left">
-                <span class="bulk-selected-pill">
-                    <span id="bulk_selected_count">0</span> <span data-lang-key="selected">{{ __('messages.selected') ?? 'selected' }}</span>
-                </span>
-            </div>
-            <div class="bulk-toolbar-actions">
-                <button type="button" class="bulk-btn bulk-btn-read" onclick="bulkMarkRead();">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span data-lang-key="mark_selected_read">{{ __('messages.mark_selected_read') ?? 'Mark as Read' }}</span>
-                </button>
-                <button type="button" class="bulk-btn bulk-btn-unread" onclick="bulkMarkUnread();">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span data-lang-key="mark_selected_unread">{{ __('messages.mark_selected_unread') ?? 'Mark as Unread' }}</span>
-                </button>
-                <button type="button" class="bulk-btn bulk-btn-delete" onclick="bulkDelete();">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    <span data-lang-key="delete_selected">{{ __('messages.delete_selected') ?? 'Delete Selected' }}</span>
-                </button>
-                <button type="button" class="bulk-btn bulk-btn-clear" onclick="clearSelection();" title="Clear selection">
-                    &times; <span data-lang-key="clear_selection">{{ __('messages.clear_selection') ?? 'Clear' }}</span>
-                </button>
-            </div>
-        </div>
+
 
     </div>
 </div>
@@ -416,7 +382,6 @@
                     row.style.transform = 'translateY(-8px)';
                     setTimeout(() => {
                         row.remove();
-                        handleRowSelect();
                     }, 220);
                 }
                 syncBadges(data.unread_count);
@@ -433,160 +398,6 @@
             });
         } else if (confirm('Are you sure you want to dismiss this notification?')) {
             executeDelete();
-        }
-    }
-
-    // Bulk selection handlers
-    function toggleSelectAll(checked) {
-        document.querySelectorAll('.notif-row-checkbox').forEach(cb => {
-            cb.checked = checked;
-        });
-        updateBulkToolbar();
-    }
-
-    function handleRowSelect() {
-        const allBoxes = document.querySelectorAll('.notif-row-checkbox');
-        const checkedBoxes = document.querySelectorAll('.notif-row-checkbox:checked');
-        const selectAllBox = document.getElementById('select_all_checkbox');
-        if (selectAllBox && allBoxes.length > 0) {
-            selectAllBox.checked = (allBoxes.length === checkedBoxes.length);
-        }
-        updateBulkToolbar();
-    }
-
-    function updateBulkToolbar() {
-        const checkedBoxes = document.querySelectorAll('.notif-row-checkbox:checked');
-        const toolbar = document.getElementById('notif_bulk_toolbar');
-        const countSpan = document.getElementById('bulk_selected_count');
-        if (toolbar) {
-            if (checkedBoxes.length > 0) {
-                toolbar.style.display = 'flex';
-                if (countSpan) countSpan.textContent = checkedBoxes.length;
-            } else {
-                toolbar.style.display = 'none';
-            }
-        }
-    }
-
-    function clearSelection() {
-        document.querySelectorAll('.notif-row-checkbox').forEach(cb => cb.checked = false);
-        const selectAllBox = document.getElementById('select_all_checkbox');
-        if (selectAllBox) selectAllBox.checked = false;
-        updateBulkToolbar();
-    }
-
-    function getSelectedIds() {
-        return Array.from(document.querySelectorAll('.notif-row-checkbox:checked')).map(cb => cb.value);
-    }
-
-    function bulkMarkRead() {
-        const ids = getSelectedIds();
-        if (ids.length === 0) return;
-
-        fetch('{{ route('notifications.bulkRead') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken || '',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ ids: ids })
-        }).then(res => res.json()).then(data => {
-            ids.forEach(id => {
-                const row = document.getElementById(`notif_row_${id}`);
-                if (row) {
-                    row.classList.remove('unread');
-                    const ind = row.querySelector('.notif-unread-indicator');
-                    if (ind) ind.remove();
-                    const readBtn = document.getElementById(`btn_read_${id}`);
-                    if (readBtn) {
-                        readBtn.outerHTML = `<button type="button" class="btn-row-action btn-row-toggle is-read" onclick="markRowUnread(${id});" id="btn_unread_${id}" title="Mark as unread">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span class="btn-action-label" data-lang-key="mark_as_unread">Mark as unread</span>
-                        </button>`;
-                    }
-                }
-            });
-            syncBadges(data.unread_count);
-            clearSelection();
-        }).catch(err => console.error(err));
-    }
-
-    function bulkMarkUnread() {
-        const ids = getSelectedIds();
-        if (ids.length === 0) return;
-
-        fetch('{{ route('notifications.bulkUnread') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken || '',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ ids: ids })
-        }).then(res => res.json()).then(data => {
-            ids.forEach(id => {
-                const row = document.getElementById(`notif_row_${id}`);
-                if (row) {
-                    row.classList.add('unread');
-                    const meta = row.querySelector('.notif-row-meta');
-                    if (meta && !meta.querySelector('.notif-unread-indicator')) {
-                        const ind = document.createElement('span');
-                        ind.className = 'notif-unread-indicator';
-                        ind.innerHTML = '<span class="unread-pulse"></span> <span data-lang-key="unread">Unread</span>';
-                        meta.appendChild(ind);
-                    }
-                    const unreadBtn = document.getElementById(`btn_unread_${id}`);
-                    if (unreadBtn) {
-                        unreadBtn.outerHTML = `<button type="button" class="btn-row-action btn-row-toggle" onclick="markRowRead(${id});" id="btn_read_${id}" title="Mark as read">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span class="btn-action-label" data-lang-key="mark_as_read">Mark as read</span>
-                        </button>`;
-                    }
-                }
-            });
-            syncBadges(data.unread_count);
-            clearSelection();
-        }).catch(err => console.error(err));
-    }
-
-    function bulkDelete() {
-        const ids = getSelectedIds();
-        if (ids.length === 0) return;
-
-        const executeBulkDelete = () => {
-            fetch('{{ route('notifications.bulkDelete') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken || '',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ ids: ids })
-            }).then(res => res.json()).then(data => {
-                ids.forEach(id => {
-                    const row = document.getElementById(`notif_row_${id}`);
-                    if (row) {
-                        row.style.opacity = '0';
-                        row.style.transform = 'translateY(-8px)';
-                        setTimeout(() => row.remove(), 220);
-                    }
-                });
-                syncBadges(data.unread_count);
-                clearSelection();
-            }).catch(err => console.error(err));
-        };
-
-        if (typeof window.showConfirmDialog === 'function') {
-            window.showConfirmDialog({
-                title: 'Dismiss Notifications',
-                message: `Are you sure you want to dismiss ${ids.length} selected notifications?`,
-                confirmText: 'Dismiss All',
-                isDanger: true,
-                onConfirm: executeBulkDelete
-            });
-        } else if (confirm(`Are you sure you want to dismiss ${ids.length} selected notifications?`)) {
-            executeBulkDelete();
         }
     }
 

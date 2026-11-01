@@ -52,6 +52,28 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 showToast(`${cardTitle} updated successfully!`);
+                if (data.avatar_url || data.logo_url) {
+                    const newUrl = data.avatar_url || data.logo_url;
+                    const pill = document.getElementById('user_profile_pill');
+                    if (pill) {
+                        pill.innerHTML = `<img src="${newUrl}" alt="Avatar" class="user-avatar-circle-img" id="header_user_avatar_img">`;
+                    }
+                    const dropdownAvatar = document.querySelector('.user-dropdown-header img, .user-dropdown-avatar-wrap img, .user-dropdown-header div');
+                    if (dropdownAvatar) {
+                        dropdownAvatar.outerHTML = `<img src="${newUrl}" alt="User" class="user-dropdown-avatar-img">`;
+                    }
+                }
+                if (data.user_name) {
+                    const nameEls = document.querySelectorAll('.user-dropdown-name');
+                    nameEls.forEach(el => el.textContent = data.user_name);
+                }
+                if (data.user_email) {
+                    const emailEls = document.querySelectorAll('.user-dropdown-email');
+                    emailEls.forEach(el => {
+                        el.textContent = data.user_email;
+                        el.setAttribute('title', data.user_email);
+                    });
+                }
                 if (formData.has('language') && window.applyLanguage) {
                     window.applyLanguage(formData.get('language'));
                 }
@@ -72,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    logoPreviewBox.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="Shop Logo">`;
+                    logoPreviewBox.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Avatar / Logo">`;
                     showToast('New logo selected! Click Save Changes to apply.');
                 };
                 reader.readAsDataURL(file);
@@ -117,5 +139,41 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast(`System notifications turned ${status}`);
         });
     }
+
+    // 7. Profile Password Accordion Toggle
+    const pwdToggleBtn = document.getElementById('btn_toggle_profile_pwd');
+    const pwdFields = document.getElementById('profile_pwd_fields');
+    const pwdToggleText = document.getElementById('pwd_toggle_text');
+    const pwdToggleArrow = document.getElementById('pwd_toggle_arrow');
+
+    if (pwdToggleBtn && pwdFields) {
+        pwdToggleBtn.addEventListener('click', function(e) {
+            if (e.target.tagName === 'INPUT') return;
+            const isHidden = pwdFields.style.display === 'none' || !pwdFields.style.display;
+            pwdFields.style.display = isHidden ? 'block' : 'none';
+            if (pwdToggleText) pwdToggleText.textContent = isHidden ? 'Cancel' : 'Set Password';
+            if (pwdToggleArrow) pwdToggleArrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+    }
+
+    // 8. Hash Anchor Smooth Scroll & Highlight (#profile_info)
+    function handleProfileHash() {
+        const hash = window.location.hash;
+        if (hash === '#profile_info' || hash === '#profile') {
+            const profileCard = document.getElementById('profile_info');
+            if (profileCard) {
+                profileCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                profileCard.classList.remove('highlight-card');
+                void profileCard.offsetWidth; // Trigger reflow for animation
+                profileCard.classList.add('highlight-card');
+                setTimeout(() => {
+                    profileCard.classList.remove('highlight-card');
+                }, 3500);
+            }
+        }
+    }
+
+    handleProfileHash();
+    window.addEventListener('hashchange', handleProfileHash);
 });
 

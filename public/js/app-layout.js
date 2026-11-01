@@ -312,13 +312,14 @@
             });
 
             // Header Global Search Filter for Page Tables & Lists
-            const searchInput = document.getElementById('global_header_search') || document.getElementById('order_search_input');
+            const searchInput = document.getElementById('global_header_search') || document.getElementById('order_search_input') || document.getElementById('category_search_input');
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const query = this.value.toLowerCase().trim();
                     const tableRows = document.querySelectorAll('table tbody tr');
                     const stockItems = document.querySelectorAll('.stock-alert-item');
                     const productCards = document.querySelectorAll('.pos-product-card, .product-card');
+                    const categoryCards = document.querySelectorAll('.category-card');
 
                     tableRows.forEach(row => {
                         const text = row.textContent.toLowerCase();
@@ -331,6 +332,11 @@
                     });
 
                     productCards.forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        card.style.display = text.includes(query) ? '' : 'none';
+                    });
+
+                    categoryCards.forEach(card => {
                         const text = card.textContent.toLowerCase();
                         card.style.display = text.includes(query) ? '' : 'none';
                     });

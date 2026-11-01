@@ -170,6 +170,130 @@
             background: rgba(255, 255, 255, 0.08) !important;
             color: #cbd5e1 !important;
         }
+
+        .create-po-modal-card,
+        .po-modal-card {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        .create-po-modal-card::-webkit-scrollbar,
+        .po-modal-card::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+
+        /* Custom Floating Alert / Toast Notification */
+        .po-floating-toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-24px) scale(0.96);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 9999999;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 1.25rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.16), 0 4px 16px rgba(245, 158, 11, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #0f172a;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s;
+            max-width: min(520px, 92vw);
+            box-sizing: border-box;
+        }
+
+        .po-floating-toast.is-visible {
+            transform: translateX(-50%) translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .po-floating-toast.is-shaking {
+            animation: poToastShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes poToastShake {
+            10%, 90% { transform: translateX(calc(-50% - 2px)) translateY(0) scale(1); }
+            20%, 80% { transform: translateX(calc(-50% + 4px)) translateY(0) scale(1); }
+            30%, 50%, 70% { transform: translateX(calc(-50% - 4px)) translateY(0) scale(1); }
+            40%, 60% { transform: translateX(calc(-50% + 2px)) translateY(0) scale(1); }
+        }
+
+        [data-theme="dark"] .po-floating-toast,
+        body.dark-mode .po-floating-toast {
+            background: rgba(24, 24, 28, 0.94) !important;
+            border-color: rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 4px 20px rgba(245, 158, 11, 0.2) !important;
+            color: #f8fafc !important;
+        }
+
+        .po-toast-icon-wrap {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .po-toast-icon-wrap.warning {
+            background: rgba(245, 158, 11, 0.16);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        [data-theme="dark"] .po-toast-icon-wrap.warning,
+        body.dark-mode .po-toast-icon-wrap.warning {
+            background: rgba(245, 158, 11, 0.22) !important;
+            color: #fbbf24 !important;
+            border-color: rgba(245, 158, 11, 0.45) !important;
+        }
+
+        .po-toast-text {
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .po-toast-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 0.25rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .po-toast-close:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        @keyframes rowWarningFlash {
+            0%, 100% { background: transparent; }
+            25%, 75% { background: rgba(245, 158, 11, 0.18); }
+            50% { background: rgba(245, 158, 11, 0.08); }
+        }
+
+        .row-warning-flash {
+            animation: rowWarningFlash 0.9s ease;
+        }
     </style>
 @endpush
 
@@ -480,9 +604,6 @@
                 <div id="po_modal_status_badge">
                     <!-- Dynamic status badge -->
                 </div>
-                <button type="button" onclick="closePurchaseOrderDetailModal()" title="Close (Esc)" style="background: none; border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--text-muted, #94a3b8); padding: 0.25rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color 0.15s ease;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
             </div>
         </div>
 
@@ -629,14 +750,8 @@
                     <h3 class="order-detail-modal-title" style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title, #0f172a);">
                         Create Purchase Order
                     </h3>
-                    <p class="order-detail-modal-date" style="font-size: 0.775rem; margin: 0.2rem 0 0; color: var(--text-muted, #71717a);">
-                        Order raw ingredients from verified suppliers and track incoming stock
-                    </p>
                 </div>
             </div>
-            <button type="button" onclick="closeCreatePurchaseOrderModal()" title="Close (Esc)" style="background: none; border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--text-muted, #94a3b8); padding: 0.25rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color 0.15s ease;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
         </div>
 
         <!-- Modal Body Form -->
@@ -700,9 +815,6 @@
                                     <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #ea580c;">
                                         2. Purchase Order Items
                                     </h4>
-                                    <p style="font-size: 0.75rem; color: var(--text-muted, #64748b); margin: 0.15rem 0 0 0;">
-                                        Add raw materials to order. Unit and current price will automatically populate.
-                                    </p>
                                 </div>
                                 <button type="button" id="btn_modal_add_item" onclick="createModalItemRow()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 50px; font-weight: 700; font-size: 0.775rem; border: 1px solid var(--border-color, #d4d4d8); cursor: pointer;">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -757,16 +869,14 @@
                             <div style="display: flex; flex-direction: column; gap: 0.65rem;">
                                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; background: #ea580c; border: 1px solid #ea580c; color: #fff; border-radius: 50px; font-weight: 800; font-size: 0.925rem; cursor: pointer; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25); display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                    <span>Save Purchase Order (Draft)</span>
+                                    <span>Save Purchase Order</span>
                                 </button>
                                 <button type="button" onclick="closeCreatePurchaseOrderModal()" class="btn btn-secondary" style="width: 100%; padding: 0.65rem; border-radius: 50px; border: 1px solid var(--border-color, #d4d4d8); text-align: center; color: var(--text-muted, #64748b); font-weight: 600; font-size: 0.85rem; cursor: pointer; background: transparent;">
                                     Cancel
                                 </button>
                             </div>
 
-                            <div class="create-po-tip-box" style="margin-top: 0.85rem; padding: 0.75rem; border-radius: 10px; font-size: 0.75rem; line-height: 1.45;">
-                                ℹ️ Saving creates a <strong>Draft</strong> purchase order. When ready, click "Place Order" to change status to <strong>Ordered</strong>, and "Receive" when vendor delivers to replenish stock.
-                            </div>
+
                         </div>
                     </div>
 
@@ -779,6 +889,69 @@
 @push('scripts')
 <script>
     const CSRF_TOKEN = '{{ csrf_token() }}';
+
+    let poToastTimer = null;
+
+    window.showPoToast = function(message, type = 'warning') {
+        let toast = document.getElementById('po_floating_toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'po_floating_toast';
+            toast.className = 'po-floating-toast';
+            document.body.appendChild(toast);
+        }
+
+        const iconHtml = type === 'warning' ? `
+            <div class="po-toast-icon-wrap warning">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+        ` : `
+            <div class="po-toast-icon-wrap info">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+        `;
+
+        toast.innerHTML = `
+            ${iconHtml}
+            <span class="po-toast-text">${escapeHtml(message)}</span>
+            <button type="button" class="po-toast-close" onclick="closePoToast()" aria-label="Dismiss">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        `;
+
+        toast.className = `po-floating-toast po-toast-${type} is-visible`;
+
+        toast.classList.remove('is-shaking');
+        void toast.offsetWidth;
+        toast.classList.add('is-shaking');
+
+        if (poToastTimer) clearTimeout(poToastTimer);
+        poToastTimer = setTimeout(() => {
+            closePoToast();
+        }, 3600);
+    };
+
+    window.closePoToast = function() {
+        const toast = document.getElementById('po_floating_toast');
+        if (toast) {
+            toast.classList.remove('is-visible', 'is-shaking');
+        }
+        if (poToastTimer) {
+            clearTimeout(poToastTimer);
+            poToastTimer = null;
+        }
+    };
 
     function escapeHtml(str) {
         if (!str) return '';
@@ -1055,7 +1228,11 @@
                 tr.remove();
                 recalculateModalGrandTotal();
             } else {
-                alert('A purchase order must contain at least one ingredient.');
+                showPoToast('A purchase order must contain at least one ingredient.', 'warning');
+                tr.classList.remove('row-warning-flash');
+                void tr.offsetWidth;
+                tr.classList.add('row-warning-flash');
+                setTimeout(() => tr.classList.remove('row-warning-flash'), 1000);
             }
         });
 

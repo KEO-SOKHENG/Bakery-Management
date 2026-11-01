@@ -217,18 +217,17 @@
                                     </button>
 
                                     <!-- Delete Button -->
-                                    <form action="{{ route('admin.recipes.destroy', $recipe->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete recipe \'{{ $recipe->recipe_name ?? 'Item' }}\'?');" style="margin: 0; display: inline-flex;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon-action delete" title="Delete Recipe" style="background: transparent; border: none; cursor: pointer; color: #ef4444; padding: 5px; border-radius: 6px;">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn-icon-action delete btn-delete-recipe" title="Delete Recipe"
+                                        data-id="{{ $recipe->id }}"
+                                        data-name="{{ $recipe->recipe_name ?? 'Recipe' }}"
+                                        style="background: transparent; border: none; cursor: pointer; color: #ef4444; padding: 5px; border-radius: 6px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -248,7 +247,7 @@
 </div>
 
 <!-- ADD RECIPE MODAL -->
-<x-modal id="add_recipe_modal" title="Add Recipe Formula" maxWidth="560px" class="dash-modal-overlay">
+<x-modal id="add_recipe_modal" title="Add Recipe Formula" maxWidth="560px" class="dash-modal-overlay" :showClose="false">
     <form action="{{ route('admin.recipes.store') }}" method="POST">
         @csrf
         <x-input name="name" label="Recipe Name" placeholder="e.g. Classic Butter Croissant" :required="true" />
@@ -270,7 +269,7 @@
             <label class="form-label">Baking Notes / Oven Settings</label>
             <textarea name="instructions" class="form-control-textarea" rows="2" placeholder="Steps, dough folding notes, and oven temperature settings..."></textarea>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_recipe">Cancel</x-button>
             <x-button variant="primary" type="submit">Save Recipe</x-button>
         </div>
@@ -278,7 +277,7 @@
 </x-modal>
 
 <!-- EDIT RECIPE MODAL -->
-<x-modal id="edit_recipe_modal" title="Edit Recipe Formula" maxWidth="560px" class="dash-modal-overlay">
+<x-modal id="edit_recipe_modal" title="Edit Recipe Formula" maxWidth="560px" class="dash-modal-overlay" :showClose="false">
     <form action="" method="POST" id="edit_recipe_form">
         @csrf
         @method('PUT')
@@ -304,12 +303,70 @@
             <label class="form-label">Baking Notes / Oven Settings</label>
             <textarea name="instructions" id="edit_recipe_instructions" class="form-control-textarea" rows="2" placeholder="Baking instructions..."></textarea>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <!-- Danger Zone / Delete Recipe Action Card -->
+        <div style="margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div class="user-action-card user-action-card-danger">
+                <div>
+                    <div class="user-action-card-title" style="color: #ef4444;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span>Delete Recipe</span>
+                    </div>
+                    <div class="user-action-card-desc">
+                        Permanently delete this baking formula from active production
+                    </div>
+                </div>
+                <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit_recipe">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_recipe">Cancel</x-button>
             <x-button variant="primary" type="submit">Update Recipe</x-button>
         </div>
     </form>
 </x-modal>
+
+<!-- Hidden form for recipe deletion -->
+<form id="form_delete_recipe" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<!-- ==========================================================================
+     UNIFIED DELETE RECIPE CONFIRMATION MODAL CARD
+     ========================================================================== -->
+<div class="user-modal-backdrop" id="delete_recipe_confirm_modal">
+    <div class="user-modal-card" style="max-width: 440px;">
+        <div class="user-modal-header" style="border-bottom: 1px solid rgba(220, 38, 38, 0.2);">
+            <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Delete Recipe</span>
+            </h3>
+        </div>
+        <div class="user-modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
+            <p style="font-size: 0.925rem; margin: 0; color: var(--user-text, #ffffff); line-height: 1.5;">
+                Are you sure you want to delete recipe <strong id="delete_modal_recipe_name" style="color: #f59e0b;"></strong>?
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.8rem; color: var(--user-muted, #a1a1aa); line-height: 1.45;">
+                <div style="font-weight: 700; color: #ef4444; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Production Integrity Protected</span>
+                </div>
+                Completed production batches that used this formula remain intact in past bakery logs and cost audits.
+            </div>
+        </div>
+        <div class="user-modal-footer" style="padding: 1rem 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-modal-cancel" id="btn_cancel_delete_recipe_confirm">Close</button>
+            <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_confirm_delete_recipe_execute" style="height: 40px; padding: 0 1.25rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete Recipe</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>
@@ -360,11 +417,15 @@
             editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEdit(); });
         }
 
+        let currentEditRecipeId = null;
+        let currentEditRecipeName = '';
+
         document.querySelectorAll('.btn-edit-recipe').forEach(btn => {
             btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                editForm.action = `/admin/recipes/${id}`;
-                document.getElementById('edit_recipe_name').value = this.getAttribute('data-name') || '';
+                currentEditRecipeId = this.getAttribute('data-id');
+                currentEditRecipeName = this.getAttribute('data-name') || '';
+                editForm.action = `/admin/recipes/${currentEditRecipeId}`;
+                document.getElementById('edit_recipe_name').value = currentEditRecipeName;
                 document.getElementById('edit_recipe_product').value = this.getAttribute('data-product') || '';
                 document.getElementById('edit_recipe_yield').value = this.getAttribute('data-yield') || '1';
                 document.getElementById('edit_recipe_time').value = this.getAttribute('data-time') || '';
@@ -377,6 +438,73 @@
                 document.body.style.overflow = 'hidden';
             });
         });
+
+        // Unified Delete Confirmation Modal
+        const deleteRecipeModal = document.getElementById('delete_recipe_confirm_modal');
+        const deleteRecipeModalName = document.getElementById('delete_modal_recipe_name');
+        const btnCloseDeleteRecipe = document.getElementById('btn_close_delete_recipe_confirm');
+        const btnCancelDeleteRecipe = document.getElementById('btn_cancel_delete_recipe_confirm');
+        const btnConfirmDeleteRecipe = document.getElementById('btn_confirm_delete_recipe_execute');
+        const formDeleteRecipe = document.getElementById('form_delete_recipe');
+        let targetDeleteRecipeId = null;
+
+        function openDeleteRecipeModal(id, name) {
+            targetDeleteRecipeId = id;
+            if (deleteRecipeModalName) deleteRecipeModalName.textContent = `"${name}"`;
+            if (deleteRecipeModal) {
+                deleteRecipeModal.classList.add('active', 'is-active');
+                deleteRecipeModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDeleteRecipeModal() {
+            if (deleteRecipeModal) {
+                deleteRecipeModal.classList.remove('active', 'is-active');
+                deleteRecipeModal.style.display = 'none';
+                if (!editModal || editModal.style.display !== 'flex') {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        // Table row delete buttons
+        document.querySelectorAll('.btn-delete-recipe').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                openDeleteRecipeModal(id, name);
+            });
+        });
+
+        // Delete button from inside Edit Modal
+        const btnDeleteFromEditRecipe = document.getElementById('btn_delete_from_edit_recipe');
+        if (btnDeleteFromEditRecipe) {
+            btnDeleteFromEditRecipe.addEventListener('click', function() {
+                if (currentEditRecipeId) {
+                    openDeleteRecipeModal(currentEditRecipeId, currentEditRecipeName);
+                }
+            });
+        }
+
+        if (btnCloseDeleteRecipe) btnCloseDeleteRecipe.addEventListener('click', closeDeleteRecipeModal);
+        if (btnCancelDeleteRecipe) btnCancelDeleteRecipe.addEventListener('click', closeDeleteRecipeModal);
+        if (deleteRecipeModal) {
+            deleteRecipeModal.addEventListener('click', (e) => {
+                if (e.target === deleteRecipeModal) closeDeleteRecipeModal();
+            });
+        }
+
+        if (btnConfirmDeleteRecipe) {
+            btnConfirmDeleteRecipe.addEventListener('click', function() {
+                if (!targetDeleteRecipeId) return;
+                btnConfirmDeleteRecipe.disabled = true;
+                btnConfirmDeleteRecipe.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Deleting...</span>';
+                formDeleteRecipe.action = `/admin/recipes/${targetDeleteRecipeId}`;
+                formDeleteRecipe.submit();
+            });
+        }
 
         // Real-time table search filtering
         const searchInput = document.getElementById('recipe_search_input') || document.querySelector('.header-search-input');

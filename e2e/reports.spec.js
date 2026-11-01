@@ -19,11 +19,11 @@ test.describe('Report Management Module', () => {
             const heading = page.locator('h1');
             await expect(heading).toContainText(/Reports/i);
 
-            // Verify all 10 report tabs are present
+            // Verify all 5 primary report tabs are present
             const tabContainer = page.locator('.report-nav-tabs');
             await expect(tabContainer).toBeVisible();
             const tabLinks = tabContainer.locator('a.report-tab-btn');
-            await expect(tabLinks).toHaveCount(10);
+            await expect(tabLinks).toHaveCount(5);
 
             // Verify filter bar
             const filterBar = page.locator('.dash-filter-bar');
@@ -46,18 +46,22 @@ test.describe('Report Management Module', () => {
         test('should switch through report tabs and display distinct metrics', async ({ page }) => {
             await page.goto('/admin/reports');
 
-            // 1. Revenue Report
+            // 1. Sales group & Revenue Report
+            await page.click('#nav_sales');
+            await expect(page).toHaveURL(/type=sales/);
             await page.click('#tab_revenue');
             await expect(page).toHaveURL(/type=revenue/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
-            await expect(page.locator('.chart-card')).toBeVisible();
+            await expect(page.locator('.report-table-wrapper')).toBeVisible();
 
             // 2. Orders Report
             await page.click('#tab_orders');
             await expect(page).toHaveURL(/type=orders/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
 
-            // 3. Products Report
+            // 3. Inventory group & Products Report
+            await page.click('#nav_inventory');
+            await expect(page).toHaveURL(/type=products/);
             await page.click('#tab_products');
             await expect(page).toHaveURL(/type=products/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
@@ -72,28 +76,28 @@ test.describe('Report Management Module', () => {
             await expect(page).toHaveURL(/type=low-stock/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
 
-            // 6. Production Report
-            await page.click('#tab_production');
-            await expect(page).toHaveURL(/type=production/);
-            await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
-
-            // 7. Customers Report
-            await page.click('#tab_customers');
-            await expect(page).toHaveURL(/type=customers/);
-            await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
-
-            // 8. Purchases Report
+            // 6. Purchases Report
             await page.click('#tab_purchases');
             await expect(page).toHaveURL(/type=purchases/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
 
+            // 7. Production Report
+            await page.click('#tab_production');
+            await expect(page).toHaveURL(/type=production/);
+            await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
+
+            // 8. Customers Report
+            await page.click('#tab_customers');
+            await expect(page).toHaveURL(/type=customers/);
+            await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
+
             // 9. Profit & Loss Report
-            await page.click('#tab_profit_loss');
+            await page.goto('/admin/reports?type=profit-loss');
             await expect(page).toHaveURL(/type=profit-loss/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
 
             // 10. Sales Report
-            await page.click('#tab_sales');
+            await page.click('#nav_sales');
             await expect(page).toHaveURL(/type=sales/);
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
         });
@@ -113,40 +117,29 @@ test.describe('Report Management Module', () => {
             await expect(page.locator('.reports-summary-grid')).toBeVisible();
         });
 
-        test('should render visual chart elements and responsive KPI cards', async ({ page }) => {
+        test('should render responsive KPI summary cards without visual chart breakdown cards', async ({ page }) => {
             await page.goto('/admin/reports?type=sales');
             await expect(page.locator('.reports-summary-grid')).toBeVisible();
             await expect(page.locator('.reports-summary-grid .report-stat-card')).toHaveCount(4);
 
-            // Check visual payment breakdown card on Sales
-            const paymentBreakdown = page.locator('#sales_payment_distribution_card');
-            await expect(paymentBreakdown).toBeVisible();
+            // Verify visual breakdown cards (e.g. payment distribution) are not present
+            await expect(page.locator('#sales_payment_distribution_card')).toHaveCount(0);
 
-            // Check Revenue SVG chart
-            await page.goto('/admin/reports?type=revenue');
-            const chartCard = page.locator('.chart-card');
-            await expect(chartCard).toBeVisible();
-            await expect(chartCard.locator('svg')).toBeVisible();
+            // Verify Products tab does not render Top 5 breakdown card
+            await page.goto('/admin/reports?type=products');
+            await expect(page.locator('#products_top5_card')).toHaveCount(0);
         });
 
-        test('should filter table records dynamically using search input', async ({ page }) => {
+        test('should not display Data Audit search card and should render report table directly', async ({ page }) => {
             await page.goto('/admin/reports?type=sales');
-            const searchInput = page.locator('#report_search_input');
-            await expect(searchInput).toBeVisible();
-
-            // Fill query and submit search via Enter key
-            await searchInput.fill('ORD-');
-            await searchInput.press('Enter');
-
-            await expect(page).toHaveURL(/search=ORD-/);
+            await expect(page.locator('.report-controls-card')).toHaveCount(0);
+            await expect(page.locator('#report_search_input')).toHaveCount(0);
             await expect(page.locator('.report-table-wrapper')).toBeVisible();
 
-            // Reset search
-            const resetBtn = page.locator('a:has-text("Reset")');
-            if (await resetBtn.count() > 0) {
-                await resetBtn.click();
-                await expect(page).not.toHaveURL(/search=ORD-/);
-            }
+            // Check Customers tab as well
+            await page.goto('/admin/reports?type=customers');
+            await expect(page.locator('.report-controls-card')).toHaveCount(0);
+            await expect(page.locator('.report-table-wrapper')).toBeVisible();
         });
 
         test('should provide valid export links for Excel and PDF', async ({ page }) => {
@@ -165,7 +158,7 @@ test.describe('Report Management Module', () => {
             expect(pdfHref).toContain('type=sales');
 
             const printBtn = page.locator('#btn_print_report');
-            await expect(printBtn).toBeVisible();
+            await expect(printBtn).not.toBeVisible();
         });
 
         test('should maintain layout integrity under language switches', async ({ page }) => {

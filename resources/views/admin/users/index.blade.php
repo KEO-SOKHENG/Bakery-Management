@@ -3,8 +3,8 @@
 @section('title', 'Staff & Accounts - Bakery Management System')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/users.css') }}?v={{ @filemtime(public_path('css/users.css')) ?: '1.0' }}">
     <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/users.css') }}?v={{ @filemtime(public_path('css/users.css')) ?: '1.0' }}">
 @endpush
 
 @section('header_toolbar')
@@ -157,12 +157,12 @@
         <table class="orders-table" id="users_table">
             <thead>
                 <tr>
-                    <th>Staff</th>
-                    <th>Contact</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Last Active</th>
-                    <th style="text-align: right;">Actions</th>
+                    <th style="width: 25%;">Staff</th>
+                    <th style="width: 21%;">Contact</th>
+                    <th style="width: 13%;">Role</th>
+                    <th style="width: 13%;">Status</th>
+                    <th style="width: 14%;">Last Active</th>
+                    <th style="width: 14%; min-width: 160px; text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -180,9 +180,6 @@
                                         {{ $user->name }}
                                         @if($user->id === auth()->id())
                                             <span class="user-tag-you">YOU</span>
-                                        @endif
-                                        @if($user->must_change_password)
-                                            <span class="user-tag-temp" title="Temporary Password Pending Change">TEMP PWD</span>
                                         @endif
                                     </div>
                                     <div class="user-username">{{ '@' . $user->username }}</div>
@@ -211,7 +208,7 @@
                                 Joined {{ $user->created_at ? $user->created_at->format('M d, Y') : '—' }}
                             </div>
                         </td>
-                        <td>
+                        <td class="user-actions-cell" style="text-align: right;">
                             <div class="user-action-group">
                                 <!-- View Details & Audit Button -->
                                 <button
@@ -224,7 +221,7 @@
                                     <span>View</span>
                                 </button>
 
-                                <!-- Edit Profile Button -->
+                                <!-- Edit Profile Button (Central Hub for Role, Status, Permissions, Password, Delete) -->
                                 <button
                                     type="button"
                                     class="btn-action-btn btn-edit-user"
@@ -237,79 +234,11 @@
                                     data-role="{{ $user->role }}"
                                     data-status="{{ $user->status }}"
                                     data-mustchange="{{ $user->must_change_password ? '1' : '0' }}"
+                                    data-isself="{{ $user->id === auth()->id() ? '1' : '0' }}"
                                 >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                     <span>Edit</span>
                                 </button>
-
-                                <!-- More Actions Dropdown -->
-                                <div class="user-more-wrapper">
-                                    <button
-                                        type="button"
-                                        class="btn-action-btn btn-more-toggle"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
-                                        title="More actions"
-                                    >
-                                        <span>More</span>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
-                                    </button>
-
-                                    <div class="user-more-menu" role="menu">
-                                        <!-- Permissions -->
-                                        <button
-                                            type="button"
-                                            class="dropdown-item btn-permissions-user"
-                                            data-id="{{ $user->id }}"
-                                            data-name="{{ $user->name }}"
-                                            data-role="{{ $user->role }}"
-                                            role="menuitem"
-                                        >
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                            <span>Permissions</span>
-                                        </button>
-
-                                        <!-- Change Password -->
-                                        <button
-                                            type="button"
-                                            class="dropdown-item btn-reset-pwd-user"
-                                            data-id="{{ $user->id }}"
-                                            data-name="{{ $user->name }}"
-                                            data-username="{{ $user->username }}"
-                                            role="menuitem"
-                                        >
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-                                            <span>Change Password</span>
-                                        </button>
-
-                                        @if($user->id !== auth()->id())
-                                            <!-- Suspend / Activate Status -->
-                                            <button
-                                                type="button"
-                                                class="dropdown-item btn-status-user"
-                                                data-id="{{ $user->id }}"
-                                                data-name="{{ $user->name }}"
-                                                data-status="{{ $user->status }}"
-                                                role="menuitem"
-                                            >
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
-                                                <span>{{ $user->status === 'active' ? 'Suspend Account' : 'Activate Account' }}</span>
-                                            </button>
-
-                                            <div class="dropdown-divider"></div>
-
-                                            <!-- Delete Button -->
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="delete-user-form" onsubmit="return confirm('Are you sure you want to delete staff account \'{{ $user->username }}\'? If they have sales or order records, consider deactivating them instead.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item dropdown-item-danger delete" role="menuitem">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                    <span>Delete Account</span>
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
                             </div>
                         </td>
                     </tr>
@@ -335,7 +264,6 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3 data-lang-key="create_user">{{ __('messages.create_user') }}</h3>
-            <button type="button" class="btn-modal-close" id="btn_close_create_user">&times;</button>
         </div>
         <form action="{{ route('admin.users.store') }}" method="POST">
             @csrf
@@ -383,18 +311,8 @@
                 </div>
 
                 <div class="form-field-group">
-                    <label for="create_user_password">Password / Temporary Password * (min 6 chars)</label>
+                    <label for="create_user_password">Password * (min 6 chars)</label>
                     <input type="password" id="create_user_password" name="password" required minlength="6" placeholder="••••••••••••">
-                </div>
-
-                <div style="margin-top: 0.5rem; background: rgba(86, 48, 32, 0.05); padding: 0.75rem; border-radius: 10px; border: 1px dashed var(--user-border);">
-                    <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--user-text);">
-                        <input type="checkbox" name="must_change_password" value="1" checked style="width: 18px; height: 18px; accent-color: #563020;">
-                        <span data-lang-key="force_password_change">{{ __('messages.force_password_change') }}</span>
-                    </label>
-                    <div style="font-size: 0.75rem; color: var(--user-muted); margin-top: 0.25rem; margin-left: 1.8rem;">
-                        If checked, the account will be forced to set a permanent password upon first login.
-                    </div>
                 </div>
             </div>
             <div class="user-modal-footer">
@@ -412,7 +330,6 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3 data-lang-key="edit_user">{{ __('messages.edit_user') }}</h3>
-            <button type="button" class="btn-modal-close" id="btn_close_edit_user">&times;</button>
         </div>
         <form id="form_edit_user" method="POST">
             @csrf
@@ -460,16 +377,64 @@
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="edit_user_password">New Password (leave empty to keep current)</label>
-                    <input type="password" id="edit_user_password" name="password" minlength="6" placeholder="Optional new password">
+                <!-- 1. PERMISSIONS SECTION -->
+                <div style="margin-top: 1rem; border-top: 1px solid var(--user-border); padding-top: 1rem;">
+                    <div class="user-action-card user-action-card-permissions">
+                        <div>
+                            <div class="user-action-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>Role & Module Permissions</span>
+                            </div>
+                            <div class="user-action-card-desc">
+                                Manage granular module access and custom permission overrides
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-action-card-btn btn-permissions-action" id="edit_btn_manage_permissions">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span>Permissions</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div style="margin-top: 0.5rem; background: rgba(86, 48, 32, 0.05); padding: 0.75rem; border-radius: 10px; border: 1px dashed var(--user-border);">
-                    <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--user-text);">
-                        <input type="checkbox" id="edit_must_change_password" name="must_change_password" value="1" style="width: 18px; height: 18px; accent-color: #563020;">
-                        <span data-lang-key="force_password_change">{{ __('messages.force_password_change') }}</span>
-                    </label>
+                <!-- 2. CHANGE PASSWORD SECTION -->
+                <div style="margin-top: 0.85rem;">
+                    <div class="user-action-card user-action-card-password">
+                        <div>
+                            <div class="user-action-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                                <span>Staff Password</span>
+                            </div>
+                            <div class="user-action-card-desc">
+                                Reset account password
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-action-card-btn btn-password-action" id="edit_btn_open_reset_pwd">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                            <span>Change Password</span>
+                        </button>
+                    </div>
+                    <!-- Hidden inputs for script & test backwards-compatibility -->
+                    <input type="hidden" id="edit_user_password" name="password" value="">
+                    <input type="checkbox" id="edit_must_change_password" name="must_change_password" value="1" style="display: none;">
+                </div>
+
+                <!-- 3. DANGER ZONE / DELETE ACCOUNT SECTION (Hidden if editing self) -->
+                <div id="edit_danger_zone" style="margin-top: 0.85rem;">
+                    <div class="user-action-card user-action-card-danger">
+                        <div>
+                            <div class="user-action-card-title" style="color: #ef4444;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <span>Delete Staff Account</span>
+                            </div>
+                            <div class="user-action-card-desc">
+                                Permanently delete account while preserving all historical business records
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Delete Account</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="user-modal-footer">
@@ -477,6 +442,43 @@
                 <x-button variant="primary" type="submit" class="btn-user-primary" data-lang-key="save">{{ __('messages.save') }}</x-button>
             </div>
         </form>
+        <form id="form_delete_user_from_modal" method="POST" style="display: none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     DELETE ACCOUNT CONFIRMATION MODAL
+     ========================================================================== -->
+<div class="user-modal-backdrop" id="delete_confirm_modal">
+    <div class="user-modal-card" style="max-width: 440px;">
+        <div class="user-modal-header" style="border-bottom: 1px solid rgba(220, 38, 38, 0.2);">
+            <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Delete Staff Account</span>
+            </h3>
+        </div>
+        <div class="user-modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
+            <p style="font-size: 0.925rem; margin: 0; color: var(--user-text); line-height: 1.5;">
+                Are you sure you want to delete staff account <strong id="delete_modal_username" style="color: #f59e0b;"></strong>?
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.8rem; color: var(--user-muted); line-height: 1.45;">
+                <div style="font-weight: 700; color: #ef4444; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Historical Business Records Protected</span>
+                </div>
+                All sales, orders, production logs, and audit entries linked to this staff member remain safely preserved.
+            </div>
+        </div>
+        <div class="user-modal-footer" style="padding: 1rem 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-modal-cancel" id="btn_cancel_delete_confirm">Close</button>
+            <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_confirm_delete_execute" style="height: 40px; padding: 0 1.25rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete Account</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -485,35 +487,31 @@
      ========================================================================== -->
 <div class="user-modal-backdrop" id="reset_password_modal">
     <div class="user-modal-card">
-        <div class="user-modal-header">
-            <h3 data-lang-key="reset_password">{{ __('messages.reset_password') }}</h3>
-            <button type="button" class="btn-modal-close" id="btn_close_reset_pwd">&times;</button>
+        <div class="user-modal-header" style="border-bottom: 1px solid rgba(245, 158, 11, 0.2);">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;" data-lang-key="reset_password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                <span>{{ __('messages.reset_password') }}</span>
+            </h3>
         </div>
         <form id="form_reset_password" method="POST">
             @csrf
             <div class="user-modal-body">
-                <div style="padding: 0.75rem; background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.25); border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #92400e;">
-                    Resetting password for: <strong id="reset_pwd_user_title">User</strong>
+                <div style="padding: 0.75rem 1rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #f59e0b; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                    <span>Resetting password for: <strong id="reset_pwd_user_title" style="color: var(--user-text);">User</strong></span>
                 </div>
 
                 <div class="form-field-group">
                     <label for="reset_pwd_input">New Password * (min 6 characters)</label>
                     <input type="password" id="reset_pwd_input" name="password" required minlength="6" placeholder="Enter new password">
                 </div>
-
-                <div style="background: rgba(86, 48, 32, 0.05); padding: 0.75rem; border-radius: 10px; border: 1px dashed var(--user-border);">
-                    <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--user-text);">
-                        <input type="checkbox" name="must_change_password" value="1" checked style="width: 18px; height: 18px; accent-color: #563020;">
-                        <span data-lang-key="force_password_change">{{ __('messages.force_password_change') }}</span>
-                    </label>
-                    <div style="font-size: 0.75rem; color: var(--user-muted); margin-top: 0.25rem; margin-left: 1.8rem;">
-                        User will be required to change this password before accessing any bakery features upon their next login.
-                    </div>
-                </div>
             </div>
             <div class="user-modal-footer">
                 <x-button variant="secondary" id="btn_cancel_reset_pwd" class="btn-modal-cancel" data-lang-key="cancel">{{ __('messages.cancel') }}</x-button>
-                <x-button variant="warning" type="submit" class="btn-user-primary">Save New Password</x-button>
+                <button type="submit" class="btn btn-action-card-btn btn-password-action" style="height: 40px; padding: 0 1.25rem; font-size: 0.875rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>Save New Password</span>
+                </button>
             </div>
         </form>
     </div>
@@ -526,7 +524,6 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3>Update Account Status</h3>
-            <button type="button" class="btn-modal-close" id="btn_close_status_modal">&times;</button>
         </div>
         <form id="form_status_user" method="POST">
             @csrf
@@ -568,14 +565,13 @@
                     Configuring permissions for Staff Member
                 </div>
             </div>
-            <button type="button" class="btn-modal-close" id="btn_close_perm_modal">&times;</button>
         </div>
         <form id="form_update_permissions" method="POST">
             @csrf
             @method('PUT')
             <div class="user-modal-body" style="max-height: 65vh; overflow-y: auto;">
-                <div id="perm_admin_notice" style="display: none; padding: 0.85rem; background: rgba(91, 33, 182, 0.1); border: 1px solid rgba(91, 33, 182, 0.3); border-radius: 12px; font-size: 0.85rem; font-weight: 700; color: #5b21b6; margin-bottom: 0.5rem;">
-                    👑 <strong>Administrator Account:</strong> Admins inherently possess all module permissions unconditionally.
+                <div id="perm_admin_notice" style="display: none; padding: 0.85rem 1rem; background: rgba(147, 51, 234, 0.12); border: 1px solid rgba(147, 51, 234, 0.35); border-radius: 12px; font-size: 0.85rem; font-weight: 700; color: #a855f7; margin-bottom: 0.75rem;">
+                    👑 <strong>Administrator Account:</strong> Admins inherently possess all module permissions unconditionally. Overrides are not required.
                 </div>
 
                 <div class="permission-modules-list" id="permission_modules_container">
@@ -624,7 +620,6 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3 data-lang-key="user_details">{{ __('messages.user_details') }}</h3>
-            <button type="button" class="btn-modal-close" id="btn_close_view_modal">&times;</button>
         </div>
         <div class="user-modal-body">
             <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--user-border); padding-bottom: 1rem;">
@@ -686,12 +681,15 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             const wrapper = this.closest('.user-more-wrapper');
+            const row = this.closest('tr');
             const isOpen = wrapper.classList.contains('is-open');
 
             // Close other open dropdowns
             document.querySelectorAll('.user-more-wrapper.is-open').forEach(w => {
                 if (w !== wrapper) {
                     w.classList.remove('is-open');
+                    const r = w.closest('tr');
+                    if (r) r.classList.remove('has-open-dropdown');
                     const t = w.querySelector('.btn-more-toggle');
                     if (t) t.setAttribute('aria-expanded', 'false');
                 }
@@ -699,9 +697,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isOpen) {
                 wrapper.classList.remove('is-open');
+                if (row) row.classList.remove('has-open-dropdown');
                 this.setAttribute('aria-expanded', 'false');
             } else {
                 wrapper.classList.add('is-open');
+                if (row) row.classList.add('has-open-dropdown');
                 this.setAttribute('aria-expanded', 'true');
             }
         });
@@ -713,6 +713,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const wrapper = this.closest('.user-more-wrapper');
             if (wrapper) {
                 wrapper.classList.remove('is-open');
+                const r = wrapper.closest('tr');
+                if (r) r.classList.remove('has-open-dropdown');
                 const t = wrapper.querySelector('.btn-more-toggle');
                 if (t) t.setAttribute('aria-expanded', 'false');
             }
@@ -724,6 +726,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!e.target.closest('.user-more-wrapper')) {
             document.querySelectorAll('.user-more-wrapper.is-open').forEach(w => {
                 w.classList.remove('is-open');
+                const r = w.closest('tr');
+                if (r) r.classList.remove('has-open-dropdown');
                 const t = w.querySelector('.btn-more-toggle');
                 if (t) t.setAttribute('aria-expanded', 'false');
             });
@@ -735,6 +739,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') {
             document.querySelectorAll('.user-more-wrapper.is-open').forEach(w => {
                 w.classList.remove('is-open');
+                const r = w.closest('tr');
+                if (r) r.classList.remove('has-open-dropdown');
                 const t = w.querySelector('.btn-more-toggle');
                 if (t) t.setAttribute('aria-expanded', 'false');
             });
@@ -744,31 +750,50 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Create User Modal
     const createModal = document.getElementById('create_user_modal');
     const btnOpenCreate = document.getElementById('btn_open_create_user_modal');
-    const btnCloseCreate = document.getElementById('btn_close_create_user');
     const btnCancelCreate = document.getElementById('btn_cancel_create_user');
 
     if (btnOpenCreate) btnOpenCreate.addEventListener('click', () => openModal(createModal));
-    if (btnCloseCreate) btnCloseCreate.addEventListener('click', () => closeModal(createModal));
     if (btnCancelCreate) btnCancelCreate.addEventListener('click', () => closeModal(createModal));
 
-    // 2. Edit User Modal
+    // 2. Edit User Modal & Integrated Features (Permissions, Password, Delete)
     const editModal = document.getElementById('edit_user_modal');
-    const btnCloseEdit = document.getElementById('btn_close_edit_user');
     const btnCancelEdit = document.getElementById('btn_cancel_edit_user');
     const formEdit = document.getElementById('form_edit_user');
+    const btnManagePermFromEdit = document.getElementById('edit_btn_manage_permissions');
+    const btnOpenResetPwdFromEdit = document.getElementById('edit_btn_open_reset_pwd');
+    const btnDeleteFromEdit = document.getElementById('btn_delete_from_edit');
+    const formDeleteFromModal = document.getElementById('form_delete_user_from_modal');
+
+    let currentEditUserId = null;
+    let currentEditUserName = '';
+    let currentEditUserUsername = '';
+    let currentEditUserRole = '';
 
     document.querySelectorAll('.btn-edit-user').forEach(btn => {
         btn.addEventListener('click', function() {
-            const id = this.dataset.id;
-            formEdit.action = `/admin/users/${id}`;
-            document.getElementById('edit_user_name').value = this.dataset.name || '';
-            document.getElementById('edit_user_username').value = this.dataset.username || '';
+            currentEditUserId = this.dataset.id;
+            currentEditUserName = this.dataset.name || '';
+            currentEditUserUsername = this.dataset.username || '';
+            currentEditUserRole = this.dataset.role || 'cashier';
+            const isSelf = this.dataset.isself === '1';
+
+            formEdit.action = `/admin/users/${currentEditUserId}`;
+            document.getElementById('edit_user_name').value = currentEditUserName;
+            document.getElementById('edit_user_username').value = currentEditUserUsername;
             document.getElementById('edit_user_email').value = this.dataset.email || '';
             document.getElementById('edit_user_phone').value = this.dataset.phone || '';
-            document.getElementById('edit_user_role').value = this.dataset.role || 'cashier';
+            document.getElementById('edit_user_role').value = currentEditUserRole;
             document.getElementById('edit_user_status').value = this.dataset.status || 'active';
-            document.getElementById('edit_must_change_password').checked = (this.dataset.mustchange === '1');
+            if (document.getElementById('edit_must_change_password')) {
+                document.getElementById('edit_must_change_password').checked = false;
+            }
             document.getElementById('edit_user_password').value = '';
+
+            const dangerZone = document.getElementById('edit_danger_zone');
+            if (dangerZone) {
+                dangerZone.style.display = isSelf ? 'none' : 'block';
+            }
+
             openModal(editModal);
         });
     });
@@ -776,31 +801,83 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCloseEdit) btnCloseEdit.addEventListener('click', () => closeModal(editModal));
     if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => closeModal(editModal));
 
+    // Open Permissions from inside Edit Modal
+    if (btnManagePermFromEdit) {
+        btnManagePermFromEdit.addEventListener('click', function() {
+            if (!currentEditUserId) return;
+            const selectedRole = document.getElementById('edit_user_role') ? document.getElementById('edit_user_role').value : currentEditUserRole;
+            openPermissionsForUser(currentEditUserId, currentEditUserName, selectedRole);
+        });
+    }
+
+    // Open Reset Password Modal from inside Edit Modal
+    if (btnOpenResetPwdFromEdit) {
+        btnOpenResetPwdFromEdit.addEventListener('click', function() {
+            if (!currentEditUserId) return;
+            formReset.action = `/admin/users/${currentEditUserId}/reset-password`;
+            resetTitle.textContent = `${currentEditUserName} (@${currentEditUserUsername})`;
+            document.getElementById('reset_pwd_input').value = '';
+            openModal(resetModal);
+        });
+    }
+
+    // Delete Account with Custom Confirmation Modal
+    const deleteConfirmModal = document.getElementById('delete_confirm_modal');
+    const btnCloseDeleteConfirm = document.getElementById('btn_close_delete_confirm');
+    const btnCancelDeleteConfirm = document.getElementById('btn_cancel_delete_confirm');
+    const btnConfirmDeleteExecute = document.getElementById('btn_confirm_delete_execute');
+    const deleteModalUsername = document.getElementById('delete_modal_username');
+
+    if (btnDeleteFromEdit) {
+        btnDeleteFromEdit.addEventListener('click', function() {
+            if (!currentEditUserId) return;
+            if (deleteModalUsername) {
+                deleteModalUsername.textContent = `@${currentEditUserUsername}`;
+            }
+            openModal(deleteConfirmModal);
+        });
+    }
+
+    if (btnCloseDeleteConfirm) {
+        btnCloseDeleteConfirm.addEventListener('click', () => closeModal(deleteConfirmModal));
+    }
+    if (btnCancelDeleteConfirm) {
+        btnCancelDeleteConfirm.addEventListener('click', () => closeModal(deleteConfirmModal));
+    }
+    if (btnConfirmDeleteExecute) {
+        btnConfirmDeleteExecute.addEventListener('click', function() {
+            if (!currentEditUserId) return;
+            btnConfirmDeleteExecute.disabled = true;
+            btnConfirmDeleteExecute.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Deleting...</span>';
+            formDeleteFromModal.action = `/admin/users/${currentEditUserId}`;
+            formDeleteFromModal.submit();
+        });
+    }
+
     // 3. Reset Password Modal
     const resetModal = document.getElementById('reset_password_modal');
-    const btnCloseReset = document.getElementById('btn_close_reset_pwd');
     const btnCancelReset = document.getElementById('btn_cancel_reset_pwd');
     const formReset = document.getElementById('form_reset_password');
     const resetTitle = document.getElementById('reset_pwd_user_title');
 
     document.querySelectorAll('.btn-reset-pwd-user').forEach(btn => {
         btn.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const name = this.dataset.name;
-            const username = this.dataset.username;
-            formReset.action = `/admin/users/${id}/reset-password`;
-            resetTitle.textContent = `${name} (@${username})`;
-            document.getElementById('reset_pwd_input').value = '';
-            openModal(resetModal);
+            const id = this.dataset.id || currentEditUserId;
+            const name = this.dataset.name || currentEditUserName;
+            const username = this.dataset.username || currentEditUserUsername;
+            if (id) {
+                formReset.action = `/admin/users/${id}/reset-password`;
+                resetTitle.textContent = `${name} (@${username})`;
+                document.getElementById('reset_pwd_input').value = '';
+                openModal(resetModal);
+            }
         });
     });
 
-    if (btnCloseReset) btnCloseReset.addEventListener('click', () => closeModal(resetModal));
     if (btnCancelReset) btnCancelReset.addEventListener('click', () => closeModal(resetModal));
 
     // 4. Status Quick Update Modal
     const statusModal = document.getElementById('status_user_modal');
-    const btnCloseStatus = document.getElementById('btn_close_status_modal');
     const btnCancelStatus = document.getElementById('btn_cancel_status_modal');
     const formStatus = document.getElementById('form_status_user');
     const statusUserName = document.getElementById('status_user_name');
@@ -818,81 +895,95 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    if (btnCloseStatus) btnCloseStatus.addEventListener('click', () => closeModal(statusModal));
     if (btnCancelStatus) btnCancelStatus.addEventListener('click', () => closeModal(statusModal));
 
     // 5. Permissions Management Modal
     const permModal = document.getElementById('permissions_user_modal');
-    const btnClosePerm = document.getElementById('btn_close_perm_modal');
     const btnCancelPerm = document.getElementById('btn_cancel_perm_modal');
     const formPerm = document.getElementById('form_update_permissions');
     const permSubtitle = document.getElementById('perm_user_subtitle');
     const permAdminNotice = document.getElementById('perm_admin_notice');
     const btnSavePerm = document.getElementById('btn_save_permissions');
 
-    document.querySelectorAll('.btn-permissions-user').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const userId = this.dataset.id;
-            const userName = this.dataset.name;
-            const userRole = this.dataset.role;
+    async function openPermissionsForUser(userId, userName, userRole) {
+        formPerm.action = `/admin/users/${userId}/permissions`;
+        permSubtitle.textContent = `Configuring permissions for ${userName} (${(userRole || '').toUpperCase()})`;
 
-            formPerm.action = `/admin/users/${userId}/permissions`;
-            permSubtitle.textContent = `Configuring permissions for ${userName} (${userRole.toUpperCase()})`;
+        const permBtn = document.getElementById('edit_btn_manage_permissions');
+        let originalHtml = '';
+        if (permBtn) {
+            originalHtml = permBtn.innerHTML;
+            permBtn.disabled = true;
+            permBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Loading...</span>';
+        }
 
-            // Fetch current permissions state
-            try {
-                const response = await fetch(`/admin/users/${userId}/permissions`, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await response.json();
+        // Fetch current permissions state
+        try {
+            const response = await fetch(`/admin/users/${userId}/permissions`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
 
-                const isAdmin = (userRole.toLowerCase() === 'admin');
-                if (isAdmin) {
-                    permAdminNotice.style.display = 'block';
-                    btnSavePerm.disabled = true;
-                } else {
-                    permAdminNotice.style.display = 'none';
-                    btnSavePerm.disabled = false;
+            const isAdmin = (userRole && userRole.toLowerCase() === 'admin');
+            if (isAdmin) {
+                permAdminNotice.style.display = 'block';
+                btnSavePerm.disabled = true;
+            } else {
+                permAdminNotice.style.display = 'none';
+                btnSavePerm.disabled = false;
+            }
+
+            const defaults = data.role_defaults || [];
+            const overrides = data.custom_overrides || {};
+            const effective = data.effective_permissions || [];
+
+            document.querySelectorAll('.perm-checkbox').forEach(cb => {
+                const key = cb.dataset.permKey;
+                const safeKey = key.replace(/\./g, '_');
+                const defaultTag = document.getElementById(`tag_default_${safeKey}`);
+
+                // Show or hide default badge
+                if (defaultTag) {
+                    defaultTag.style.display = defaults.includes(key) ? 'inline-block' : 'none';
                 }
 
-                const defaults = data.role_defaults || [];
-                const overrides = data.custom_overrides || {};
-                const effective = data.effective_permissions || [];
+                // Checked state
+                if (isAdmin) {
+                    cb.checked = true;
+                    cb.disabled = true;
+                } else {
+                    cb.disabled = false;
+                    cb.checked = effective.includes(key);
+                }
+            });
 
-                document.querySelectorAll('.perm-checkbox').forEach(cb => {
-                    const key = cb.dataset.permKey;
-                    const safeKey = key.replace(/\./g, '_');
-                    const defaultTag = document.getElementById(`tag_default_${safeKey}`);
+            openModal(permModal);
+        } catch (err) {
+            console.error('Error fetching permissions:', err);
+            alert('Could not load user permissions. Please try again.');
+        } finally {
+            if (permBtn) {
+                permBtn.disabled = false;
+                permBtn.innerHTML = originalHtml;
+            }
+        }
+    }
 
-                    // Show or hide default badge
-                    if (defaultTag) {
-                        defaultTag.style.display = defaults.includes(key) ? 'inline-block' : 'none';
-                    }
-
-                    // Checked state
-                    if (isAdmin) {
-                        cb.checked = true;
-                        cb.disabled = true;
-                    } else {
-                        cb.disabled = false;
-                        cb.checked = effective.includes(key);
-                    }
-                });
-
-                openModal(permModal);
-            } catch (err) {
-                console.error('Error fetching permissions:', err);
-                alert('Could not load user permissions. Please try again.');
+    document.querySelectorAll('.btn-permissions-user').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.id || currentEditUserId;
+            const userName = this.dataset.name || currentEditUserName;
+            const userRole = this.dataset.role || currentEditUserRole;
+            if (userId) {
+                openPermissionsForUser(userId, userName, userRole);
             }
         });
     });
 
-    if (btnClosePerm) btnClosePerm.addEventListener('click', () => closeModal(permModal));
     if (btnCancelPerm) btnCancelPerm.addEventListener('click', () => closeModal(permModal));
 
     // 6. View User Details & Audit Trail Modal
     const viewModal = document.getElementById('view_user_modal');
-    const btnCloseView = document.getElementById('btn_close_view_modal');
     const btnCloseViewFooter = document.getElementById('btn_close_view_footer');
     const viewName = document.getElementById('view_user_name');
     const viewUsername = document.getElementById('view_user_username');
@@ -954,7 +1045,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    if (btnCloseView) btnCloseView.addEventListener('click', () => closeModal(viewModal));
     if (btnCloseViewFooter) btnCloseViewFooter.addEventListener('click', () => closeModal(viewModal));
 
     // Close on backdrop click

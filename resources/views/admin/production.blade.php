@@ -4,7 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/production.css') }}?v={{ @filemtime(public_path('css/production.css')) ?: '1.0' }}">
-    <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/orders.css') }}?v={{ @filemtime(public_path('css/orders.css')) ?: '1.0' }}">
 @endpush
 
 @section('header_toolbar')
@@ -358,7 +358,7 @@
             <h3 class="prod-modal-title" data-lang-key="schedule_production_batch">
                 {{ __('messages.schedule_production_batch') }}
             </h3>
-            <button type="button" class="btn-close-modal" id="btn_close_schedule_modal">&times;</button>
+            
         </div>
 
         <form action="{{ route('admin.production.store') }}" method="POST" id="form_create_production">
@@ -374,7 +374,7 @@
                         <option value="">-- Choose Product to Bake --</option>
                         @foreach($products as $p)
                             <option value="{{ $p->id }}" data-has-recipe="{{ $p->recipe ? 'true' : 'false' }}">
-                                {{ $p->image_emoji ?? '🥖' }} {{ $p->name }} (Current Stock: {{ $p->stock }})
+                                {{ $p->image_emoji ?? '' }} {{ $p->name }} (Current Stock: {{ $p->stock }})
                             </option>
                         @endforeach
                     </select>
@@ -395,8 +395,17 @@
                     </label>
                     <select name="baker_id" id="prod_select_baker" class="prod-form-select">
                         @foreach($bakers as $baker)
+                            @php
+                                $bName = $baker->name;
+                                $bRole = $baker->role;
+                                if ($bRole && !str_contains(strtolower($bName), strtolower($bRole)) && !str_contains($bName, '(')) {
+                                    $bakerDisplay = "{$bName} (" . ucfirst($bRole) . ")";
+                                } else {
+                                    $bakerDisplay = $bName;
+                                }
+                            @endphp
                             <option value="{{ $baker->id }}" {{ $baker->role === 'baker' ? 'selected' : '' }}>
-                                {{ $baker->name }} ({{ ucfirst($baker->role) }})
+                                {{ $bakerDisplay }}
                             </option>
                         @endforeach
                     </select>
@@ -482,14 +491,12 @@
                 <div class="order-detail-modal-badge" id="modal_batch_code">BATCH-0001</div>
                 <div>
                     <h3 class="order-detail-modal-title">Production Details</h3>
-                    <p class="order-detail-modal-date" id="modal_batch_sched_date">-</p>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div id="modal_batch_status_badge">
                     <!-- Status badge injected here -->
                 </div>
-                <button type="button" class="btn-close-modal" onclick="closeBatchDetailModal()" style="font-size: 1.5rem; line-height: 1; padding: 0.2rem; background: none; border: none; cursor: pointer; color: inherit;">&times;</button>
             </div>
         </div>
 
@@ -501,12 +508,12 @@
                     <span class="prod-detail-banner-emoji" id="modal_batch_product_emoji">🥖</span>
                     <div style="min-width: 0;">
                         <div class="prod-detail-banner-name" id="modal_batch_product_name">Product Name</div>
-                        <div class="prod-detail-banner-sub" id="modal_batch_product_sub">Bakery &bull; Stock: 0 units</div>
+                        <div class="prod-detail-banner-sub" id="modal_batch_product_sub">Bakery</div>
                     </div>
                 </div>
                 <div class="prod-detail-banner-qty">
-                    <span class="prod-detail-banner-qty-val" id="modal_batch_qty_val">10</span>
-                    <span class="prod-detail-banner-qty-lbl">units to bake</span>
+                    <span class="prod-detail-banner-qty-val" id="modal_batch_qty_val">0</span>
+                    <span class="prod-detail-banner-qty-lbl">To Bake</span>
                 </div>
             </div>
 
@@ -543,19 +550,20 @@
                         <span class="baker-avatar" id="modal_batch_baker_avatar">UB</span>
                         <span class="info-value" id="modal_batch_baker_name" style="margin: 0;">Unassigned</span>
                     </div>
-                    <span class="info-sub" id="modal_batch_creator" style="margin-top: 0.35rem;">Scheduled by: System</span>
                 </div>
                 <div class="order-detail-info-item">
                     <span class="info-label">Recipe</span>
                     <span class="info-value" id="modal_batch_recipe_name" style="margin-top: 0.25rem; color: #ea580c;">Standard Recipe</span>
-                    <span class="info-sub" id="modal_batch_duration_sub" style="margin-top: 0.35rem;">Duration: -</span>
                 </div>
             </div>
 
-            <!-- Special Notes / Instructions if any -->
+            <!-- Special Notes if any -->
             <div id="modal_batch_notes_box" class="order-detail-note-box" style="display: none;">
-                <span class="note-tag">📝 Notes & Instructions:</span>
-                <span id="modal_batch_notes_text" class="note-text"></span>
+                <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.75rem;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.85;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Notes:</span>
+                </div>
+                <span id="modal_batch_notes_text" class="note-text" style="font-size: 0.8rem; line-height: 1.4;"></span>
             </div>
 
             <!-- Itemized Ingredients Breakdown Section -->
@@ -662,9 +670,8 @@
     };
 
     window.populateBatchDetailModal = function (batch) {
-        // 1. Batch header & date
+        // 1. Batch header
         document.getElementById('modal_batch_code').textContent = batch.batch_number || `#${batch.id}`;
-        document.getElementById('modal_batch_sched_date').textContent = batch.created_at ? `Created ${batch.created_at}` : (batch.scheduled_at || '');
 
         // 2. Status badge
         const statusMap = {
@@ -679,8 +686,8 @@
         // 3. Product & Quantity
         document.getElementById('modal_batch_product_emoji').textContent = batch.product?.image_emoji || '🥖';
         document.getElementById('modal_batch_product_name').textContent = batch.product?.name || 'Bakery Product';
-        document.getElementById('modal_batch_product_sub').innerHTML = `${batch.product?.category || 'Bakery'} &bull; Store Stock: <strong>${batch.product?.stock ?? 0} units</strong>`;
-        document.getElementById('modal_batch_qty_val').textContent = batch.quantity;
+        document.getElementById('modal_batch_product_sub').textContent = batch.product?.category || 'Bakery';
+        document.getElementById('modal_batch_qty_val').textContent = `${batch.quantity} units`;
 
         // 4. Lifecycle timeline
         document.getElementById('modal_timeline_scheduled').textContent = batch.scheduled_at || '-';
@@ -704,39 +711,29 @@
             if (completedDot) completedDot.className = 'timeline-step-dot completed active';
         } else {
             completedLabel.textContent = 'Completed';
-            document.getElementById('modal_timeline_completed').textContent = batch.status === 'in_progress' ? 'In Progress' : 'Pending';
+            document.getElementById('modal_timeline_completed').textContent = batch.status === 'in_progress' ? '—' : 'Pending';
             if (completedDot) completedDot.className = 'timeline-step-dot completed';
         }
 
         // 5. Personnel & Recipe
         document.getElementById('modal_batch_baker_avatar').textContent = batch.baker?.initials || 'UB';
-        document.getElementById('modal_batch_baker_name').textContent = batch.baker?.name ? `${batch.baker.name} (${batch.baker.role})` : 'Unassigned';
-        document.getElementById('modal_batch_creator').textContent = `Scheduled by: ${batch.creator?.name || 'System'}`;
-
-        document.getElementById('modal_batch_recipe_name').textContent = batch.recipe?.name || 'No Recipe Configured';
-        const durSub = document.getElementById('modal_batch_duration_sub');
-        if (batch.duration) {
-            durSub.textContent = `Duration: ${batch.duration}`;
-            durSub.style.display = 'block';
+        const bName = batch.baker?.name || 'Unassigned';
+        const bRole = batch.baker?.role;
+        if (bRole && !bName.toLowerCase().includes(bRole.toLowerCase()) && !bName.includes('(')) {
+            document.getElementById('modal_batch_baker_name').textContent = `${bName} (${bRole})`;
         } else {
-            durSub.style.display = 'none';
+            document.getElementById('modal_batch_baker_name').textContent = bName;
         }
 
-        // 6. Notes & Recipe Instructions
+        document.getElementById('modal_batch_recipe_name').textContent = batch.recipe?.name || 'Standard Recipe';
+
+        // 6. Notes (clean custom notes only, no redundant dump)
         const notesBox = document.getElementById('modal_batch_notes_box');
         const notesText = document.getElementById('modal_batch_notes_text');
-        const instructions = batch.recipe?.instructions;
-        const notes = batch.notes;
-        let combinedNotes = '';
-        if (instructions && instructions !== 'No detailed instructions provided.') {
-            combinedNotes += `Recipe: ${instructions}`;
-        }
-        if (notes) {
-            combinedNotes += (combinedNotes ? ' | ' : '') + `Notes: ${notes}`;
-        }
+        const notes = (batch.notes || '').trim();
 
-        if (combinedNotes) {
-            notesText.textContent = combinedNotes;
+        if (notes && notes !== 'No notes provided.') {
+            notesText.textContent = notes;
             notesBox.style.display = 'flex';
         } else {
             notesBox.style.display = 'none';

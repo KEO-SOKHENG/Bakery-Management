@@ -13,7 +13,6 @@ class Order extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_PREPARING = 'preparing';
     public const STATUS_READY_FOR_PICKUP = 'ready_for_pickup';
-    public const STATUS_OUT_FOR_DELIVERY = 'out_for_delivery';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
 
@@ -29,6 +28,7 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'order_status',
+        'loyalty_points_awarded',
         'is_custom',
         'special_instructions',
         'pickup_date',
@@ -41,6 +41,7 @@ class Order extends Model
         'discount' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
+        'loyalty_points_awarded' => 'integer',
     ];
 
     // =========================================================================
@@ -72,6 +73,7 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
+
     // =========================================================================
     // STATUS WORKFLOW & TRANSITIONS
     // =========================================================================
@@ -79,8 +81,7 @@ class Order extends Model
     /**
      * Define allowed forward and cancellation transitions.
      * Primary: pending -> preparing -> ready_for_pickup -> completed
-     * Optional delivery: ready_for_pickup -> out_for_delivery -> completed
-     * Cancellation: pending -> cancelled, preparing -> cancelled
+     * Cancellation: pending -> cancelled, preparing -> cancelled, ready_for_pickup -> cancelled
      * Terminal: completed and cancelled cannot transition to anything.
      */
     public static function validTransitions(): array
@@ -96,10 +97,7 @@ class Order extends Model
             ],
             self::STATUS_READY_FOR_PICKUP => [
                 self::STATUS_COMPLETED,
-                self::STATUS_OUT_FOR_DELIVERY,
-            ],
-            self::STATUS_OUT_FOR_DELIVERY => [
-                self::STATUS_COMPLETED,
+                self::STATUS_CANCELLED,
             ],
             self::STATUS_COMPLETED => [],
             self::STATUS_CANCELLED => [],
@@ -133,10 +131,6 @@ class Order extends Model
         return $this->normalized_status === self::STATUS_READY_FOR_PICKUP;
     }
 
-    public function isOutForDelivery(): bool
-    {
-        return $this->normalized_status === self::STATUS_OUT_FOR_DELIVERY;
-    }
 
     public function isCompleted(): bool
     {
@@ -155,7 +149,7 @@ class Order extends Model
 
     public function canBeCancelled(): bool
     {
-        return in_array($this->normalized_status, [self::STATUS_PENDING, self::STATUS_PREPARING], true);
+        return in_array($this->normalized_status, [self::STATUS_PENDING, self::STATUS_PREPARING, self::STATUS_READY_FOR_PICKUP], true);
     }
 
     // =========================================================================

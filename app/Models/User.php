@@ -102,6 +102,8 @@ class User extends Authenticatable
         return $this->role === 'baker';
     }
 
+
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);

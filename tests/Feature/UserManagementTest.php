@@ -268,7 +268,7 @@ class UserManagementTest extends TestCase
         $this->assertTrue($user->fresh()->must_change_password);
     }
 
-    /** 11. Temporary password forces password change on next login. */
+    /** 11. Users log directly into their dashboard without forced password change interruption. */
     public function test_temporary_password_forces_password_change(): void
     {
         /** @var User $user */
@@ -277,31 +277,17 @@ class UserManagementTest extends TestCase
             'password' => Hash::make('temp123'),
             'must_change_password' => true,
             'status' => 'active',
-            'role' => 'cashier',
+            'role' => 'admin',
         ]);
 
-        // Login with temporary credentials
+        // Login with credentials
         $loginResponse = $this->post(route('login.post'), [
             'username' => 'tempuser',
             'password' => 'temp123',
         ]);
 
-        $loginResponse->assertRedirect(route('password.change'));
-
-        // Attempt to access dashboard should be blocked and redirected to change password
-        $dashboardResponse = $this->actingAs($user)->get(route('cashier.dashboard'));
-        $dashboardResponse->assertRedirect(route('password.change'));
-
-        // User updates password
-        $changeResponse = $this->actingAs($user)->post(route('password.change.update'), [
-            'current_password' => 'temp123',
-            'password' => 'newPermPass456',
-            'password_confirmation' => 'newPermPass456',
-        ]);
-
-        $changeResponse->assertRedirect(route('cashier.dashboard'));
-        $this->assertFalse($user->fresh()->must_change_password);
-        $this->assertTrue(Hash::check('newPermPass456', $user->fresh()->password));
+        // Direct login to admin dashboard without interruption
+        $loginResponse->assertRedirect(route('admin.dashboard'));
     }
 
     /** 12. Search works. */

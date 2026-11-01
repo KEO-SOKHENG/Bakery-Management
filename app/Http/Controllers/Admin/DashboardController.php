@@ -188,10 +188,9 @@ class DashboardController extends Controller
         $statusPending = (int) ($rawStatusCounts['pending'] ?? 0);
         $statusPreparing = (int) (($rawStatusCounts['preparing'] ?? 0) + ($rawStatusCounts['baking'] ?? 0));
         $statusReady = (int) (($rawStatusCounts['ready_for_pickup'] ?? 0) + ($rawStatusCounts['ready'] ?? 0));
-        $statusDelivery = (int) ($rawStatusCounts['out_for_delivery'] ?? 0);
         $statusCompleted = (int) ($rawStatusCounts['completed'] ?? 0);
         $statusCancelled = (int) ($rawStatusCounts['cancelled'] ?? 0);
-        $totalAllOrders = $statusPending + $statusPreparing + $statusReady + $statusDelivery + $statusCompleted + $statusCancelled;
+        $totalAllOrders = $statusPending + $statusPreparing + $statusReady + $statusCompleted + $statusCancelled;
 
         // =====================================================================
         // 6. INVENTORY: LOW STOCK & EXPIRING INGREDIENTS
@@ -292,7 +291,6 @@ class DashboardController extends Controller
             'statusPending',
             'statusPreparing',
             'statusReady',
-            'statusDelivery',
             'statusCompleted',
             'statusCancelled',
             'totalAllOrders',

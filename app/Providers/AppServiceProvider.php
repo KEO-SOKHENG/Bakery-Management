@@ -29,9 +29,13 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
-        // Set Bakery System custom pagination views
-        Paginator::defaultView('vendor.pagination.custom');
-        Paginator::defaultSimpleView('vendor.pagination.simple-custom');
+        // Set Bakery System custom pagination views with safe fallback
+        if (View::exists('vendor.pagination.custom')) {
+            Paginator::defaultView('vendor.pagination.custom');
+        }
+        if (View::exists('vendor.pagination.simple-custom')) {
+            Paginator::defaultSimpleView('vendor.pagination.simple-custom');
+        }
 
         // Centralized RBAC Gate authorization
         Gate::before(function (\App\Models\User $user, string $ability) {

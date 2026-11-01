@@ -276,7 +276,6 @@ class ReportService
         $pendingOrders = (int) (clone $allPeriodOrders)->where('order_status', Order::STATUS_PENDING)->count();
         $preparingOrders = (int) (clone $allPeriodOrders)->whereIn('order_status', [Order::STATUS_PREPARING, 'baking'])->count();
         $readyOrders = (int) (clone $allPeriodOrders)->whereIn('order_status', [Order::STATUS_READY_FOR_PICKUP, 'ready'])->count();
-        $deliveryOrders = (int) (clone $allPeriodOrders)->where('order_status', Order::STATUS_OUT_FOR_DELIVERY)->count();
         $cancelledOrders = (int) (clone $allPeriodOrders)->where('order_status', Order::STATUS_CANCELLED)->count();
         $customOrders = (int) (clone $allPeriodOrders)->where('is_custom', true)->count();
 
@@ -294,7 +293,6 @@ class ReportService
             'pendingOrders'     => $pendingOrders,
             'preparingOrders'   => $preparingOrders,
             'readyOrders'       => $readyOrders,
-            'deliveryOrders'    => $deliveryOrders,
             'cancelledOrders'   => $cancelledOrders,
             'customOrders'      => $customOrders,
             'completionRate'    => $completionRate,

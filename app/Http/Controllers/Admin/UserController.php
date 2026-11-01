@@ -291,7 +291,7 @@ class UserController extends Controller
             'must_change_password' => 'nullable|boolean',
         ]);
 
-        $mustChange = $request->boolean('must_change_password', true);
+        $mustChange = $request->boolean('must_change_password', false);
 
         $user->password = Hash::make($validated['password']);
         $user->must_change_password = $mustChange;
@@ -299,7 +299,7 @@ class UserController extends Controller
 
         AuditLogService::log(
             'password_reset',
-            "Admin reset password for user '{$user->username}' (force_change=" . ($mustChange ? 'yes' : 'no') . ")",
+            "Admin reset password for user '{$user->username}'" . ($mustChange ? ' (force_change=yes)' : ''),
             $user,
             ['must_change_password' => $mustChange]
         );

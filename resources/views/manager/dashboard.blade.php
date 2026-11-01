@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Manager Dashboard - Bakery Management')
+@section('body_class', 'is-catalog-page is-dashboard-page')
 @section('header_title', 'Shift & Operations Management')
 @section('header_subtitle', 'Oversee real daily production batches, floor inventory, and store orders')
 
@@ -10,6 +11,8 @@
 @endpush
 
 @section('content')
+<div class="dash-page-container">
+    <div class="dash-scrollable-body" id="dash_scrollable_body">
 <!-- Operational KPI Cards Grid -->
 <div class="dash-stat-row" style="margin-bottom: 1.5rem;">
     <!-- Today's Orders -->

@@ -211,18 +211,16 @@
                                     data-status="{{ $ing->status }}">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                 </button>
-                                <form action="{{ route('admin.ingredients.destroy', $ing->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete ingredient \'{{ $ing->name }}\'?');" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-icon-action delete" title="Delete Ingredient">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn-icon-action delete btn-delete-ing" title="Delete Ingredient"
+                                    data-id="{{ $ing->id }}"
+                                    data-name="{{ $ing->name }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -242,7 +240,7 @@
 </div>
 
 <!-- ADD INGREDIENT MODAL -->
-<x-modal id="add_ingredient_modal" title="Add Ingredient" maxWidth="540px" class="dash-modal-overlay">
+<x-modal id="add_ingredient_modal" title="Add Ingredient" maxWidth="540px" class="dash-modal-overlay" :showClose="false">
     <form action="{{ route('admin.ingredients.store') }}" method="POST">
         @csrf
         <x-input name="name" label="Ingredient Name" placeholder="e.g. Unbleached Bread Flour" :required="true" />
@@ -267,7 +265,7 @@
             <x-input type="date" name="expiry_date" label="Expiry Date" />
         </div>
 
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_ing">Cancel</x-button>
             <x-button variant="primary" type="submit">Save Ingredient</x-button>
         </div>
@@ -275,7 +273,7 @@
 </x-modal>
 
 <!-- EDIT INGREDIENT MODAL -->
-<x-modal id="edit_ingredient_modal" title="Edit Ingredient" maxWidth="540px" class="dash-modal-overlay">
+<x-modal id="edit_ingredient_modal" title="Edit Ingredient" maxWidth="540px" class="dash-modal-overlay" :showClose="false">
     <form id="edit_ingredient_form" method="POST">
         @csrf
         @method('PUT')
@@ -306,12 +304,70 @@
             <option value="inactive">Inactive</option>
         </x-select>
 
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <!-- Danger Zone / Delete Ingredient Action Card -->
+        <div style="margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div class="user-action-card user-action-card-danger">
+                <div>
+                    <div class="user-action-card-title" style="color: #ef4444;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span>Delete Ingredient</span>
+                    </div>
+                    <div class="user-action-card-desc">
+                        Permanently delete this ingredient from bakery inventory records
+                    </div>
+                </div>
+                <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit_ing">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_ing">Cancel</x-button>
             <x-button variant="primary" type="submit">Update Ingredient</x-button>
         </div>
     </form>
 </x-modal>
+
+<!-- Hidden form for ingredient deletion -->
+<form id="form_delete_ingredient" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<!-- ==========================================================================
+     UNIFIED DELETE INGREDIENT CONFIRMATION MODAL CARD
+     ========================================================================== -->
+<div class="user-modal-backdrop" id="delete_ingredient_confirm_modal">
+    <div class="user-modal-card" style="max-width: 440px;">
+        <div class="user-modal-header" style="border-bottom: 1px solid rgba(220, 38, 38, 0.2);">
+            <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Delete Ingredient</span>
+            </h3>
+        </div>
+        <div class="user-modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
+            <p style="font-size: 0.925rem; margin: 0; color: var(--user-text, #ffffff); line-height: 1.5;">
+                Are you sure you want to delete ingredient <strong id="delete_modal_ing_name" style="color: #f59e0b;"></strong>?
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.8rem; color: var(--user-muted, #a1a1aa); line-height: 1.45;">
+                <div style="font-weight: 700; color: #ef4444; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Recipe & Production Safety</span>
+                </div>
+                If this ingredient is linked to recipe formulations or historical batches, past production history remains safely recorded.
+            </div>
+        </div>
+        <div class="user-modal-footer" style="padding: 1rem 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-modal-cancel" id="btn_cancel_delete_ing_confirm">Close</button>
+            <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_confirm_delete_ing_execute" style="height: 40px; padding: 0 1.25rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete Ingredient</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>
@@ -362,11 +418,15 @@
             editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEdit(); });
         }
 
+        let currentEditIngId = null;
+        let currentEditIngName = '';
+
         document.querySelectorAll('.btn-edit-ing').forEach(btn => {
             btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                editForm.action = `/admin/ingredients/${id}`;
-                document.getElementById('edit_ing_name').value = this.getAttribute('data-name') || '';
+                currentEditIngId = this.getAttribute('data-id');
+                currentEditIngName = this.getAttribute('data-name') || '';
+                editForm.action = `/admin/ingredients/${currentEditIngId}`;
+                document.getElementById('edit_ing_name').value = currentEditIngName;
                 document.getElementById('edit_ing_unit').value = this.getAttribute('data-unit') || '';
                 document.getElementById('edit_ing_quantity').value = this.getAttribute('data-quantity') || '';
                 document.getElementById('edit_ing_cost').value = this.getAttribute('data-cost') || '';
@@ -380,6 +440,73 @@
                 document.body.style.overflow = 'hidden';
             });
         });
+
+        // Unified Delete Confirmation Modal
+        const deleteConfirmModal = document.getElementById('delete_ingredient_confirm_modal');
+        const deleteModalName = document.getElementById('delete_modal_ing_name');
+        const btnCloseDeleteConfirm = document.getElementById('btn_close_delete_ing_confirm');
+        const btnCancelDeleteConfirm = document.getElementById('btn_cancel_delete_ing_confirm');
+        const btnConfirmDeleteExecute = document.getElementById('btn_confirm_delete_ing_execute');
+        const formDeleteIngredient = document.getElementById('form_delete_ingredient');
+        let targetDeleteId = null;
+
+        function openDeleteModal(id, name) {
+            targetDeleteId = id;
+            if (deleteModalName) deleteModalName.textContent = `"${name}"`;
+            if (deleteConfirmModal) {
+                deleteConfirmModal.classList.add('active', 'is-active');
+                deleteConfirmModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDeleteModal() {
+            if (deleteConfirmModal) {
+                deleteConfirmModal.classList.remove('active', 'is-active');
+                deleteConfirmModal.style.display = 'none';
+                if (!editModal || editModal.style.display !== 'flex') {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        // Table row delete buttons
+        document.querySelectorAll('.btn-delete-ing').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                openDeleteModal(id, name);
+            });
+        });
+
+        // Delete button from inside Edit Modal
+        const btnDeleteFromEdit = document.getElementById('btn_delete_from_edit_ing');
+        if (btnDeleteFromEdit) {
+            btnDeleteFromEdit.addEventListener('click', function() {
+                if (currentEditIngId) {
+                    openDeleteModal(currentEditIngId, currentEditIngName);
+                }
+            });
+        }
+
+        if (btnCloseDeleteConfirm) btnCloseDeleteConfirm.addEventListener('click', closeDeleteModal);
+        if (btnCancelDeleteConfirm) btnCancelDeleteConfirm.addEventListener('click', closeDeleteModal);
+        if (deleteConfirmModal) {
+            deleteConfirmModal.addEventListener('click', (e) => {
+                if (e.target === deleteConfirmModal) closeDeleteModal();
+            });
+        }
+
+        if (btnConfirmDeleteExecute) {
+            btnConfirmDeleteExecute.addEventListener('click', function() {
+                if (!targetDeleteId) return;
+                btnConfirmDeleteExecute.disabled = true;
+                btnConfirmDeleteExecute.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Deleting...</span>';
+                formDeleteIngredient.action = `/admin/ingredients/${targetDeleteId}`;
+                formDeleteIngredient.submit();
+            });
+        }
 
         // Real-time instant search filtering for ingredients table
         const searchInput = document.getElementById('ingredient_search_input');

@@ -351,7 +351,7 @@
 </div>
 
 <!-- ADD SUPPLIER MODAL -->
-<x-modal id="add_supplier_modal" title="Add Supplier" maxWidth="540px" class="dash-modal-overlay">
+<x-modal id="add_supplier_modal" title="Add Supplier" maxWidth="540px" class="dash-modal-overlay" :showClose="false">
     <form action="{{ route('admin.suppliers.store') }}" method="POST">
         @csrf
         <x-input name="name" label="Company / Vendor Name" placeholder="e.g. Royal Flour Mills Ltd." :required="true" />
@@ -371,7 +371,7 @@
             <label class="form-label">Notes & Procurement Terms</label>
             <textarea name="notes" rows="2" class="form-control-textarea" placeholder="e.g. Net 30 payment terms, weekly delivery on Mondays"></textarea>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_supplier">Cancel</x-button>
             <x-button variant="primary" type="submit">Create Supplier</x-button>
         </div>
@@ -379,7 +379,7 @@
 </x-modal>
 
 <!-- EDIT SUPPLIER MODAL -->
-<x-modal id="edit_supplier_modal" title="Edit Supplier" maxWidth="540px" class="dash-modal-overlay">
+<x-modal id="edit_supplier_modal" title="Edit Supplier" maxWidth="540px" class="dash-modal-overlay" :showClose="false">
     <form id="edit_supplier_form" method="POST">
         @csrf
         @method('PUT')
@@ -400,7 +400,7 @@
             <label class="form-label">Notes & Procurement Terms</label>
             <textarea name="notes" id="edit_supplier_notes" rows="2" class="form-control-textarea"></textarea>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_supplier">Cancel</x-button>
             <x-button variant="primary" type="submit">Update Supplier</x-button>
         </div>
@@ -422,18 +422,12 @@
                     <h3 class="order-detail-modal-title" id="modal_supplier_name" style="font-size: 1.1rem; font-weight: 800; margin: 0; color: var(--text-title, #0f172a);">
                         Supplier Name
                     </h3>
-                    <p class="order-detail-modal-date" id="modal_supplier_sub" style="font-size: 0.775rem; margin: 0.2rem 0 0; color: var(--text-muted, #71717a);">
-                        Vendor Partner &bull; Registered Oct 26, 2026
-                    </p>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 0.65rem;">
                 <div id="modal_supplier_status_badge">
                     <span class="status-badge status-completed">Active</span>
                 </div>
-                <button type="button" onclick="closeSupplierDetailModal()" title="Close (Esc)" style="background: none; border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--text-muted, #94a3b8); padding: 0.25rem; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color 0.15s ease;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
             </div>
         </div>
 
@@ -479,7 +473,7 @@
             <div id="modal_supplier_notes_box" class="order-detail-note-box" style="display: none;">
                 <span class="note-tag" style="display: flex; align-items: center; gap: 0.35rem; font-weight: 800; font-size: 0.775rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                    Procurement Terms & Notes
+                    Notes:
                 </span>
                 <span id="modal_supplier_notes" class="note-text" style="font-size: 0.825rem; line-height: 1.45;"></span>
             </div>
@@ -495,9 +489,7 @@
                             Purchase Orders (<span id="modal_tab_orders_count">0</span>)
                         </button>
                     </div>
-                    <a id="modal_link_manage_inventory" href="{{ route('admin.ingredients') }}" style="font-size: 0.75rem; font-weight: 700; color: #ea580c; text-decoration: none;">
-                        Manage Inventory &rarr;
-                    </a>
+
                 </div>
 
                 <!-- Tab Content 1: Supplied Ingredients -->
@@ -533,6 +525,9 @@
             <button type="button" id="modal_btn_edit_supplier" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-size: 0.825rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                 <span>Edit</span>
+            </button>
+            <button type="button" onclick="closeSupplierDetailModal()" class="btn-order-detail-close" style="margin-left: auto;">
+                Close
             </button>
         </div>
     </div>
@@ -585,7 +580,7 @@
 
         // Header info
         document.getElementById('modal_supplier_name').textContent = name;
-        document.getElementById('modal_supplier_sub').textContent = `Vendor Partner • Added ${createdAt || 'Recently'}`;
+        const subEl = document.getElementById('modal_supplier_sub'); if (subEl) subEl.textContent = `Added ${createdAt || 'Recently'}`;
 
         // Status badge
         const badgeHtml = status === 'active'
@@ -594,9 +589,9 @@
         document.getElementById('modal_supplier_status_badge').innerHTML = badgeHtml;
 
         // Quick Stats
-        document.getElementById('modal_supplier_stat_items').textContent = `${itemsCount} items`;
-        document.getElementById('modal_supplier_stat_orders').textContent = `${ordersCount} orders`;
-        document.getElementById('modal_supplier_stat_spend').textContent = '...';
+        document.getElementById('modal_supplier_stat_items').textContent = itemsCount;
+        document.getElementById('modal_supplier_stat_orders').textContent = ordersCount;
+        document.getElementById('modal_supplier_stat_spend').textContent = '$0.00';
 
         // Contact info
         document.getElementById('modal_supplier_contact').textContent = contact || '—';
@@ -606,7 +601,7 @@
         document.getElementById('modal_supplier_email').innerHTML = email
             ? `<a href="mailto:${escapeHtml(email)}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">${escapeHtml(email)}</a>`
             : '<span style="color: var(--text-muted, #71717a);">—</span>';
-        document.getElementById('modal_supplier_address').textContent = address || 'No facility address recorded';
+        document.getElementById('modal_supplier_address').textContent = address || '—';
 
         // Notes
         const notesBox = document.getElementById('modal_supplier_notes_box');
@@ -653,7 +648,7 @@
                     document.getElementById('modal_supplier_stat_spend').textContent = '$' + Number(data.stats.total_spend).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
                 if (data.stats && data.stats.total_orders !== undefined) {
-                    document.getElementById('modal_supplier_stat_orders').textContent = `${data.stats.total_orders} orders`;
+                    document.getElementById('modal_supplier_stat_orders').textContent = data.stats.total_orders;
                     document.getElementById('modal_tab_orders_count').textContent = data.stats.total_orders;
                 }
                 if (data.supplier.ingredients) {
@@ -705,9 +700,11 @@
         const container = document.getElementById('supplier_ingredients_list');
         if (!ingredients || ingredients.length === 0) {
             container.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted, #71717a); padding: 1.5rem; font-size: 0.825rem;">
-                    <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">📦</div>
-                    No ingredients linked to this vendor yet.
+                <div style="text-align: center; color: var(--text-muted, #71717a); padding: 1.25rem; font-size: 0.825rem;">
+                    <div style="opacity: 0.4; margin-bottom: 0.35rem;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    </div>
+                    No ingredients linked to this vendor.
                 </div>
             `;
             return;
@@ -741,9 +738,11 @@
         const container = document.getElementById('supplier_orders_list');
         if (!orders || orders.length === 0) {
             container.innerHTML = `
-                <div style="text-align: center; color: var(--text-muted, #71717a); padding: 1.5rem; font-size: 0.825rem;">
-                    <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">📋</div>
-                    No purchase orders placed with this vendor yet.
+                <div style="text-align: center; color: var(--text-muted, #71717a); padding: 1.25rem; font-size: 0.825rem;">
+                    <div style="opacity: 0.4; margin-bottom: 0.35rem;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                    </div>
+                    No purchase orders found.
                 </div>
             `;
             return;

@@ -200,10 +200,24 @@
     top: 4.25rem !important; /* Sticks right beneath top-header-bar */
     z-index: 820 !important;
     background: var(--bg-main, #f5f0eb) !important;
-    padding: 0.35rem 0 !important;
+    padding: 0.4rem 0 !important;
     margin-bottom: 0.75rem !important;
     width: 100% !important;
     box-sizing: border-box !important;
+}
+
+/* Solid backdrop extending upwards to completely seal the gap between top header and category tabs,
+   preventing scrolled product cards from peeking out above or behind the menu */
+.pos-category-sticky-bar::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: -2rem;
+    right: -2rem;
+    height: 140px;
+    background: var(--bg-main, #f5f0eb);
+    pointer-events: none;
+    z-index: -1;
 }
 
 [data-theme="dark"] .pos-category-sticky-bar,
@@ -211,8 +225,19 @@ body.dark-mode .pos-category-sticky-bar {
     background: #000000 !important;
 }
 
+[data-theme="dark"] .pos-category-sticky-bar::before,
+body.dark-mode .pos-category-sticky-bar::before {
+    background: #000000 !important;
+}
+
 [data-theme="glass"] .pos-category-sticky-bar {
-    background: rgba(13, 13, 15, 0.85) !important;
+    background: rgba(13, 13, 15, 0.95) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="glass"] .pos-category-sticky-bar::before {
+    background: rgba(13, 13, 15, 0.95) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
@@ -1496,9 +1521,32 @@ body.dark-mode .pos-pay-btn {
         visibility: hidden !important;
     }
 
+    #pos_receipt_modal,
+    #pos_receipt_modal .pos-receipt-modal,
     #pos_receipt_print_area,
     #pos_receipt_print_area * {
         visibility: visible !important;
+        display: block !important;
+    }
+
+    #pos_receipt_modal {
+        position: static !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    #pos_receipt_modal .pos-receipt-modal {
+        position: static !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        max-width: 320px !important;
     }
 
     #pos_receipt_print_area {
@@ -1516,10 +1564,12 @@ body.dark-mode .pos-pay-btn {
     }
 
     .pos-modal-actions,
-    .pos-modal-backdrop,
+    .pos-modal-backdrop:not(#pos_receipt_modal),
     .bakery-sidebar,
     .top-header-bar,
-    .fireflies-layer {
+    .fireflies-layer,
+    .pos-cart-backdrop,
+    .pos-mobile-cart-bar {
         display: none !important;
     }
 }
@@ -1583,3 +1633,207 @@ button:focus,
     box-shadow: none !important;
 }
 
+/* ==========================================================================
+   Full Viewport Locked Layout for POS Terminal
+   Everything is sticky/fixed; only product cards grid (& cart items) scroll
+   ========================================================================== */
+html:has(.is-pos-page),
+html.is-pos-page,
+body.is-pos-page {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.is-pos-page .bakery-app-layout {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.is-pos-page .bakery-sidebar {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    position: sticky !important;
+    top: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+body.is-pos-page .bakery-main-content {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1rem 1.5rem 1rem 1.5rem !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+}
+
+body.is-pos-page .top-header-bar {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.75rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 850 !important;
+}
+
+body.is-pos-page .main-content-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body.is-pos-page .pos-screen-layout {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 380px !important;
+    gap: 1.25rem !important;
+    margin-bottom: 0 !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+}
+
+@media (min-width: 1440px) {
+    body.is-pos-page .pos-screen-layout {
+        grid-template-columns: 1fr 420px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    body.is-pos-page .pos-screen-layout {
+        grid-template-columns: 1fr 340px !important;
+        gap: 1rem !important;
+    }
+}
+
+/* Left: Catalog Panel */
+body.is-pos-page .pos-catalog-panel {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    gap: 0.5rem !important;
+}
+
+/* Category Filter Bar: Always Sticky / Locked at Top, Never Moves */
+body.is-pos-page .pos-category-sticky-bar {
+    position: sticky !important;
+    top: 0 !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 0.25rem !important;
+    padding: 0.15rem 0 !important;
+    z-index: 10 !important;
+    background: transparent !important;
+}
+
+body.is-pos-page .pos-category-sticky-bar::before {
+    display: none !important;
+}
+
+/* THE FOOD CARDS GRID: ONLY THIS SCROLLS UP/DOWN */
+body.is-pos-page .pos-grid-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    padding-bottom: 1.5rem !important;
+    align-content: start !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)) !important;
+    gap: 1rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+}
+
+body.is-pos-page .pos-grid-container::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+
+body.is-pos-page .pos-grid-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+body.is-pos-page .pos-grid-container::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+body.is-pos-page .pos-grid-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
+}
+
+/* Right: Cart Panel (Always Sticky, 100% Height, Fits Perfectly) */
+body.is-pos-page .pos-cart-panel {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: static !important;
+    top: auto !important;
+    box-sizing: border-box !important;
+    padding: 1.15rem 1.25rem !important;
+}
+
+body.is-pos-page .pos-cart-header {
+    flex-shrink: 0 !important;
+    padding-bottom: 0.65rem !important;
+    margin-bottom: 0.65rem !important;
+}
+
+/* Cart Items scroll internally */
+body.is-pos-page .pos-cart-items-container {
+    flex: 1 1 auto !important;
+    min-height: 80px !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    margin-bottom: 0.65rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+body.is-pos-page .pos-cart-items-container::-webkit-scrollbar {
+    width: 5px !important;
+    display: block !important;
+}
+
+body.is-pos-page .pos-cart-items-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 9999px !important;
+}
+
+/* Payment Selector Sticky at bottom of cart */
+body.is-pos-page .pos-cart-form-group {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Totals Sticky at bottom of cart */
+body.is-pos-page .pos-totals-table {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.65rem !important;
+    padding-top: 0.5rem !important;
+}
+
+/* Complete Sale Button Sticky at bottom of cart */
+body.is-pos-page .pos-checkout-btn,
+body.is-pos-page .btn-complete-sale,
+body.is-pos-page #btn_complete_sale {
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+}

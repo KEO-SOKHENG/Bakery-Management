@@ -14,7 +14,11 @@
     <!-- Instant Theme Loader -->
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('bakery_theme') || 'light';
+            let savedTheme = localStorage.getItem('bakery_theme') || 'light';
+            if (savedTheme === 'glass') {
+                savedTheme = 'dark';
+                try { localStorage.setItem('bakery_theme', 'dark'); } catch(e) {}
+            }
             document.documentElement.setAttribute('data-theme', savedTheme);
             const syncBody = () => {
                 if (document.body) {
@@ -37,7 +41,7 @@
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}?v={{ @filemtime(public_path('css/responsive.css')) ?: '1.0' }}">
 </head>
-<body>
+<body class="{{ (request()->is('pos*') || request()->is('cashier*')) ? 'is-pos-page' : ((request()->is('admin/products*') || request()->is('admin/categories*') || request()->is('admin/reports*') || request()->is('admin/settings*') || request()->is('admin/notifications*') || request()->is('*dashboard*')) ? 'is-catalog-page is-dashboard-page is-settings-page' : '') }} @yield('body_class')">
     <div class="bakery-app-layout">
         <!-- Sidebar Navigation -->
         <aside class="bakery-sidebar" id="sidebar_nav">
@@ -110,6 +114,7 @@
                         <span data-lang-key="orders">Orders</span>
                     </a>
                 @endif
+
 
                 <!-- ==============================================
                      2. MANAGEMENT SECTION
@@ -273,9 +278,10 @@
                             <input
                                 type="text"
                                 class="header-search-input"
-                                id="{{ request()->is('pos*') || request()->is('cashier*') ? 'pos_search_input' : (request()->is('admin/orders*') ? 'order_search_input' : 'global_header_search') }}"
+                                id="{{ request()->is('pos*') || request()->is('cashier*') ? 'pos_search_input' : (request()->is('admin/orders*') ? 'order_search_input' : (request()->is('admin/categories*') ? 'category_search_input' : 'global_header_search')) }}"
                                 placeholder="Search page items..."
                                 autocomplete="off"
+                                value="{{ request('search') }}"
                             >
                         </div>
 
@@ -336,47 +342,103 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    @hasSection('header_sub_action')
-                        <div class="header-sub-action-wrap">
-                            @yield('header_sub_action')
+                        <!-- User Profile Pill & Dropdown -->
+                        <div class="user-profile-wrapper">
+                        @php
+                            $headerAvatar = null;
+                            if (auth()->check()) {
+                                $headerAvatar = \App\Services\SettingsService::getString('user_avatar_' . auth()->id(), '')
+                                    ?: \App\Services\SettingsService::getString('admin_avatar', '')
+                                    ?: \App\Services\SettingsService::getString('shop_logo', '');
+                            }
+                        @endphp
+                        <div class="user-profile-pill user-profile-circle" id="user_profile_pill" role="button" tabindex="0" title="{{ auth()->check() ? auth()->user()->name . ' (' . ucfirst(auth()->user()->role) . ')' : 'User Account Menu' }}" aria-label="User Account Menu">
+                            @if(!empty($headerAvatar))
+                                <img src="{{ asset($headerAvatar) }}" alt="{{ auth()->check() ? auth()->user()->name : 'Avatar' }}" class="user-avatar-circle-img" id="header_user_avatar_img">
+                            @else
+                                <div class="user-avatar-img" id="header_user_avatar_placeholder">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
+                            @endif
                         </div>
-                    @endif
-
-                    <!-- User Profile Pill & Dropdown -->
-                    <div class="user-profile-wrapper">
-                        {{-- <div class="user-profile-pill" id="user_profile_pill">
-                            <div class="user-avatar-img">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            </div>
-                            <span>{{ auth()->check() ? auth()->user()->name : 'User' }} ({{ auth()->check() ? ucfirst(auth()->user()->role) : 'Role' }})</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                        </div> --}}
 
                         <div class="user-dropdown-menu" id="user_dropdown_menu">
+                            <!-- Executive User Header Card -->
                             <div class="user-dropdown-header">
-                                <div class="user-dropdown-name">{{ auth()->check() ? auth()->user()->name : 'User Account' }}</div>
-                                <div class="user-dropdown-email">{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}</div>
+                                <div class="user-dropdown-avatar-wrap">
+                                    @if(!empty($headerAvatar))
+                                        <img src="{{ asset($headerAvatar) }}" alt="{{ auth()->check() ? auth()->user()->name : 'User' }}" class="user-dropdown-avatar-img">
+                                    @else
+                                        <div class="user-dropdown-avatar-placeholder">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        </div>
+                                    @endif
+                                    <span class="user-online-badge" title="Online"></span>
+                                </div>
+                                <div class="user-dropdown-info">
+                                    <div class="user-dropdown-name-row">
+                                        <span class="user-dropdown-name">{{ auth()->check() ? auth()->user()->name : 'User Account' }}</span>
+                                        <span class="user-dropdown-role-badge">{{ auth()->check() ? ucfirst(auth()->user()->role) : 'Staff' }}</span>
+                                    </div>
+                                    <div class="user-dropdown-email" title="{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}">{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}</div>
+                                </div>
                             </div>
-                            
-                            @if(in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']))
-                                <a href="{{ route('admin.settings') }}" class="user-dropdown-item">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    <span>Settings & Theme</span>
+
+                            <div class="user-dropdown-items-list">
+                                <!-- My Profile -->
+                                <a href="{{ in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']) ? route('admin.settings') . '#profile_info' : route('profile') }}" class="user-dropdown-item" id="nav_my_profile">
+                                    <div class="dropdown-item-icon-box icon-box-profile">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    </div>
+                                    <div class="dropdown-item-text">
+                                        <div class="dropdown-item-title">My Profile</div>
+                                        <div class="dropdown-item-desc">Account & security details</div>
+                                    </div>
+                                    <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                                 </a>
-                            @endif
+
+                                <!-- Settings & Theme (Admin / Manager only) -->
+                                @if(in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']))
+                                    <a href="{{ route('admin.settings') }}" class="user-dropdown-item">
+                                        <div class="dropdown-item-icon-box icon-box-settings">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </div>
+                                        <div class="dropdown-item-text">
+                                            <div class="dropdown-item-title">Settings & Theme</div>
+                                            <div class="dropdown-item-desc">Store branding & layout</div>
+                                        </div>
+                                        <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </a>
+                                @endif
+                            </div>
 
                             <div class="user-dropdown-divider"></div>
 
-                            <a href="{{ route('logout') }}" class="user-dropdown-item" style="color: #ef4444;">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                                <span>Sign Out</span>
-                            </a>
+                            <!-- Sign Out -->
+                            <div class="user-dropdown-footer">
+                                <a href="{{ route('logout') }}" class="user-dropdown-item user-dropdown-item-danger">
+                                    <div class="dropdown-item-icon-box icon-box-danger">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                    </div>
+                                    <div class="dropdown-item-text">
+                                        <div class="dropdown-item-title">Sign Out</div>
+                                        <div class="dropdown-item-desc">Securely exit session</div>
+                                    </div>
+                                    <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </header>
+
+                @hasSection('header_sub_action')
+                    <div class="header-sub-action-wrap">
+                        @yield('header_sub_action')
+                    </div>
+                @endif
+            </div>
+        </header>
 
             <!-- Page Specific Content -->
             <main id="main_content" class="main-content-body">

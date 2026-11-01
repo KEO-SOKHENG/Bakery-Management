@@ -237,7 +237,7 @@ class OrderManagementTest extends TestCase
     }
 
     /**
-     * Test E: Delivery status workflow: Ready for Pickup → Out for Delivery → Completed.
+     * Test E: Status workflow: Ready for Pickup → Completed (and out_for_delivery retirement).
      */
     public function test_delivery_status_workflow_transitions(): void
     {
@@ -251,19 +251,33 @@ class OrderManagementTest extends TestCase
             'order_status'   => 'ready_for_pickup',
         ]);
 
-        // 1. Ready for Pickup → Out for Delivery
+        // 1. Transition to retired 'out_for_delivery' must be rejected
         $res1 = $this->actingAs($this->admin)->post(route('admin.orders.updateStatus', $order), [
             'status' => 'out_for_delivery',
         ]);
-        $res1->assertSessionHas('success');
-        $this->assertEquals('out_for_delivery', $order->fresh()->order_status);
+        $res1->assertSessionHas('error');
+        $this->assertEquals('ready_for_pickup', $order->fresh()->order_status);
 
-        // 2. Out for Delivery → Completed
+        // 2. Ready for Pickup → Completed
         $res2 = $this->actingAs($this->admin)->post(route('admin.orders.updateStatus', $order), [
             'status' => 'completed',
         ]);
         $res2->assertSessionHas('success');
         $this->assertEquals('completed', $order->fresh()->order_status);
+    }
+
+    /**
+     * Test Fallback: Authenticated delivery routes redirect to orders with info flash message.
+     */
+    public function test_delivery_fallback_redirects_to_orders(): void
+    {
+        $resIndex = $this->actingAs($this->admin)->get('/admin/deliveries');
+        $resIndex->assertRedirect(route('admin.orders'));
+        $resIndex->assertSessionHas('info');
+
+        $resId = $this->actingAs($this->admin)->get('/admin/deliveries/123');
+        $resId->assertRedirect(route('admin.orders'));
+        $resId->assertSessionHas('info');
     }
 
     /**

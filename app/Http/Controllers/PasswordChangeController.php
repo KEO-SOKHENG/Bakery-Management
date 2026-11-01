@@ -11,13 +11,28 @@ use Illuminate\Support\Facades\Hash;
 class PasswordChangeController extends Controller
 {
     /**
-     * Show the mandatory change password screen.
+     * Redirect to appropriate dashboard (mandatory change flow removed).
      */
     public function show()
     {
         /** @var User|null $user */
         $user = Auth::user();
-        return view('auth.change-password', compact('user'));
+        if ($user) {
+            if ($user->must_change_password) {
+                $user->must_change_password = false;
+                $user->save();
+            }
+
+            return match (strtolower($user->role)) {
+                'admin' => redirect()->route('admin.dashboard'),
+                'manager' => redirect()->route('manager.dashboard'),
+                'cashier' => redirect()->route('cashier.dashboard'),
+                'baker' => redirect()->route('admin.production'),
+                default => redirect()->route('login'),
+            };
+        }
+
+        return redirect()->route('login');
     }
 
     /**

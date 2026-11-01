@@ -142,27 +142,17 @@ body::-webkit-scrollbar,
     gap: 0.85rem !important;
 }
 
-/* Header Sub Action Wrap (Directly under search and notification on right) */
-.top-header-bar:has(.header-sub-action-wrap) {
-    align-items: flex-start !important;
-}
-
-.top-header-bar:has(.header-sub-action-wrap) .header-toolbar-slot {
-    align-self: flex-start !important;
-    margin-top: 3px !important;
-}
-
-.header-actions:has(.header-sub-action-wrap) {
+/* Header Actions Single-Row Layout (Exact Orders Page Style) */
+.header-actions {
     display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    gap: 0.5rem !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 0.85rem !important;
 }
 
 .header-sub-action-wrap {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
 }
 
 .header-sub-action-wrap .sticky-add-product-btn,
@@ -536,7 +526,6 @@ body.dark-mode .header-sub-action-wrap .sticky-add-product-btn:hover {
 
 .stat-icon-box.blue,
 .stat-icon-wrapper.revenue,
-.order-metric-icon.delivered,
 .notif-stat-icon.info { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important; color: #2563eb !important; }
 
 .stat-icon-box.purple,
@@ -625,6 +614,78 @@ body.dark-mode .header-sub-action-wrap .sticky-add-product-btn:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 140px;
+}
+
+/* User Profile Single Circle Button */
+.user-profile-circle,
+.user-profile-pill.user-profile-circle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.28) !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(86, 48, 32, 0.06) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 0.2s ease,
+                box-shadow 0.2s ease !important;
+}
+
+.user-profile-circle:hover,
+.user-profile-pill.user-profile-circle:hover {
+    transform: translateY(-2px) scale(1.06) !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 6px 18px rgba(217, 119, 6, 0.22), 0 0 12px rgba(245, 158, 11, 0.18) !important;
+}
+
+.user-profile-circle:active,
+.user-profile-pill.user-profile-circle:active {
+    transform: translateY(0) scale(0.96) !important;
+}
+
+.user-avatar-circle-img {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.user-profile-circle .user-avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #fbf4ee 0%, #f5ece2 100%) !important;
+    color: #b45309 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+[data-theme="dark"] .user-profile-circle,
+[data-theme="dark"] .user-profile-pill.user-profile-circle {
+    background: #171717 !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+[data-theme="dark"] .user-profile-circle .user-avatar-img {
+    background: #242424 !important;
+    color: #fbbf24 !important;
+}
+
+[data-theme="glass"] .user-profile-circle,
+[data-theme="glass"] .user-profile-pill.user-profile-circle {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(12px) !important;
 }
 
 /* Base Cards & Buttons */
@@ -939,8 +1000,9 @@ body.dark-mode .header-sub-action-wrap .sticky-add-product-btn:hover {
 .form-control-select,
 .form-select {
     width: 100%;
-    height: 38px;
-    padding: 0.5rem 0.85rem;
+    height: 46px;
+    min-height: 46px;
+    padding: 0 2.5rem 0 1rem;
     border-radius: var(--radius-md, 10px);
     border: 1px solid var(--border-color, #e2e8f0);
     background-color: #ffffff;
@@ -1279,6 +1341,48 @@ body.dark-mode .alert-info {
     padding: 1.5rem;
     overflow-y: auto;
     flex: 1;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.modal-body::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.modal-card {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.modal-card::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+
+.modal-sticky-footer {
+    position: sticky;
+    bottom: -1.5rem;
+    margin: 1.5rem -1.5rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color, #eee9e0);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    z-index: 10;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .modal-sticky-footer,
+body.dark-mode .modal-sticky-footer {
+    background: #17171a;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .modal-footer {
@@ -1322,6 +1426,207 @@ body.dark-mode .btn-modal-close {
     background: rgba(28, 28, 33, 0.85);
     backdrop-filter: blur(28px) saturate(180%);
     border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Unified Action Card & Deletion Modal Styles */
+.user-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10100;
+    padding: 1rem;
+}
+
+.user-modal-backdrop.is-active,
+.user-modal-backdrop.active {
+    display: flex !important;
+}
+
+.user-modal-card {
+    background: var(--bg-card, #ffffff);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-color, #e2e8f0);
+    animation: userModalFadeIn 0.25s ease;
+}
+
+.user-modal-card::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.user-modal-card form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+@keyframes userModalFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.user-modal-header {
+    flex-shrink: 0;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-card, #ffffff);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    z-index: 10;
+}
+
+.user-modal-header h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-primary, #1e293b);
+}
+
+.user-modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.user-modal-footer {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    padding: 1.15rem 1.5rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background: var(--bg-card, #ffffff);
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+}
+
+/* Action Cards */
+.user-action-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.95rem 1.15rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-action-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-action-card-danger {
+    background: rgba(239, 68, 68, 0.06);
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+.user-action-card-title {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--text-primary, #1e293b);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.user-action-card-desc {
+    font-size: 0.775rem;
+    color: var(--text-muted, #64748b);
+    margin-top: 0.2rem;
+    line-height: 1.35;
+}
+
+.btn-action-card-btn {
+    height: 36px;
+    padding: 0 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.825rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.btn-danger-action {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.btn-danger-action:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .user-modal-card,
+body.dark-mode .user-modal-card,
+[data-theme="dark"] .user-modal-header,
+body.dark-mode .user-modal-header,
+[data-theme="dark"] .user-modal-footer,
+body.dark-mode .user-modal-footer {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .user-modal-header h3,
+body.dark-mode .user-modal-header h3 {
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .user-action-card,
+body.dark-mode .user-action-card {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+[data-theme="dark"] .user-action-card-danger,
+body.dark-mode .user-action-card-danger {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
 
@@ -1844,8 +2149,6 @@ input[type="file"]::file-selector-button:hover,
 [data-theme="dark"] .orders-card,
 [data-theme="dark"] .detail-card,
 [data-theme="dark"] .form-card,
-[data-theme="dark"] .delivery-metric-card,
-[data-theme="dark"] .deliveries-table-card,
 [data-theme="dark"] .user-modal-card,
 [data-theme="dark"] .permission-module-card,
 [data-theme="dark"] .data-card,
@@ -2262,8 +2565,6 @@ input[type="file"]::file-selector-button:hover,
 [data-theme="glass"] .orders-card,
 [data-theme="glass"] .detail-card,
 [data-theme="glass"] .form-card,
-[data-theme="glass"] .delivery-metric-card,
-[data-theme="glass"] .deliveries-table-card,
 [data-theme="glass"] .user-modal-card,
 [data-theme="glass"] .permission-module-card,
 [data-theme="glass"] .data-card,
@@ -2589,6 +2890,7 @@ input[type="file"]::file-selector-button:hover,
     top: calc(100% + 0.65rem);
     right: 0;
     width: 360px;
+    max-width: calc(100vw - 2rem);
     background-color: #ffffff;
     border: 1px solid var(--border-color, #e4e4e7);
     border-radius: 1rem;
@@ -2657,6 +2959,7 @@ input[type="file"]::file-selector-button:hover,
 .notification-list {
     max-height: 320px;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin !important;
     scrollbar-color: rgba(245, 158, 11, 0.35) transparent !important;
 }
@@ -2804,23 +3107,25 @@ input[type="file"]::file-selector-button:hover,
     user-select: none;
 }
 
+/* Executive Modern User Dropdown Menu */
 .user-dropdown-menu {
     position: absolute;
     top: calc(100% + 0.65rem);
     right: 0;
-    width: 230px;
-    background-color: #ffffff;
-    border: 1px solid var(--border-color, #e4e4e7);
-    border-radius: 1rem;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+    width: 295px;
+    background: #ffffff;
+    border: 1px solid rgba(86, 48, 32, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 24px 50px -8px rgba(86, 48, 32, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.04);
     z-index: 100000 !important;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-8px) scale(0.97);
+    transform: translateY(-10px) scale(0.96);
     transform-origin: top right;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
-    padding: 0.4rem 0;
+    padding: 0.55rem;
+    backdrop-filter: blur(24px);
 }
 
 .user-dropdown-menu.active {
@@ -2829,43 +3134,210 @@ input[type="file"]::file-selector-button:hover,
     transform: translateY(0) scale(1);
 }
 
+/* User Card Header */
 .user-dropdown-header {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid #f4f4f5;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, rgba(251, 244, 238, 0.85) 0%, rgba(245, 236, 226, 0.65) 100%);
+    border: 1px solid rgba(217, 119, 6, 0.18);
+    border-radius: 15px;
+    margin-bottom: 0.5rem;
+}
+
+.user-dropdown-avatar-wrap {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+
+.user-dropdown-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: block;
+}
+
+.user-dropdown-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #b45309;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.user-online-badge {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+.user-dropdown-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.user-dropdown-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.2rem;
 }
 
 .user-dropdown-name {
     font-weight: 800;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     color: #18181b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.user-dropdown-role-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(217, 119, 6, 0.15);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.28);
+    flex-shrink: 0;
 }
 
 .user-dropdown-email {
-    font-size: 0.75rem;
+    font-size: 0.76rem;
     color: #71717a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+/* Menu Items List */
+.user-dropdown-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .user-dropdown-item {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 1rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #3f3f46;
+    gap: 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border-radius: 12px;
+    color: #27272a;
     text-decoration: none;
-    transition: background-color 0.15s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    user-select: none;
 }
 
 .user-dropdown-item:hover {
-    background-color: #f4f4f5;
+    background-color: #faf5f0;
     color: #18181b;
+    transform: translateX(2px);
+}
+
+.dropdown-item-icon-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.user-dropdown-item:hover .dropdown-item-icon-box {
+    transform: scale(1.08);
+}
+
+.icon-box-profile {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+}
+
+.icon-box-settings {
+    background: rgba(245, 158, 11, 0.14);
+    color: #d97706;
+}
+
+.icon-box-danger {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+.dropdown-item-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.dropdown-item-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: inherit;
+    line-height: 1.25;
+}
+
+.dropdown-item-desc {
+    font-size: 0.71rem;
+    color: #a1a1aa;
+    line-height: 1.25;
+    margin-top: 1px;
+}
+
+.dropdown-item-arrow {
+    color: #d4d4d8;
+    opacity: 0.6;
+    transition: transform 0.18s ease, opacity 0.18s ease, color 0.18s ease;
+    flex-shrink: 0;
+}
+
+.user-dropdown-item:hover .dropdown-item-arrow {
+    transform: translateX(3px);
+    opacity: 1;
+    color: #563020;
 }
 
 .user-dropdown-divider {
     height: 1px;
-    background-color: #f4f4f5;
-    margin: 0.3rem 0;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 0.4rem 0.25rem;
+}
+
+.user-dropdown-footer {
+    padding-top: 0.1rem;
+}
+
+.user-dropdown-item-danger:hover {
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+}
+
+.user-dropdown-item-danger:hover .dropdown-item-arrow {
+    color: #dc2626 !important;
 }
 
 /* Dark Mode Overrides for Header Dropdowns */
@@ -2913,17 +3385,83 @@ input[type="file"]::file-selector-button:hover,
     color: #fbbf24 !important;
 }
 
+[data-theme="dark"] .user-dropdown-menu {
+    background: #18181b !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .user-dropdown-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+[data-theme="dark"] .user-dropdown-avatar-img,
+[data-theme="dark"] .user-dropdown-avatar-placeholder {
+    border-color: #27272a !important;
+}
+
+[data-theme="dark"] .user-online-badge {
+    border-color: #18181b !important;
+}
+
+[data-theme="dark"] .user-dropdown-name {
+    color: #f4f4f5 !important;
+}
+
+[data-theme="dark"] .user-dropdown-role-badge {
+    background: rgba(245, 158, 11, 0.22) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] .user-dropdown-email {
+    color: #a1a1aa !important;
+}
+
 [data-theme="dark"] .user-dropdown-item {
-    color: #d4d4d8 !important;
+    color: #e4e4e7 !important;
 }
 
 [data-theme="dark"] .user-dropdown-item:hover {
-    background-color: #242424 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
     color: #ffffff !important;
 }
 
+[data-theme="dark"] .icon-box-profile {
+    background: rgba(59, 130, 246, 0.2) !important;
+    color: #93c5fd !important;
+}
+
+[data-theme="dark"] .icon-box-settings {
+    background: rgba(245, 158, 11, 0.2) !important;
+    color: #fde047 !important;
+}
+
+[data-theme="dark"] .icon-box-danger {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .dropdown-item-desc {
+    color: #71717a !important;
+}
+
+[data-theme="dark"] .dropdown-item-arrow {
+    color: #52525b !important;
+}
+
+[data-theme="dark"] .user-dropdown-item:hover .dropdown-item-arrow {
+    color: #f4f4f5 !important;
+}
+
 [data-theme="dark"] .user-dropdown-divider {
-    background-color: #262626 !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .user-dropdown-item-danger:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
 }
 
 /* Glass Mode Overrides for Header Dropdowns */
@@ -4538,4 +5076,287 @@ body.dark-mode .confirm-modal-btn.cancel-btn:hover {
     .prod-toolbar-card {
         position: static !important;
     }
+}
+
+
+/* ==========================================================================
+   Full Viewport Locked Layout for Products & Categories Pages
+   Top headers & action toolbars are always sticky; only card grid scrolls up/down
+   ========================================================================== */
+html:has(.is-catalog-page),
+html.is-catalog-page,
+body.is-catalog-page {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.is-catalog-page .bakery-app-layout {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+body.is-catalog-page .bakery-sidebar {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    position: sticky !important;
+    top: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+body.is-catalog-page .bakery-main-content {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1.15rem 1.75rem 1.15rem 1.75rem !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+}
+
+body.is-catalog-page .top-header-bar {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.75rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 850 !important;
+}
+
+body.is-catalog-page .main-content-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body.is-catalog-page .products-container,
+body.is-catalog-page .categories-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    overflow: hidden !important;
+}
+
+body.is-catalog-page .products-header,
+body.is-catalog-page .categories-header {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+}
+
+body.is-catalog-page .products-container > .alert,
+body.is-catalog-page .categories-container > .alert {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* THE CARDS GRID: ONLY THIS SCROLLS UP/DOWN */
+body.is-catalog-page .products-grid,
+body.is-catalog-page .categories-grid {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    padding-bottom: 1.5rem !important;
+    align-content: start !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+}
+
+body.is-catalog-page .products-grid::-webkit-scrollbar,
+body.is-catalog-page .categories-grid::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+
+body.is-catalog-page .products-grid::-webkit-scrollbar-track,
+body.is-catalog-page .categories-grid::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+body.is-catalog-page .products-grid::-webkit-scrollbar-thumb,
+body.is-catalog-page .categories-grid::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+body.is-catalog-page .products-grid::-webkit-scrollbar-thumb:hover,
+body.is-catalog-page .categories-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
+}
+
+
+/* ==========================================================================
+   Full Viewport Locked Layout for Sales & Reports Page
+   Headers & toolbar are always sticky; only report charts & tables scroll
+   ========================================================================== */
+body.is-reports-page .reports-page-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+body.is-reports-page .reports-fixed-header-section {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+body.is-reports-page .reports-sticky-toolbar-wrapper {
+    position: static !important;
+    top: auto !important;
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.4rem !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+body.is-reports-page .reports-sub-nav {
+    flex-shrink: 0 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* THE REPORT BODY: ONLY THIS SCROLLS UP/DOWN */
+body.is-reports-page .reports-scrollable-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    padding-bottom: 2rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+}
+
+body.is-reports-page .reports-scrollable-body::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+
+body.is-reports-page .reports-scrollable-body::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+body.is-reports-page .reports-scrollable-body::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+body.is-reports-page .reports-scrollable-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
+}
+
+/* ==========================================================================
+   Full Viewport Locked Layout for Settings Page
+   Top header bar (menu-bar with General Settings & Notifications) is always sticky;
+   Only the settings cards scroll up/down
+   ========================================================================== */
+body.is-settings-page .settings-page-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+body.is-settings-page .settings-scrollable-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    padding-bottom: 2.5rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+}
+
+body.is-settings-page .settings-scrollable-body::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+
+body.is-settings-page .settings-scrollable-body::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+body.is-settings-page .settings-scrollable-body::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+body.is-settings-page .settings-scrollable-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
+}
+
+/* ==========================================================================
+   Full Viewport Locked Layout for Dashboard Page
+   Top header bar (menu-bar with date period pills & search) is always sticky;
+   Only the dashboard content (KPI cards, charts, tables) scrolls up/down
+   ========================================================================== */
+body.is-dashboard-page .dash-page-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+body.is-dashboard-page .dash-scrollable-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    padding-bottom: 2.5rem !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+}
+
+body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+}
+
+body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
 }

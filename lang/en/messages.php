@@ -107,6 +107,7 @@ return [
     'production_management' => 'Production Management',
     'production_batches' => 'Production Batches',
     'production_batch' => 'Production Batch',
+    'product' => 'Product',
     'schedule_production_batch' => 'Schedule Production Batch',
     'batch_number' => 'Batch #',
     'baker' => 'Baker',
@@ -189,7 +190,6 @@ return [
     'pending' => 'Pending',
     'preparing' => 'Preparing',
     'ready_for_pickup' => 'Ready for Pickup',
-    'out_for_delivery' => 'Out for Delivery',
     'order_status' => 'Order Status',
     'update_order' => 'Update Order',
     'cancel_order' => 'Cancel Order',
@@ -313,7 +313,6 @@ return [
     'order_ready' => 'Order Ready',
     'production_completed' => 'Production Completed',
     'purchase_order_received' => 'Purchase Order Received',
-    'delivery_reminder' => 'Delivery Reminder',
     'promotion' => 'Promotion',
     'broadcast_announcement' => 'Broadcast Announcement',
     'send_promotion' => 'Send Promotion',
@@ -416,16 +415,6 @@ return [
     'restore_now' => 'Restore Settings',
     'save_changes' => 'Save Changes',
 
-    // Delivery Management
-    'deliveries' => 'Deliveries',
-    'delivery_management' => 'Delivery Management',
-    'delivery_management_subtitle' => 'Live driver assignments, routes, and order fulfillment tracking',
-    'total_deliveries' => 'Total Deliveries',
-    'pending_assigned' => 'Pending / Assigned',
-    'search_delivery_placeholder' => 'Search tracking, order, recipient...',
-    'schedule_delivery' => 'Schedule Delivery',
-    'assigned_driver' => 'Assigned Driver',
-    'destination_address' => 'Destination Address',
 
     // Category Safety
     'category_has_products_error' => 'Cannot delete category \':name\' because it contains :count products. Please reassign or delete these products first.',

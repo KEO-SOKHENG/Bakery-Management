@@ -855,22 +855,20 @@ class ReportManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewHas('type', 'overview');
 
-        // Navigation elements
+        // Navigation elements (5 primary consolidated tabs)
         $response->assertSee('id="nav_overview"', false);
         $response->assertSee('id="nav_sales"', false);
         $response->assertSee('id="nav_inventory"', false);
         $response->assertSee('id="tab_production"', false);
         $response->assertSee('id="tab_customers"', false);
-        $response->assertSee('id="nav_more_toggle"', false);
-        $response->assertSee('id="reports_more_dropdown"', false);
-        $response->assertSee('id="tab_profit_loss"', false);
 
-        // Overview KPI summary cards
+        // Overview KPI summary cards (including P&L navigation card)
         $response->assertSee('id="overview_sales_card"', false);
         $response->assertSee('id="overview_revenue_card"', false);
         $response->assertSee('id="overview_orders_card"', false);
         $response->assertSee('id="overview_pl_card"', false);
         $response->assertSee('id="overview_stock_card"', false);
+        $response->assertSee('type=profit-loss', false);
     }
 
     /** 27. Reports contextual sub-navigation pills render for Sales and Inventory */

@@ -91,7 +91,7 @@ class CustomerController extends Controller
     /**
      * Display customer detail with full purchase history.
      */
-    public function show(Customer $customer)
+    public function show(Request $request, Customer $customer)
     {
         $orders = $customer->orders()
             ->with(['items.product', 'sale', 'payments'])
@@ -103,14 +103,29 @@ class CustomerController extends Controller
         $avgOrderValue = $customer->average_order_value;
         $lastVisit = $customer->last_visit;
 
-        return view('admin.customers.show', compact(
-            'customer',
-            'orders',
-            'totalSpent',
-            'totalOrders',
-            'avgOrderValue',
-            'lastVisit'
-        ));
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'customer' => $customer,
+                'totalSpent' => number_format($totalSpent, 2),
+                'totalOrders' => $totalOrders,
+                'avgOrderValue' => number_format($avgOrderValue, 2),
+                'lastVisit' => $lastVisit ? $lastVisit->format('M d, Y') : 'Never',
+                'orders' => $orders->map(function ($order) {
+                    return [
+                        'order_number' => $order->order_number,
+                        'date' => $order->created_at->format('M d, Y h:i A'),
+                        'total' => number_format($order->total, 2),
+                        'status' => ucfirst($order->order_status ?? 'completed'),
+                        'payment_method' => ucfirst($order->payment_method ?? 'cash'),
+                        'items_count' => $order->items->count(),
+                    ];
+                }),
+            ]);
+        }
+
+        // Dedicated page is removed; redirect directly to customer index
+        return redirect()->route('admin.customers.index');
     }
 
     /**

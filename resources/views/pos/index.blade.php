@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'POS Sales Terminal - Bakery Management')
+@section('body_class', 'is-pos-page')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/pos.css') }}?v={{ @filemtime(public_path('css/pos.css')) ?: '1.0' }}">

@@ -2,6 +2,10 @@
 
 @section('title', 'Edit Purchase Order #' . $purchaseOrder->po_number . ' - Bakery Management System')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
+@endpush
+
 @section('content')
 <!-- Header Bar -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
@@ -143,6 +147,79 @@
 
 @push('scripts')
 <script>
+    let poToastTimer = null;
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function showPoToast(message, type = 'warning') {
+        let toast = document.getElementById('po_floating_toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'po_floating_toast';
+            toast.className = 'po-floating-toast';
+            document.body.appendChild(toast);
+        }
+
+        const iconHtml = type === 'warning' ? `
+            <div class="po-toast-icon-wrap warning">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+        ` : `
+            <div class="po-toast-icon-wrap info">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+        `;
+
+        toast.innerHTML = `
+            ${iconHtml}
+            <span class="po-toast-text">${escapeHtml(message)}</span>
+            <button type="button" class="po-toast-close" onclick="closePoToast()" aria-label="Dismiss">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        `;
+
+        toast.className = `po-floating-toast po-toast-${type} is-visible`;
+
+        toast.classList.remove('is-shaking');
+        void toast.offsetWidth;
+        toast.classList.add('is-shaking');
+
+        if (poToastTimer) clearTimeout(poToastTimer);
+        poToastTimer = setTimeout(() => {
+            closePoToast();
+        }, 3600);
+    }
+
+    function closePoToast() {
+        const toast = document.getElementById('po_floating_toast');
+        if (toast) {
+            toast.classList.remove('is-visible', 'is-shaking');
+        }
+        if (poToastTimer) {
+            clearTimeout(poToastTimer);
+            poToastTimer = null;
+        }
+    }
+
     const ingredientsCatalog = @json($ingredientsJson);
     const existingItems = @json($purchaseOrder->items);
     let rowCount = 0;
@@ -223,7 +300,11 @@
                 tr.remove();
                 recalculateGrandTotal();
             } else {
-                alert('A purchase order must have at least one ingredient.');
+                showPoToast('A purchase order must contain at least one ingredient.', 'warning');
+                tr.classList.remove('row-warning-flash');
+                void tr.offsetWidth;
+                tr.classList.add('row-warning-flash');
+                setTimeout(() => tr.classList.remove('row-warning-flash'), 1000);
             }
         });
 

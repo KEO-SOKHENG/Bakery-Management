@@ -80,7 +80,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="pickup_date">Pickup / Delivery Schedule</label>
+                        <label class="form-label" for="pickup_date">Pickup Schedule</label>
                         <input type="datetime-local" name="pickup_date" id="pickup_date" class="form-control-input"
                                value="{{ old('pickup_date', $order->pickup_date ? $order->pickup_date->format('Y-m-d\TH:i') : '') }}">
                     </div>

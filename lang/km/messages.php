@@ -107,6 +107,7 @@ return [
     'production_management' => 'ការគ្រប់គ្រងការផលិត',
     'production_batches' => 'បាច់ផលិតកម្ម',
     'production_batch' => 'បាច់ផលិត',
+    'product' => 'ផលិតផល',
     'schedule_production_batch' => 'កំណត់ពេលបាច់ផលិត',
     'batch_number' => 'លេខបាច់ #',
     'baker' => 'អ្នកដុតនំ',
@@ -189,7 +190,6 @@ return [
     'pending' => 'កំពុងរង់ចាំ',
     'preparing' => 'កំពុងរៀបចំ/ដុតនំ',
     'ready_for_pickup' => 'រួចរាល់សម្រាប់មកយក',
-    'out_for_delivery' => 'កំពុងដឹកជញ្ជូន',
     'order_status' => 'ស្ថានភាពការកុម្ម៉ង់',
     'update_order' => 'កែប្រែការកុម្ម៉ង់',
     'cancel_order' => 'បោះបង់ការកុម្ម៉ង់',
@@ -313,7 +313,6 @@ return [
     'order_ready' => 'ការបញ្ជាទិញរួចរាល់',
     'production_completed' => 'ការផលិតបានបញ្ចប់',
     'purchase_order_received' => 'បានទទួលការបញ្ជាទិញទំនិញចូល',
-    'delivery_reminder' => 'ការរំលឹកការដឹកជញ្ជូន',
     'promotion' => 'ការផ្សព្វផ្សាយ',
     'broadcast_announcement' => 'ផ្សព្វផ្សាយសេចក្តីជូនដំណឹង',
     'send_promotion' => 'ផ្ញើការផ្សព្វផ្សាយ',
@@ -415,17 +414,6 @@ return [
     'restore_warning' => 'ខ្ញុំបញ្ជាក់ថាខ្ញុំចង់ស្តារការកំណត់ប្រព័ន្ធឡើងវិញ។ ការកំណត់បច្ចុប្បន្ននឹងត្រូវសរសេរជាន់លើ។',
     'restore_now' => 'ស្តារការកំណត់ឡើងវិញ',
     'save_changes' => 'រក្សាទុកការផ្លាស់ប្តូរ',
-
-    // Delivery Management
-    'deliveries' => 'ការដឹកជញ្ជូន',
-    'delivery_management' => 'ការគ្រប់គ្រងការដឹកជញ្ជូន',
-    'delivery_management_subtitle' => 'ការចាត់តាំងអ្នកដឹកជញ្ជូន ផ្លូវ និងការតាមដានការដឹកជញ្ជូន',
-    'total_deliveries' => 'ការដឹកជញ្ជូនសរុប',
-    'pending_assigned' => 'រង់ចាំ / បានចាត់តាំង',
-    'search_delivery_placeholder' => 'ស្វែងរកលេខកូដ លេខបញ្ជាទិញ អ្នកទទួល...',
-    'schedule_delivery' => 'កំណត់ពេលដឹកជញ្ជូន',
-    'assigned_driver' => 'អ្នកដឹកជញ្ជូនដែលបានចាត់តាំង',
-    'destination_address' => 'អាសយដ្ឋានគោលដៅ',
 
     // Category Safety
     'category_has_products_error' => 'មិនអាចលុបប្រភេទ \':name\' បានទេ ពីព្រោះវាមាន :count ផលិតផល។ សូមផ្លាស់ប្តូរ ឬលុបផលិតផលទាំងនេះជាមុនសិន។',

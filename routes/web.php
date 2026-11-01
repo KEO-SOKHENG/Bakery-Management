@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\HrController;
 use App\Http\Controllers\PasswordChangeController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PosController;
 
 // Health Check Endpoint (Render, Kubernetes, monitoring services)
@@ -50,6 +51,10 @@ Route::middleware(['auth'])->group(function () {
     // Mandatory Password Change
     Route::get('/change-password', [PasswordChangeController::class, 'show'])->name('password.change');
     Route::post('/change-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
+
+    // Self-Service User Profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // -------------------------------------------------------------
     // ADMIN EXCLUSIVE ROUTES (Admin Only)
@@ -179,6 +184,17 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
         Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    });
+
+    // -------------------------------------------------------------
+    // RETIRED DELIVERY ROUTE FALLBACK (Project Owner Decision 1)
+    // -------------------------------------------------------------
+    // Gracefully handles legacy notifications and bookmarked URLs pointing to /admin/deliveries/*
+    Route::middleware(['auth'])->prefix('admin')->group(function () {
+        Route::get('/deliveries/{id?}', function () {
+            return redirect()->route('admin.orders')
+                ->with('info', 'Customer delivery tracking has been retired. Order fulfillment records remain accessible in Orders.');
+        })->where('id', '[0-9]+')->name('admin.deliveries.fallback');
     });
 
     // MANAGER DASHBOARD

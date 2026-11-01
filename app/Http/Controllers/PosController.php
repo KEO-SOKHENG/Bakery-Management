@@ -200,8 +200,10 @@ class PosController extends Controller
                 $orderNumber = 'ORD-' . strtoupper(uniqid());
                 $paymentRef  = 'PAY-' . strtoupper(uniqid());
 
+                $pointsEarned = $customer ? (int) floor($grandTotal) : 0;
+
                 // 1. Create Order with customer association
-                $order = Order::create([
+                $orderPayload = [
                     'user_id'        => Auth::id(),
                     'customer_id'    => $customer ? $customer->id : null,
                     'order_number'   => $orderNumber,
@@ -213,7 +215,11 @@ class PosController extends Controller
                     'payment_method' => $paymentMethod,
                     'payment_status' => 'paid',
                     'order_status'   => 'completed',
-                ]);
+                ];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'loyalty_points_awarded')) {
+                    $orderPayload['loyalty_points_awarded'] = $pointsEarned;
+                }
+                $order = Order::create($orderPayload);
 
                 // 2. Create Order Items
                 foreach ($itemsToSave as $item) {

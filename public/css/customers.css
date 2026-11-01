@@ -372,6 +372,10 @@
     animation: modalFadeIn 0.25s ease;
 }
 
+.cust-modal-card.cust-modal-card-lg {
+    max-width: 680px;
+}
+
 @keyframes modalFadeIn {
     from { opacity: 0; transform: scale(0.96); }
     to { opacity: 1; transform: scale(1); }

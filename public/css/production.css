@@ -609,7 +609,8 @@
 .prod-form-label {
     font-size: 0.825rem;
     font-weight: 700;
-    color: var(--text-dark, #27272a);
+    color: #475569;
+    letter-spacing: 0.01em;
 }
 
 .prod-form-input, .prod-form-select, .prod-form-textarea {
@@ -868,10 +869,10 @@
 }
 
 .prod-detail-banner-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #faf6f0;
+    border: 1px solid #eee9e0;
     border-radius: 14px;
-    padding: 0.85rem 1.1rem;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -886,12 +887,12 @@
 }
 
 .prod-detail-banner-emoji {
-    font-size: 1.75rem;
-    width: 44px;
-    height: 44px;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -900,15 +901,15 @@
 
 .prod-detail-banner-name {
     font-weight: 800;
-    font-size: 1rem;
-    color: var(--text-dark, #1e293b);
+    font-size: 0.95rem;
+    color: #1e293b;
     line-height: 1.25;
 }
 
 .prod-detail-banner-sub {
-    font-size: 0.74rem;
-    color: var(--text-muted, #64748b);
-    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 0.15rem;
 }
 
 .prod-detail-banner-qty {
@@ -918,16 +919,16 @@
 
 .prod-detail-banner-qty-val {
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 900;
     color: #ea580c;
     line-height: 1;
 }
 
 .prod-detail-banner-qty-lbl {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    color: var(--text-muted, #64748b);
+    color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
@@ -1021,19 +1022,34 @@
 /* Dark mode for batch detail modal */
 [data-theme="dark"] .prod-detail-banner-card,
 body.dark-mode .prod-detail-banner-card {
-    background: #131316 !important;
+    background: #1e1e24 !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 [data-theme="dark"] .prod-detail-banner-emoji,
 body.dark-mode .prod-detail-banner-emoji {
-    background: #1a1a20 !important;
+    background: #272730 !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 [data-theme="dark"] .prod-detail-banner-name,
 body.dark-mode .prod-detail-banner-name {
     color: #ffffff !important;
+}
+
+[data-theme="dark"] .prod-detail-banner-sub,
+body.dark-mode .prod-detail-banner-sub {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .prod-detail-banner-qty-val,
+body.dark-mode .prod-detail-banner-qty-val {
+    color: #f97316 !important;
+}
+
+[data-theme="dark"] .prod-detail-banner-qty-lbl,
+body.dark-mode .prod-detail-banner-qty-lbl {
+    color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .prod-modal-timeline-grid,
@@ -1084,4 +1100,86 @@ body.dark-mode .prod-modal-ing-table td {
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+.prod-modal-card-detail,
+.prod-modal-ingredients-wrapper {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.prod-modal-card-detail::-webkit-scrollbar,
+.prod-modal-ingredients-wrapper::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Modal Form Labels and Inputs Dark Mode Styling */
+[data-theme="dark"] .prod-modal-content,
+body.dark-mode .prod-modal-content {
+    background: #18181b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.prod-modal-content {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.prod-modal-content::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+[data-theme="dark"] .prod-modal-header,
+body.dark-mode .prod-modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .prod-modal-title,
+body.dark-mode .prod-modal-title {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .prod-form-label,
+body.dark-mode .prod-form-label {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .prod-form-input,
+body.dark-mode .prod-form-input,
+[data-theme="dark"] .prod-form-select,
+body.dark-mode .prod-form-select,
+[data-theme="dark"] .prod-form-textarea,
+body.dark-mode .prod-form-textarea {
+    background: #121215 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .prod-form-select option,
+body.dark-mode .prod-form-select option {
+    background: #18181b !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .prod-form-input:focus,
+body.dark-mode .prod-form-input:focus,
+[data-theme="dark"] .prod-form-select:focus,
+body.dark-mode .prod-form-select:focus,
+[data-theme="dark"] .prod-form-textarea:focus,
+body.dark-mode .prod-form-textarea:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.25) !important;
+}
+
+[data-theme="dark"] .prod-form-input::placeholder,
+body.dark-mode .prod-form-input::placeholder,
+[data-theme="dark"] .prod-form-textarea::placeholder,
+body.dark-mode .prod-form-textarea::placeholder {
+    color: #71717a !important;
 }

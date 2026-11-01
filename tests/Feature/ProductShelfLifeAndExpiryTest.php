@@ -9,6 +9,8 @@ use App\Models\Recipe;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -167,5 +169,131 @@ class ProductShelfLifeAndExpiryTest extends TestCase
         $product->refresh();
         $expectedExpiry = Carbon::now()->addDays(4)->toDateString();
         $this->assertEquals($expectedExpiry, $product->expiry_date?->toDateString());
+    }
+
+    public function test_product_can_be_updated_with_validated_fields()
+    {
+        $product = Product::create([
+            'category_id' => $this->category->id,
+            'name' => 'Original Brioche',
+            'sku' => 'BRI-001',
+            'price' => 4.00,
+            'cost' => 1.50,
+            'stock' => 12,
+            'minimum_stock' => 4,
+            'shelf_life' => 3,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+            'category_id' => $this->category->id,
+            'name' => 'Updated Golden Brioche',
+            'sku' => 'BRI-001',
+            'price' => 5.50,
+            'cost' => 2.00,
+            'stock' => 20,
+            'minimum_stock' => 6,
+            'shelf_life' => 5,
+            'expiry_date' => now()->addDays(5)->toDateString(),
+            'status' => 'active',
+            'description' => 'Updated rich brioche loaf',
+        ]);
+
+        $response->assertRedirect(route('admin.products'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Updated Golden Brioche',
+            'price' => 5.50,
+            'stock' => 20,
+            'shelf_life' => 5,
+        ]);
+    }
+
+    public function test_product_can_be_created_and_updated_with_uploaded_image()
+    {
+        $fakeImage = UploadedFile::fake()->image('bakery_tart.jpg', 300, 300);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $this->category->id,
+            'name' => 'Fruit Tart with Image',
+            'sku' => 'TART-IMG-01',
+            'price' => 6.00,
+            'stock' => 8,
+            'image' => $fakeImage,
+        ]);
+
+        $response->assertRedirect(route('admin.products'));
+        $product = Product::where('sku', 'TART-IMG-01')->first();
+        $this->assertNotNull($product);
+        $this->assertNotNull($product->image_path);
+        $this->assertFileExists(public_path($product->image_path));
+
+        // Clean up stored file
+        if (File::exists(public_path($product->image_path))) {
+            File::delete(public_path($product->image_path));
+        }
+    }
+
+    public function test_product_view_renders_edit_and_image_upload_ui()
+    {
+        $product = Product::create([
+            'category_id' => $this->category->id,
+            'name' => 'View Test Cake',
+            'sku' => 'VTC-001',
+            'price' => 12.00,
+            'stock' => 5,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.products'));
+        $response->assertStatus(200);
+        $response->assertSee('enctype="multipart/form-data"', false);
+        $response->assertSee('id="create_product_image"', false);
+        $response->assertSee('id="edit_product_modal"', false);
+        $response->assertSee('btn-edit-product', false);
+    }
+
+    public function test_updating_product_without_new_image_preserves_existing_image()
+    {
+        $fakeImage = UploadedFile::fake()->image('original_bun.jpg', 200, 200);
+
+        $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $this->category->id,
+            'name' => 'Original Bun',
+            'sku' => 'BUN-PRESERVE-01',
+            'price' => 2.50,
+            'stock' => 15,
+            'image' => $fakeImage,
+        ]);
+
+        $product = Product::where('sku', 'BUN-PRESERVE-01')->firstOrFail();
+        $originalImagePath = $product->image_path;
+        $this->assertNotNull($originalImagePath);
+        $this->assertFileExists(public_path($originalImagePath));
+
+        // Update product WITHOUT providing an image
+        $response = $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
+            'category_id' => $this->category->id,
+            'name' => 'Renamed Bun with Same Image',
+            'sku' => 'BUN-PRESERVE-01',
+            'price' => 3.00,
+            'stock' => 20,
+            'status' => 'active',
+        ]);
+
+        $response->assertRedirect(route('admin.products'));
+        $product->refresh();
+
+        $this->assertEquals('Renamed Bun with Same Image', $product->name);
+        $this->assertEquals(3.00, (float)$product->price);
+        $this->assertEquals($originalImagePath, $product->image_path, 'Existing image path should be preserved when no new image is uploaded');
+        $this->assertFileExists(public_path($originalImagePath));
+
+        // Clean up stored file
+        if (File::exists(public_path($originalImagePath))) {
+            File::delete(public_path($originalImagePath));
+        }
     }
 }
