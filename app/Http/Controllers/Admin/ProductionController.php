@@ -216,7 +216,7 @@ class ProductionController extends Controller
             ]);
         }
 
-        return view('admin.production.show', compact('production', 'requiredIngredients'));
+        return redirect()->route('admin.production', ['open_batch' => $production->id]);
     }
 
     public function store(Request $request)

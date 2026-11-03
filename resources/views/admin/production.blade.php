@@ -910,6 +910,15 @@
 
         if (productSelect) productSelect.addEventListener('change', updateIngredientPreview);
         if (qtyInput) qtyInput.addEventListener('input', updateIngredientPreview);
+
+        // Auto-open batch modal if navigated with open_batch parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoOpenBatch = urlParams.get('open_batch') || urlParams.get('batch');
+        if (autoOpenBatch && window.openBatchDetailModal) {
+            setTimeout(() => {
+                window.openBatchDetailModal(autoOpenBatch);
+            }, 60);
+        }
     });
 </script>
 @endpush

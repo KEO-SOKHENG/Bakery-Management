@@ -210,7 +210,7 @@ class NotificationService
     public function notifyProductionScheduled(Production $production): void
     {
         $productName = $production->product ? $production->product->name : 'Bakery Item';
-        $actionUrl = route('admin.production.show', $production);
+        $actionUrl = route('admin.production', ['open_batch' => $production->id]);
 
         $title = "Production Scheduled: Batch #{$production->batch_number}";
         $message = "Batch for {$production->quantity} units of {$productName} scheduled.";
@@ -224,7 +224,7 @@ class NotificationService
     public function notifyProductionCompleted(Production $production): void
     {
         $productName = $production->product ? $production->product->name : 'Bakery Item';
-        $actionUrl = route('admin.production.show', $production);
+        $actionUrl = route('admin.production', ['open_batch' => $production->id]);
 
         $title = "Production Completed: Batch #{$production->batch_number}";
         $message = "Batch completed! {$production->quantity} units of {$productName} produced and added to available stock.";
@@ -238,7 +238,7 @@ class NotificationService
     public function notifyPurchaseOrderUpdated(PurchaseOrder $po, string $action): void
     {
         $supplierName = $po->supplier ? $po->supplier->name : 'Supplier';
-        $actionUrl = route('admin.purchase-orders.show', $po);
+        $actionUrl = route('admin.purchase-orders.index', ['open_po' => $po->id]);
 
         if ($action === 'ordered') {
             $title = "Purchase Order Placed: #{$po->po_number}";

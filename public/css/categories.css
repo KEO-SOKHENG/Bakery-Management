@@ -9,43 +9,71 @@
 .categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .category-card {
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-subtle, #e4e4e7);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    transition: border-color 0.2s ease;
+    gap: 1.15rem;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .category-card:hover {
-    border-color: var(--primary-amber);
+    border-color: #ea580c !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(234, 88, 12, 0.12);
+}
+
+[data-theme="dark"] .category-card,
+body.dark-mode .category-card {
+    background: #17171a !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .category-card:hover,
+body.dark-mode .category-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    border-color: rgba(234, 88, 12, 0.5) !important;
 }
 
 .category-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-md);
-    background-color: var(--primary-amber-light);
+    width: 52px;
+    height: 52px;
+    border-radius: 0.75rem;
+    background: rgba(217, 119, 54, 0.1);
+    border: 1px solid rgba(217, 119, 54, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
+    flex-shrink: 0;
 }
 
 .category-info h3 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--espresso-dark);
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0 0 0.25rem 0;
+    color: var(--text-title, #0f172a);
+}
+
+[data-theme="dark"] .category-info h3,
+body.dark-mode .category-info h3 {
+    color: #ffffff;
 }
 
 .category-info p {
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: #71717a;
+    margin: 0;
+}
+
+[data-theme="dark"] .category-info p,
+body.dark-mode .category-info p {
+    color: #a1a1aa;
 }

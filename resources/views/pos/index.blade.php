@@ -7,20 +7,6 @@
     <link rel="stylesheet" href="{{ asset('css/pos.css') }}?v={{ @filemtime(public_path('css/pos.css')) ?: '1.0' }}">
 @endpush
 
-@section('header_toolbar')
-    <div class="period-pill-group" id="pos_date_tabs">
-        <a href="{{ route('pos', array_merge(request()->except('date'), ['date' => ''])) }}"
-           class="period-pill {{ (!request('date') || request('date') === 'all') ? 'active' : '' }}">All Dates</a>
-        <a href="{{ route('pos', array_merge(request()->except('date'), ['date' => 'today'])) }}"
-           class="period-pill {{ request('date') === 'today' ? 'active' : '' }}">Today</a>
-        <a href="{{ route('pos', array_merge(request()->except('date'), ['date' => 'yesterday'])) }}"
-           class="period-pill {{ request('date') === 'yesterday' ? 'active' : '' }}">Yesterday</a>
-        <a href="{{ route('pos', array_merge(request()->except('date'), ['date' => 'this_week'])) }}"
-           class="period-pill {{ request('date') === 'this_week' ? 'active' : '' }}">This Week</a>
-        <a href="{{ route('pos', array_merge(request()->except('date'), ['date' => 'this_month'])) }}"
-           class="period-pill {{ request('date') === 'this_month' ? 'active' : '' }}">This Month</a>
-    </div>
-@endsection
 
 @section('content')
 <div class="pos-screen-layout">
@@ -61,10 +47,11 @@
                     data-stock="{{ (int) $product->stock }}"
                     data-category-id="{{ $product->category_id }}"
                     data-code="{{ strtolower($product->code ?? $product->sku ?? '') }}"
+                    data-image="{{ $product->image_url ?? '' }}"
                 >
                     <div class="pos-item-visual">
-                        @if($product->image && file_exists(public_path('storage/' . $product->image)))
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px;">
+                        @if($product->image_url)
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px; display: block;">
                         @else
                             {!! $product->getIconSvg(40) !!}
                         @endif

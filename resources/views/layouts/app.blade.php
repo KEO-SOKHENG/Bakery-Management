@@ -14,8 +14,14 @@
     <!-- Instant Theme Loader -->
     <script>
         (function() {
-            let savedTheme = localStorage.getItem('bakery_theme') || 'light';
-            if (savedTheme === 'glass') {
+            let savedTheme = localStorage.getItem('bakery_theme');
+            if (!savedTheme) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    savedTheme = 'dark';
+                } else {
+                    savedTheme = 'light';
+                }
+            } else if (savedTheme === 'glass') {
                 savedTheme = 'dark';
                 try { localStorage.setItem('bakery_theme', 'dark'); } catch(e) {}
             }
@@ -31,6 +37,33 @@
             } else {
                 document.addEventListener('DOMContentLoaded', syncBody);
             }
+
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem('bakery_theme')) {
+                        const newTheme = e.matches ? 'dark' : 'light';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        if (document.body) {
+                            document.body.classList.toggle('dark-mode', newTheme === 'dark');
+                            document.body.classList.toggle('theme-dark', newTheme === 'dark');
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+
+    <!-- Instant Sidebar State Loader (Prevents flash / jump when navigating with collapsed sidebar) -->
+    <script>
+        (function() {
+            try {
+                if (window.innerWidth >= 1200 && localStorage.getItem('bakery_sidebar_state') === 'collapsed') {
+                    document.documentElement.classList.add('sidebar-initially-collapsed');
+                }
+            } catch(e) {}
+            document.addEventListener('DOMContentLoaded', function() {
+                document.documentElement.classList.remove('sidebar-initially-collapsed');
+            });
         })();
     </script>
 
@@ -45,28 +78,40 @@
     <div class="bakery-app-layout">
         <!-- Sidebar Navigation -->
         <aside class="bakery-sidebar" id="sidebar_nav">
-            <!-- Brand / Logo Area -->
-            <div class="bakery-logo-area">
-                <div class="bakery-logo-text">
-                    <div class="bakery-logo-title">Bakery</div>
-                    <div class="bakery-logo-subtitle">Management System</div>
+            <script>
+                (function() {
+                    try {
+                        if (window.innerWidth >= 1200 && localStorage.getItem('bakery_sidebar_state') === 'collapsed') {
+                            var sb = document.getElementById('sidebar_nav');
+                            if (sb) sb.classList.add('sidebar-collapsed');
+                            if (document.body) document.body.classList.add('sidebar-is-closed');
+                        }
+                    } catch(e) {}
+                })();
+            </script>
+            <!-- Brand / Logo Area (Interactive toggle button) -->
+            <button type="button" class="bakery-logo-area" id="sidebar_brand_toggle" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
+                <div class="bakery-logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <path d="M10 26C6.7 26 4 23.3 4 20C4 17.2 6.1 14.8 8.8 14.2C8.5 13.5 8.3 12.8 8.3 12C8.3 7.6 11.9 4 16.3 4C19.7 4 22.6 6.1 23.8 9.2C24.8 8.5 26 8 27.3 8C31 8 34 11 34 14.7C34 15.2 33.9 15.7 33.7 16.2C35.6 17.3 36.8 19.4 36.8 21.8C36.8 25.2 34 28 30.5 28H10" stroke="#f97316" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 25L25 12" stroke="#f97316" stroke-width="2.4" stroke-linecap="round"/>
+                        <path d="M16 19C15 17.5 16 16 17.5 16.5C18.5 17.5 18 19 16 19Z" fill="#f97316"/>
+                        <path d="M19.5 15.5C18.5 14 19.5 12.5 21 13C22 14 21.5 15.5 19.5 15.5Z" fill="#f97316"/>
+                        <path d="M23 12C22 10.5 23 9 24.5 9.5C25.5 10.5 25 12 23 12Z" fill="#f97316"/>
+                        <path d="M17.5 22.5C16.5 21 17.5 19.5 19 20C20 21 19.5 22.5 17.5 22.5Z" fill="#f97316"/>
+                        <path d="M21 19C20 17.5 21 16 22.5 16.5C23.5 17.5 23 19 21 19Z" fill="#f97316"/>
+                    </svg>
                 </div>
-                <button type="button" class="sidebar-header-toggle-btn" id="sidebar_close_btn" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
-                    <svg class="icon-chevron-toggle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                    <svg class="icon-close-mobile" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
+                <div class="bakery-logo-text">
+                    <span class="bakery-logo-title">Bakery</span>
+                    <span class="bakery-logo-subtitle">Management System</span>
+                </div>
+            </button>
 
             <!-- Navigation Links -->
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav has-liquid-pill">
                 <!-- Liquid Moving Pointer Pill -->
                 <div class="nav-pointer-pill" id="nav_pointer_pill"></div>
-
                 @php
                     $role = auth()->check() ? strtolower(auth()->user()->role) : 'admin';
                 @endphp
@@ -74,27 +119,26 @@
                 <!-- ==============================================
                      1. MAIN SECTION
                      ============================================== -->
-                <div class="sidebar-section-header" data-lang-key="main">Main</div>
-
+                
                 <!-- Dashboard (All Roles) -->
                 @if($role === 'admin')
                     <a href="{{ route('admin.dashboard') }}" class="sidebar-nav-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
                         <span data-lang-key="dashboard">Dashboard</span>
                     </a>
                 @elseif($role === 'manager')
                     <a href="{{ route('manager.dashboard') }}" class="sidebar-nav-item {{ request()->is('manager/dashboard') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
                         <span data-lang-key="dashboard">Dashboard</span>
                     </a>
                 @elseif($role === 'baker')
                     <a href="{{ route('admin.production') }}" class="sidebar-nav-item {{ request()->is('admin/production*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
                         <span data-lang-key="production">Production</span>
                     </a>
                 @else
                     <a href="{{ route('cashier.dashboard') }}" class="sidebar-nav-item {{ (request()->is('cashier/dashboard') || request()->is('pos*')) ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         <span data-lang-key="pos">POS Cashier</span>
                     </a>
                 @endif
@@ -102,7 +146,7 @@
                 <!-- POS Terminal (Admin & Manager) -->
                 @if(in_array($role, ['admin', 'manager']))
                     <a href="{{ route('pos') }}" class="sidebar-nav-item {{ request()->is('pos*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         <span data-lang-key="pos_terminal">POS Terminal</span>
                     </a>
                 @endif
@@ -110,28 +154,26 @@
                 <!-- Orders (Admin, Manager, Cashier) -->
                 @if(in_array($role, ['admin', 'manager', 'cashier']))
                     <a href="{{ route('admin.orders') }}" class="sidebar-nav-item {{ request()->is('admin/orders*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         <span data-lang-key="orders">Orders</span>
                     </a>
                 @endif
 
-
                 <!-- ==============================================
                      2. MANAGEMENT SECTION
                      ============================================== -->
-                <div class="sidebar-section-header" data-lang-key="management">Management</div>
-
+                
                 <!-- Products Group -->
                 @php
                     $productsOpen = request()->is('admin/products*') || request()->is('admin/categories*');
                 @endphp
                 <div class="sidebar-group {{ $productsOpen ? 'is-open' : '' }}" id="group_products">
                     <a href="{{ route('admin.products') }}" class="sidebar-nav-item {{ $productsOpen ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         <span data-lang-key="products">Products</span>
                         @if(in_array($role, ['admin', 'manager']))
                             <span class="sidebar-dropdown-btn" id="group_products_btn" role="button" tabindex="0" title="Toggle Products" aria-label="Toggle Products Submenu">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </span>
                         @endif
                     </a>
@@ -156,10 +198,10 @@
                     @endphp
                     <div class="sidebar-group {{ $inventoryOpen ? 'is-open' : '' }}" id="group_inventory">
                         <a href="{{ route('admin.ingredients') }}" class="sidebar-nav-item {{ $inventoryOpen ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/></svg>
                             <span data-lang-key="inventory">Inventory</span>
                             <span class="sidebar-dropdown-btn" id="group_inventory_btn" role="button" tabindex="0" title="Toggle Inventory" aria-label="Toggle Inventory Submenu">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </span>
                         </a>
                         <div class="sidebar-submenu">
@@ -190,7 +232,7 @@
                 <!-- Customers (Admin & Manager) -->
                 @if(in_array($role, ['admin', 'manager']))
                     <a href="{{ route('admin.customers.index') }}" class="sidebar-nav-item {{ request()->is('admin/customers*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         <span data-lang-key="customers">Customers</span>
                     </a>
                 @endif
@@ -198,7 +240,7 @@
                 <!-- Staff & Accounts (Admin Only) -->
                 @if($role === 'admin')
                     <a href="{{ route('admin.users.index') }}" class="sidebar-nav-item {{ request()->is('admin/users*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>
                         <span data-lang-key="users_staff">Staff & Accounts</span>
                     </a>
                 @endif
@@ -207,10 +249,8 @@
                      3. ANALYTICS SECTION (Admin & Manager)
                      ============================================== -->
                 @if(in_array($role, ['admin', 'manager']))
-                    <div class="sidebar-section-header" data-lang-key="analytics">Analytics</div>
-
-                    <a href="{{ route('admin.reports') }}" class="sidebar-nav-item {{ request()->is('admin/reports*') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        <a href="{{ route('admin.reports') }}" class="sidebar-nav-item {{ request()->is('admin/reports*') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                         <span data-lang-key="reports">Sales & Reports</span>
                     </a>
                 @endif
@@ -219,11 +259,9 @@
                      4. SYSTEM SECTION (Admin & Manager)
                      ============================================== -->
                 @if(in_array($role, ['admin', 'manager']))
-                    <div class="sidebar-section-header" data-lang-key="system">System</div>
-
-                    <!-- Settings (Direct Single Item) -->
+                                        <!-- Settings (Direct Single Item) -->
                     <a href="{{ route('admin.settings') }}" class="sidebar-nav-item {{ (request()->is('admin/settings*') || request()->is('admin/notifications*')) ? 'active' : '' }}" id="nav_settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                         <span data-lang-key="settings">Settings</span>
                         @if(($realUnreadCount ?? 0) > 0)
                             <span class="sidebar-badge" style="margin-left: auto; background: #ef4444; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 1px 6px; border-radius: 9999px;">{{ $realUnreadCount }}</span>
@@ -231,15 +269,45 @@
                     </a>
                 @endif
             </nav>
+            <script>
+                (function() {
+                    try {
+                        var nav = document.querySelector('.sidebar-nav');
+                        var active = nav ? nav.querySelector('.sidebar-nav-item.active') : null;
+                        var pill = document.getElementById('nav_pointer_pill');
+                        if (nav && active && pill) {
+                            var navRect = nav.getBoundingClientRect();
+                            var itemRect = active.getBoundingClientRect();
+                            if (itemRect.height > 0) {
+                                var isCollapsed = document.querySelector('.bakery-sidebar')?.classList.contains('sidebar-collapsed');
+                                var y = itemRect.top - navRect.top + nav.scrollTop;
+                                pill.style.setProperty('transition', 'none', 'important');
+                                pill.style.transform = 'translate3d(0, ' + y + 'px, 0)';
+                                if (isCollapsed) {
+                                    pill.style.width = '44px';
+                                    pill.style.height = '44px';
+                                    pill.style.borderRadius = '50%';
+                                    pill.style.left = 'calc(50% - 22px)';
+                                } else {
+                                    pill.style.width = '100%';
+                                    pill.style.height = itemRect.height + 'px';
+                                    pill.style.borderRadius = '9999px';
+                                    pill.style.left = '0px';
+                                }
+                                pill.style.opacity = '1';
+                            }
+                        }
+                    } catch(e) {}
+                })();
+            </script>
 
             <!-- Bottom Logout Button -->
             <div class="sidebar-logout">
                 <a href="{{ route('logout') }}" class="logout-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     <span data-lang-key="logout">Logout</span>
                 </a>
-            </div>
-        </aside>
+            </div></aside>
 
         <!-- Mobile & Tablet Drawer Backdrop -->
         <div id="sidebar_mobile_backdrop" class="sidebar-mobile-backdrop"></div>
@@ -393,7 +461,6 @@
                                     </div>
                                     <div class="dropdown-item-text">
                                         <div class="dropdown-item-title">My Profile</div>
-                                        <div class="dropdown-item-desc">Account & security details</div>
                                     </div>
                                     <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                                 </a>
@@ -406,7 +473,6 @@
                                         </div>
                                         <div class="dropdown-item-text">
                                             <div class="dropdown-item-title">Settings & Theme</div>
-                                            <div class="dropdown-item-desc">Store branding & layout</div>
                                         </div>
                                         <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                                     </a>
@@ -423,7 +489,6 @@
                                     </div>
                                     <div class="dropdown-item-text">
                                         <div class="dropdown-item-title">Sign Out</div>
-                                        <div class="dropdown-item-desc">Securely exit session</div>
                                     </div>
                                     <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                                 </a>
@@ -483,6 +548,15 @@
     <div id="global_confirm_modal" class="confirm-modal-backdrop" aria-hidden="true" inert role="dialog" aria-modal="true" aria-labelledby="global_confirm_title">
         <div class="confirm-modal-card">
             <div class="confirm-modal-icon-chamber danger" id="global_confirm_icon_chamber">
+                <svg id="global_confirm_icon_action" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="16 10 11 15 8 12"></polyline>
+                </svg>
+                <svg id="global_confirm_icon_cancel" style="display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
                 <svg id="global_confirm_icon_trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Clean, instant native CSS hover & active state architecture
     const nav = document.querySelector(".sidebar-nav");
     if (!nav) return;
 
@@ -9,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function initSidebarPill() {
         const nav = document.querySelector(".sidebar-nav");
         if (!nav) return;
+
+        nav.classList.add("has-liquid-pill");
 
         let pill = document.getElementById("nav_pointer_pill");
         if (!pill) {
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let currentY = null;
         let currentX = null;
         let stretchTimer = null;
+        let isSidebarAnimating = false;
 
         function movePill(item, instant = false) {
             if (!item) return;
@@ -35,23 +37,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!itemRect.width || !itemRect.height) return;
 
-            const x = itemRect.left - navRect.left;
+            const isCollapsed = document.querySelector(".bakery-sidebar")?.classList.contains("sidebar-collapsed");
+            const x = isCollapsed ? 0 : (itemRect.left - navRect.left);
             const y = itemRect.top - navRect.top + nav.scrollTop;
 
             const isMoving = currentY !== null && (Math.abs(y - currentY) > 3 || Math.abs(x - currentX) > 3);
 
             if (instant) {
+                pill.style.setProperty("transition", "none", "important");
                 pill.style.transition = "none";
             } else {
+                pill.style.removeProperty("transition");
                 pill.style.transition = "";
             }
 
-            pill.style.width = `${itemRect.width}px`;
-            pill.style.height = `${itemRect.height}px`;
+            if (isCollapsed) {
+                pill.style.width = "44px";
+                pill.style.height = "44px";
+                pill.style.borderRadius = "50%";
+                pill.style.left = "calc(50% - 22px)";
+            } else {
+                pill.style.width = `${itemRect.width}px`;
+                pill.style.height = `${itemRect.height}px`;
+                pill.style.borderRadius = "9999px";
+                pill.style.left = "0px";
+            }
 
             if (stretchTimer) clearTimeout(stretchTimer);
 
-            if (!instant && isMoving) {
+            if (!instant && isMoving && !isSidebarAnimating) {
                 // macOS / iOS Liquid stretch blob effect while in motion
                 pill.style.transform = `translate3d(${x}px, ${y}px, 0) scale3d(0.97, 1.12, 1)`;
 
@@ -77,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (instant) {
                 requestAnimationFrame(() => {
+                    pill.style.removeProperty("transition");
                     pill.style.transition = "";
                 });
             }
@@ -146,43 +161,95 @@ document.addEventListener("DOMContentLoaded", () => {
         window.addEventListener("resize", () => refreshPosition(true));
         window.addEventListener("orientationchange", () => setTimeout(() => refreshPosition(true), 250));
 
-        if (window.ResizeObserver) {
-            const ro = new ResizeObserver(() => {
-                refreshPosition(true);
-            });
-            ro.observe(nav);
-            const sidebarEl = document.querySelector(".bakery-sidebar");
-            if (sidebarEl) ro.observe(sidebarEl);
+        // Sidebar animation sync
+        const sidebarEl = document.querySelector(".bakery-sidebar");
+        let animationTimer = null;
+
+        function markSidebarAnimating() {
+            isSidebarAnimating = true;
+            if (sidebarEl) {
+                sidebarEl.classList.add("is-animating");
+            }
+            if (pill) {
+                pill.style.transition = "width 0.3s cubic-bezier(0.2, 0, 0, 1), transform 0.28s cubic-bezier(.22, 1, .36, 1), opacity 0.2s ease";
+            }
+            if (animationTimer) clearTimeout(animationTimer);
+            animationTimer = setTimeout(() => {
+                isSidebarAnimating = false;
+                if (sidebarEl) {
+                    sidebarEl.classList.remove("is-animating");
+                }
+                refreshPosition(false);
+            }, 340);
         }
 
-        // Sidebar toggle button listeners (Ctrl+B, mobile hamburger, in-sidebar toggle)
-        const toggleBtns = document.querySelectorAll("#sidebar_toggle_btn, .mobile-sidebar-toggle-btn, .sidebar-header-toggle-btn, #sidebar_close_btn");
+        if (sidebarEl) {
+            sidebarEl.addEventListener("transitionstart", (e) => {
+                if (e.target === sidebarEl && (e.propertyName === "width" || e.propertyName === "max-width")) {
+                    markSidebarAnimating();
+                }
+            });
+
+            sidebarEl.addEventListener("transitionend", (e) => {
+                if (e.target === sidebarEl && (e.propertyName === "width" || e.propertyName === "max-width")) {
+                    isSidebarAnimating = false;
+                    if (sidebarEl) {
+                        sidebarEl.classList.remove("is-animating");
+                    }
+                    refreshPosition(false);
+                }
+            });
+        }
+
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => {
+                if (!isSidebarAnimating) {
+                    refreshPosition(true);
+                }
+            });
+            ro.observe(nav);
+        }
+
+        const toggleBtns = document.querySelectorAll("#sidebar_toggle_btn, #sidebar_brand_toggle, .bakery-logo-area, .mobile-sidebar-toggle-btn, .sidebar-header-toggle-btn, #sidebar_close_btn");
         toggleBtns.forEach(btn => {
             btn.addEventListener("click", () => {
-                let ticks = 0;
-                const interval = setInterval(() => {
-                    refreshPosition(true);
-                    ticks++;
-                    if (ticks > 8) clearInterval(interval);
-                }, 40);
+                markSidebarAnimating();
+                requestAnimationFrame(() => refreshPosition(false));
+                setTimeout(() => refreshPosition(false), 60);
+                setTimeout(() => refreshPosition(false), 150);
+                setTimeout(() => refreshPosition(false), 260);
             });
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) {
+                markSidebarAnimating();
+                requestAnimationFrame(() => refreshPosition(false));
+                setTimeout(() => refreshPosition(false), 60);
+                setTimeout(() => refreshPosition(false), 150);
+                setTimeout(() => refreshPosition(false), 260);
+            }
         });
 
         // Accordion chevrons
-        document.querySelectorAll(".sidebar-dropdown-btn").forEach(btn => {
+        document.querySelectorAll(".sidebar-group > .sidebar-nav-item, .sidebar-dropdown-btn").forEach(btn => {
             btn.addEventListener("click", () => {
-                setTimeout(() => refreshPosition(false), 80);
-                setTimeout(() => refreshPosition(true), 280);
+                setTimeout(() => refreshPosition(false), 50);
+                setTimeout(() => refreshPosition(false), 150);
+                setTimeout(() => refreshPosition(false), 260);
+                setTimeout(() => refreshPosition(true), 380);
             });
         });
 
-        // Expose globally
-        window.sidebarPillRefresh = () => refreshPosition(true);
-
         // Initial alignment on page load
+        movePill(activeItem, true);
+        requestAnimationFrame(() => movePill(activeItem, true));
         setTimeout(() => {
             movePill(activeItem, true);
-        }, 40);
+        }, 50);
+
+        // Expose globally
+        window.sidebarPillRefresh = (instant = true) => refreshPosition(instant);
     }
 
     // ---------------------------------------------------------
@@ -313,6 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.menuBarsPillRefresh();
         }
     }
+    window.applyTheme = applyTheme;
 
     // ---------------------------------------------------------
     // HORIZONTAL MENU BARS LIQUID POINTER PILL (SIDEBAR PARITY)
@@ -540,6 +608,8 @@ window.showConfirmDialog = function(options) {
     }
 
     const iconChamber = document.getElementById('global_confirm_icon_chamber');
+    const iconAction = document.getElementById('global_confirm_icon_action');
+    const iconCancel = document.getElementById('global_confirm_icon_cancel');
     const iconTrash = document.getElementById('global_confirm_icon_trash');
     const iconWarn = document.getElementById('global_confirm_icon_warn');
     const iconInfo = document.getElementById('global_confirm_icon_info');
@@ -549,25 +619,63 @@ window.showConfirmDialog = function(options) {
     const cancelTextEl = document.getElementById('global_confirm_cancel_text');
     const proceedBtn = document.getElementById('btn_proceed_global_confirm');
     const proceedTextEl = document.getElementById('global_confirm_proceed_text');
+    const btnIcon = document.getElementById('global_confirm_btn_icon');
 
-    if (titleEl) titleEl.textContent = options.title || 'Confirm Deletion';
+    if (titleEl) titleEl.textContent = options.title || 'Confirm Action';
     if (messageEl) messageEl.textContent = options.message || 'Are you sure you want to proceed with this action? This cannot be undone.';
     if (cancelTextEl) cancelTextEl.textContent = options.cancelText || 'Cancel';
-    if (proceedTextEl) proceedTextEl.textContent = options.confirmText || 'Yes, Delete';
+    if (proceedTextEl) proceedTextEl.textContent = options.confirmText || 'Confirm';
 
     // Configure Icon and Button Color Scheme
-    const isWarning = options.type === 'warning' || (options.isDanger === false && options.type !== 'info');
-    const isInfo = options.type === 'info';
+    const type = options.type || 'action';
+    const isAction = type === 'action';
+    const isCancel = type === 'cancel';
+    const isWarning = type === 'warning';
+    const isInfo = type === 'info';
+    const isDanger = type === 'danger' || type === 'delete';
 
     if (iconChamber) {
-        iconChamber.className = 'confirm-modal-icon-chamber ' + (isWarning ? 'warning' : (isInfo ? 'info' : 'danger'));
+        iconChamber.className = 'confirm-modal-icon-chamber ' + (
+            isAction ? 'action' : (
+                isCancel ? 'cancel' : (
+                    isWarning ? 'warning' : (
+                        isInfo ? 'info' : 'danger'
+                    )
+                )
+            )
+        );
     }
-    if (iconTrash) iconTrash.style.display = (!isWarning && !isInfo) ? 'block' : 'none';
+    if (iconAction) iconAction.style.display = isAction ? 'block' : 'none';
+    if (iconCancel) iconCancel.style.display = isCancel ? 'block' : 'none';
+    if (iconTrash) iconTrash.style.display = isDanger ? 'block' : 'none';
     if (iconWarn) iconWarn.style.display = isWarning ? 'block' : 'none';
     if (iconInfo) iconInfo.style.display = isInfo ? 'block' : 'none';
 
     if (proceedBtn) {
-        proceedBtn.className = 'confirm-modal-btn confirm-btn ' + (isWarning ? 'warning' : (isInfo ? 'primary' : 'danger'));
+        proceedBtn.className = 'confirm-modal-btn confirm-btn ' + (
+            isAction ? 'action' : (
+                isCancel ? 'cancel' : (
+                    isWarning ? 'warning' : (
+                        isInfo ? 'primary' : 'danger'
+                    )
+                )
+            )
+        );
+    }
+
+    if (btnIcon) {
+        if (isAction) {
+            btnIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        } else if (isCancel) {
+            btnIcon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+        } else if (isWarning) {
+            btnIcon.innerHTML = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+        } else if (isInfo) {
+            btnIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        } else {
+            // danger / delete
+            btnIcon.innerHTML = '<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>';
+        }
     }
 
     const triggerEl = options.triggerEl || (document.activeElement && document.activeElement !== document.body ? document.activeElement : null);
@@ -661,7 +769,7 @@ function initGlobalConfirmModal() {
             const lower = message.toLowerCase();
             let title = 'Confirm Action';
             let confirmText = 'Confirm';
-            let type = 'danger';
+            let type = 'action';
 
             if (lower.includes('delete') || lower.includes('remove')) {
                 title = 'Confirm Deletion';
@@ -670,7 +778,7 @@ function initGlobalConfirmModal() {
             } else if (lower.includes('cancel')) {
                 title = 'Confirm Cancellation';
                 confirmText = 'Yes, Cancel';
-                type = 'danger';
+                type = 'cancel';
             } else if (lower.includes('receive') || lower.includes('receipt')) {
                 title = 'Confirm PO Receipt';
                 confirmText = 'Receive Stock';
@@ -736,7 +844,7 @@ function initGlobalConfirmModal() {
             const lower = message.toLowerCase();
             let title = 'Confirm Action';
             let confirmText = 'Confirm';
-            let type = 'danger';
+            let type = 'action';
 
             if (lower.includes('delete') || lower.includes('remove')) {
                 title = 'Confirm Deletion';
@@ -745,7 +853,7 @@ function initGlobalConfirmModal() {
             } else if (lower.includes('cancel')) {
                 title = 'Confirm Cancellation';
                 confirmText = 'Yes, Cancel';
-                type = 'danger';
+                type = 'cancel';
             } else if (lower.includes('paid') || lower.includes('disbursed')) {
                 title = 'Mark as Paid';
                 confirmText = 'Confirm Payment';

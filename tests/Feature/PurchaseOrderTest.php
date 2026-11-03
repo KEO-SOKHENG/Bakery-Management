@@ -67,7 +67,7 @@ class PurchaseOrderTest extends TestCase
 
         $po = PurchaseOrder::where('supplier_id', $this->supplier->id)->latest()->first();
         $this->assertNotNull($po);
-        $response->assertRedirect(route('admin.purchase-orders.show', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['open_po' => $po->id]));
 
         $this->assertEquals('draft', $po->status);
         $this->assertEquals(69.50, (float) $po->total_cost); // 19.50 + 50.00 = 69.50
@@ -85,7 +85,7 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)->post(route('admin.purchase-orders.order', $po->id));
-        $response->assertRedirect(route('admin.purchase-orders.show', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['open_po' => $po->id]));
 
         $po->refresh();
         $this->assertEquals('ordered', $po->status);
@@ -114,7 +114,7 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)->post(route('admin.purchase-orders.receive', $po->id));
-        $response->assertRedirect(route('admin.purchase-orders.show', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['open_po' => $po->id]));
         $response->assertSessionHas('success');
 
         $po->refresh();
@@ -210,9 +210,37 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)->post(route('admin.purchase-orders.cancel', $po->id));
-        $response->assertRedirect(route('admin.purchase-orders.show', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['open_po' => $po->id]));
 
         $this->assertEquals('cancelled', $po->fresh()->status);
+    }
+
+    public function test_purchase_order_show_redirects_to_index_with_open_po_for_browser_requests(): void
+    {
+        $po = PurchaseOrder::create([
+            'po_number'   => 'PO-SHOW-' . rand(1000, 9999),
+            'supplier_id' => $this->supplier->id,
+            'order_date'  => today(),
+            'status'      => 'ordered',
+            'total_cost'  => 50.00,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.purchase-orders.show', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['open_po' => $po->id]));
+    }
+
+    public function test_purchase_order_edit_redirects_to_index_with_edit_po_for_browser_requests(): void
+    {
+        $po = PurchaseOrder::create([
+            'po_number'   => 'PO-EDIT-' . rand(1000, 9999),
+            'supplier_id' => $this->supplier->id,
+            'order_date'  => today(),
+            'status'      => 'draft',
+            'total_cost'  => 50.00,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.purchase-orders.edit', $po->id));
+        $response->assertRedirect(route('admin.purchase-orders.index', ['edit_po' => $po->id]));
     }
 
     public function test_purchase_order_show_returns_json_when_requested(): void

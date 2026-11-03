@@ -113,8 +113,16 @@ document.addEventListener('DOMContentLoaded', function() {
             segmentedButtons.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             const theme = this.getAttribute('data-theme');
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('bakery_theme', theme);
+            if (typeof window.applyTheme === 'function') {
+                window.applyTheme(theme);
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+                if (document.body) {
+                    document.body.classList.toggle('dark-mode', theme === 'dark');
+                    document.body.classList.toggle('theme-dark', theme === 'dark');
+                }
+                localStorage.setItem('bakery_theme', theme);
+            }
             showToast(`Theme switched to ${theme.toUpperCase()} mode!`);
 
             // Sync with backend

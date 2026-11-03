@@ -91,7 +91,7 @@ class SupplierController extends Controller
                             'status'                 => $po->status,
                             'total_cost'             => (float) $po->total_cost,
                             'items_count'            => $po->items->count(),
-                            'url'                    => route('admin.purchase-orders.show', $po->id),
+                            'url'                    => route('admin.purchase-orders.index', ['open_po' => $po->id]),
                         ];
                     }),
                 ],

@@ -1149,6 +1149,41 @@ body.dark-mode .reports-sticky-toolbar-wrapper {
     flex-direction: column;
 }
 
+.report-table-wrapper {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(238, 233, 224, 0.85);
+    border-radius: 20px;
+    overflow-x: auto;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 280px) !important;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.report-table-wrapper::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+    display: block !important;
+}
+
+.report-table-wrapper::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.report-table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.3) !important;
+    border-radius: 9999px !important;
+}
+
+.report-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.55) !important;
+}
+
 .orders-card .report-table-wrapper,
 .orders-table-wrapper {
     background: transparent !important;
@@ -1156,6 +1191,7 @@ body.dark-mode .reports-sticky-toolbar-wrapper {
     border-radius: 14px !important;
     box-shadow: none !important;
     margin-bottom: 0 !important;
+    margin-top: 0 !important;
     overflow-x: auto !important;
     width: 100%;
 }
@@ -1321,6 +1357,10 @@ body.dark-mode .reports-sticky-toolbar-wrapper {
     .bakery-sidebar,
     .top-header-bar,
     .dash-filter-bar,
+    .reports-fixed-header-section,
+    .reports-export-actions,
+    .report-controls-card,
+    .report-filter-flex,
     .reports-sticky-toolbar-wrapper,
     .reports-sub-nav,
     .report-nav-tabs-container,
@@ -1348,11 +1388,19 @@ body.dark-mode .reports-sticky-toolbar-wrapper {
     /* Container resets */
     .bakery-app-layout,
     .bakery-main-content,
-    .main-content-body {
+    .main-content-body,
+    .reports-page-container,
+    .reports-container,
+    .reports-scrollable-body {
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        display: block !important;
         background: transparent !important;
     }
 
@@ -1928,7 +1976,6 @@ body.is-reports-page .reports-sub-nav {
 body.is-reports-page .reports-scrollable-body {
     flex: 1 1 auto !important;
     min-height: 0 !important;
-    height: 100% !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding-right: 6px !important;

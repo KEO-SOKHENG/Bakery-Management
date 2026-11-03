@@ -13,6 +13,7 @@ class ResetAdminPasswordTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->clearResetEnv();
         Artisan::call('migrate');
     }
 
@@ -48,6 +49,7 @@ class ResetAdminPasswordTest extends TestCase
         ];
 
         foreach ($keys as $key) {
+            putenv("{$key}=");
             putenv($key);
             unset($_ENV[$key], $_SERVER[$key]);
         }
@@ -307,10 +309,11 @@ class ResetAdminPasswordTest extends TestCase
 
         // 1. Reset temporary password via environment variable command
         $this->setResetEnv([
-            'RESET_ADMIN_PASSWORD'     => 'true',
-            'RESET_ADMIN_USERNAME'     => 'flow_admin',
-            'RESET_ADMIN_EMAIL'        => 'flow_admin@bakery.com',
-            'RESET_ADMIN_NEW_PASSWORD' => 'TemporaryResetPassword#123',
+            'RESET_ADMIN_PASSWORD'              => 'true',
+            'RESET_ADMIN_USERNAME'              => 'flow_admin',
+            'RESET_ADMIN_EMAIL'                 => 'flow_admin@bakery.com',
+            'RESET_ADMIN_NEW_PASSWORD'          => 'TemporaryResetPassword#123',
+            'RESET_ADMIN_MUST_CHANGE_PASSWORD' => 'true',
         ]);
 
         $this->assertSame(0, Artisan::call('admin:reset-password'));

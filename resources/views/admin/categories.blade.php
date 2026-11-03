@@ -69,18 +69,16 @@
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                 </button>
-                <form action="{{ route('admin.categories.destroy', $cat->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete category \'{{ $cat->name }}\'?');" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-icon-action delete" title="Delete Category" style="width: 28px; height: 28px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                    </button>
-                </form>
+                <button type="button" class="btn-icon-action delete btn-delete-category" title="Delete Category" style="width: 28px; height: 28px;"
+                    data-id="{{ $cat->id }}"
+                    data-name="{{ $cat->name }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 14px; height: 14px;">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
             </div>
         </div>
     @empty
@@ -91,22 +89,19 @@
 </div>
 
 <!-- ADD CATEGORY MODAL -->
-<x-modal id="add_category_modal" title="Add Category" maxWidth="480px" class="dash-modal-overlay">
+<x-modal id="add_category_modal" title="Add Category" maxWidth="480px" class="dash-modal-overlay" :showClose="false">
     <form action="{{ route('admin.categories.store') }}" method="POST">
         @csrf
         <x-input name="name" label="Category Name" placeholder="e.g. Artisanal Breads" :required="true" />
+        <x-select name="status" id="add_category_status" label="Status">
+            <option value="active" selected>Active</option>
+            <option value="inactive">Inactive</option>
+        </x-select>
         <div class="form-group">
-            <label class="form-label" for="add_category_status">Status</label>
-            <select name="status" id="add_category_status" class="form-control">
-                <option value="active" selected>Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
+            <label class="form-label" for="add_category_description">Description</label>
+            <textarea name="description" id="add_category_description" class="form-control-textarea" rows="3" placeholder="Brief catalog description..."></textarea>
         </div>
-        <div class="form-group">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control-textarea" rows="3" placeholder="Brief catalog description..."></textarea>
-        </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_cat">Cancel</x-button>
             <x-button variant="primary" type="submit">Save Category</x-button>
         </div>
@@ -114,28 +109,84 @@
 </x-modal>
 
 <!-- EDIT CATEGORY MODAL -->
-<x-modal id="edit_category_modal" title="Edit Category" maxWidth="480px" class="dash-modal-overlay">
+<x-modal id="edit_category_modal" title="Edit Category" maxWidth="480px" class="dash-modal-overlay" :showClose="false">
     <form id="form_edit_category" action="" method="POST">
         @csrf
         @method('PUT')
         <x-input name="name" id="edit_category_name" label="Category Name" placeholder="e.g. Artisanal Breads" :required="true" />
-        <div class="form-group">
-            <label class="form-label" for="edit_category_status">Status</label>
-            <select name="status" id="edit_category_status" class="form-control" required>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-        </div>
+        <x-select name="status" id="edit_category_status" label="Status" :required="true">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </x-select>
         <div class="form-group">
             <label class="form-label" for="edit_category_description">Description</label>
             <textarea name="description" id="edit_category_description" class="form-control-textarea" rows="3" placeholder="Brief catalog description..."></textarea>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+
+        <!-- Danger Zone / Delete Category Action Card -->
+        <div style="margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div class="user-action-card user-action-card-danger">
+                <div>
+                    <div class="user-action-card-title" style="color: #ef4444;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span>Delete Category</span>
+                    </div>
+                    <div class="user-action-card-desc">
+                        Permanently delete this category from the bakery catalog
+                    </div>
+                </div>
+                <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit_cat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_cat">Cancel</x-button>
             <x-button variant="primary" type="submit" id="btn_submit_edit_category">Update Category</x-button>
         </div>
     </form>
 </x-modal>
+
+<!-- Hidden form for category deletion -->
+<form id="form_delete_category" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+<!-- ==========================================================================
+     UNIFIED DELETE CATEGORY CONFIRMATION MODAL CARD
+     ========================================================================== -->
+<div class="user-modal-backdrop" id="delete_category_confirm_modal">
+    <div class="user-modal-card" style="max-width: 440px;">
+        <div class="user-modal-header" style="border-bottom: 1px solid rgba(220, 38, 38, 0.2);">
+            <h3 style="color: #ef4444; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Delete Category</span>
+            </h3>
+        </div>
+        <div class="user-modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
+            <p style="font-size: 0.925rem; margin: 0; color: var(--user-text, #ffffff); line-height: 1.5;">
+                Are you sure you want to delete category <strong id="delete_modal_cat_name" style="color: #f59e0b;"></strong>?
+            </p>
+            <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.8rem; color: var(--user-muted, #a1a1aa); line-height: 1.45;">
+                <div style="font-weight: 700; color: #ef4444; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Product Catalog Protection</span>
+                </div>
+                Categories linked to active products cannot be removed until products are reassigned or uncategorized.
+            </div>
+        </div>
+        <div class="user-modal-footer" style="padding: 1rem 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-modal-cancel" id="btn_cancel_delete_cat_confirm">Close</button>
+            <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_confirm_delete_cat_execute" style="height: 40px; padding: 0 1.25rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete Category</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>
@@ -143,7 +194,6 @@
         // Add Category Modal
         const addModal = document.getElementById('add_category_modal');
         const openAddBtn = document.getElementById('btn_open_category_modal');
-        const closeAddBtn = document.getElementById('btn_close_cat_modal');
         const cancelAddBtn = document.getElementById('btn_cancel_cat');
 
         function openAddModal() {
@@ -163,7 +213,6 @@
         }
 
         if (openAddBtn) openAddBtn.addEventListener('click', openAddModal);
-        if (closeAddBtn) closeAddBtn.addEventListener('click', closeAddModal);
         if (cancelAddBtn) cancelAddBtn.addEventListener('click', closeAddModal);
 
         if (addModal) {
@@ -176,7 +225,8 @@
         const editModal = document.getElementById('edit_category_modal');
         const editForm = document.getElementById('form_edit_category');
         const cancelEditBtn = document.getElementById('btn_cancel_edit_cat');
-        const closeEditBtn = document.getElementById('btn_close_edit_cat_modal');
+        let currentEditCatId = null;
+        let currentEditCatName = '';
 
         function closeEditModal() {
             if (editModal) {
@@ -187,7 +237,6 @@
         }
 
         if (cancelEditBtn) cancelEditBtn.addEventListener('click', closeEditModal);
-        if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditModal);
 
         if (editModal) {
             editModal.addEventListener('click', function(e) {
@@ -198,6 +247,9 @@
         document.querySelectorAll('.btn-edit-category').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (!editModal || !editForm) return;
+
+                currentEditCatId = this.dataset.id || '';
+                currentEditCatName = this.dataset.name || '';
 
                 editForm.action = this.dataset.updateUrl || '';
                 const nameInput = document.getElementById('edit_category_name');
@@ -214,6 +266,72 @@
                 document.body.style.overflow = 'hidden';
             });
         });
+
+        // Unified Delete Confirmation Handling
+        const deleteConfirmModal = document.getElementById('delete_category_confirm_modal');
+        const formDeleteCategory = document.getElementById('form_delete_category');
+        const deleteModalCatName = document.getElementById('delete_modal_cat_name');
+        const btnCancelDeleteCat = document.getElementById('btn_cancel_delete_cat_confirm');
+        const btnConfirmDeleteCat = document.getElementById('btn_confirm_delete_cat_execute');
+        let targetDeleteId = null;
+
+        function openDeleteModal(id, name) {
+            targetDeleteId = id;
+            if (deleteModalCatName) deleteModalCatName.textContent = name ? `"${name}"` : '';
+            if (deleteConfirmModal) {
+                deleteConfirmModal.classList.add('active', 'is-active');
+                deleteConfirmModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDeleteModal() {
+            if (deleteConfirmModal) {
+                deleteConfirmModal.classList.remove('active', 'is-active');
+                deleteConfirmModal.style.display = 'none';
+                if (!editModal || editModal.style.display !== 'flex') {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        // Table / Grid row delete buttons
+        document.querySelectorAll('.btn-delete-category').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                openDeleteModal(id, name);
+            });
+        });
+
+        // Delete button from inside Edit Modal
+        const btnDeleteFromEdit = document.getElementById('btn_delete_from_edit_cat');
+        if (btnDeleteFromEdit) {
+            btnDeleteFromEdit.addEventListener('click', function() {
+                if (currentEditCatId) {
+                    openDeleteModal(currentEditCatId, currentEditCatName);
+                }
+            });
+        }
+
+        if (btnCancelDeleteCat) btnCancelDeleteCat.addEventListener('click', closeDeleteModal);
+
+        if (deleteConfirmModal) {
+            deleteConfirmModal.addEventListener('click', function(e) {
+                if (e.target === deleteConfirmModal) closeDeleteModal();
+            });
+        }
+
+        if (btnConfirmDeleteCat) {
+            btnConfirmDeleteCat.addEventListener('click', function() {
+                if (!targetDeleteId) return;
+                btnConfirmDeleteCat.disabled = true;
+                btnConfirmDeleteCat.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Deleting...</span>';
+                formDeleteCategory.action = `/admin/categories/${targetDeleteId}`;
+                formDeleteCategory.submit();
+            });
+        }
 
         // Search filtering (client-side dynamic + submit on Enter)
         const searchInput = document.getElementById('category_search_input') || document.getElementById('global_header_search');

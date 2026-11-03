@@ -147,7 +147,7 @@ class PurchaseOrderController extends Controller
                     ->with('success', "Purchase Order #{$po->po_number} created successfully!");
             }
 
-            return redirect()->route('admin.purchase-orders.show', $po->id)
+            return redirect()->route('admin.purchase-orders.index', ['open_po' => $po->id])
                 ->with('success', "Purchase Order #{$po->po_number} created successfully!");
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Failed to create Purchase Order: ' . $e->getMessage());
@@ -162,17 +162,20 @@ class PurchaseOrderController extends Controller
             return response()->json([
                 'success' => true,
                 'purchase_order' => [
-                    'id'                     => $purchaseOrder->id,
-                    'po_number'              => $purchaseOrder->po_number,
-                    'status'                 => $purchaseOrder->status,
-                    'total_cost'             => (float) $purchaseOrder->total_cost,
-                    'order_date'             => $purchaseOrder->order_date ? $purchaseOrder->order_date->format('M d, Y') : '—',
-                    'expected_delivery_date' => $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('M d, Y') : 'Flexible / Unspecified',
-                    'received_date'          => $purchaseOrder->received_date ? $purchaseOrder->received_date->format('M d, Y H:i') : null,
-                    'created_at'             => $purchaseOrder->created_at ? $purchaseOrder->created_at->format('M d, Y H:i') : null,
-                    'notes'                  => $purchaseOrder->notes,
-                    'creator_name'           => $purchaseOrder->user->name ?? 'System Admin',
-                    'supplier'               => $purchaseOrder->supplier ? [
+                    'id'                         => $purchaseOrder->id,
+                    'po_number'                  => $purchaseOrder->po_number,
+                    'status'                     => $purchaseOrder->status,
+                    'total_cost'                 => (float) $purchaseOrder->total_cost,
+                    'supplier_id'                => $purchaseOrder->supplier_id,
+                    'order_date'                 => $purchaseOrder->order_date ? $purchaseOrder->order_date->format('M d, Y') : '—',
+                    'order_date_raw'             => $purchaseOrder->order_date ? $purchaseOrder->order_date->format('Y-m-d') : '',
+                    'expected_delivery_date'     => $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('M d, Y') : 'Flexible / Unspecified',
+                    'expected_delivery_date_raw' => $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('Y-m-d') : '',
+                    'received_date'              => $purchaseOrder->received_date ? $purchaseOrder->received_date->format('M d, Y H:i') : null,
+                    'created_at'                 => $purchaseOrder->created_at ? $purchaseOrder->created_at->format('M d, Y H:i') : null,
+                    'notes'                      => $purchaseOrder->notes,
+                    'creator_name'               => $purchaseOrder->user->name ?? 'System Admin',
+                    'supplier'                   => $purchaseOrder->supplier ? [
                         'id'             => $purchaseOrder->supplier->id,
                         'name'           => $purchaseOrder->supplier->name,
                         'contact_person' => $purchaseOrder->supplier->contact_person,
@@ -180,8 +183,9 @@ class PurchaseOrderController extends Controller
                         'email'          => $purchaseOrder->supplier->email,
                         'address'        => $purchaseOrder->supplier->address,
                     ] : null,
-                    'items'                  => $purchaseOrder->items->map(function ($item) {
+                    'items'                      => $purchaseOrder->items->map(function ($item) {
                         return [
+                            'ingredient_id'  => $item->ingredient_id,
                             'name'           => $item->ingredient->name ?? 'Ingredient',
                             'current_stock'  => $item->ingredient ? (float) $item->ingredient->quantity : 0,
                             'quantity'       => (float) $item->quantity,
@@ -190,8 +194,9 @@ class PurchaseOrderController extends Controller
                             'subtotal'       => (float) $item->subtotal,
                         ];
                     }),
-                    'routes'                 => [
+                    'routes'                     => [
                         'edit'    => route('admin.purchase-orders.edit', $purchaseOrder->id),
+                        'update'  => route('admin.purchase-orders.update', $purchaseOrder->id),
                         'order'   => route('admin.purchase-orders.order', $purchaseOrder->id),
                         'receive' => route('admin.purchase-orders.receive', $purchaseOrder->id),
                         'cancel'  => route('admin.purchase-orders.cancel', $purchaseOrder->id),
@@ -200,38 +205,61 @@ class PurchaseOrderController extends Controller
             ]);
         }
 
-        return view('admin.purchase_orders.show', compact('purchaseOrder'));
+        return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id]);
     }
 
-    public function edit(PurchaseOrder $purchaseOrder)
+    public function edit(Request $request, PurchaseOrder $purchaseOrder)
     {
         if (!$purchaseOrder->isDraft()) {
-            return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+            return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
                 ->with('error', 'Only draft purchase orders can be edited.');
         }
 
         $purchaseOrder->loadMissing(['items.ingredient', 'supplier']);
-        $suppliers = Supplier::where('status', 'active')->orderBy('name')->get();
-        $ingredients = Ingredient::where('status', 'active')->with('supplier')->orderBy('name')->get();
 
-        $ingredientsJson = $ingredients->mapWithKeys(function ($ing) {
-            return [$ing->id => [
-                'id'          => $ing->id,
-                'name'        => $ing->name,
-                'unit'        => $ing->unit,
-                'cost'        => (float) $ing->cost,
-                'stock'       => (float) $ing->quantity,
-                'supplier_id' => $ing->supplier_id,
-            ]];
-        });
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'purchase_order' => [
+                    'id'                         => $purchaseOrder->id,
+                    'po_number'                  => $purchaseOrder->po_number,
+                    'supplier_id'                => $purchaseOrder->supplier_id,
+                    'order_date'                 => $purchaseOrder->order_date ? $purchaseOrder->order_date->format('M d, Y') : '—',
+                    'order_date_raw'             => $purchaseOrder->order_date ? $purchaseOrder->order_date->format('Y-m-d') : '',
+                    'expected_delivery_date'     => $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('M d, Y') : '',
+                    'expected_delivery_date_raw' => $purchaseOrder->expected_delivery_date ? $purchaseOrder->expected_delivery_date->format('Y-m-d') : '',
+                    'notes'                      => $purchaseOrder->notes,
+                    'supplier'                   => $purchaseOrder->supplier ? [
+                        'id'   => $purchaseOrder->supplier->id,
+                        'name' => $purchaseOrder->supplier->name,
+                    ] : null,
+                    'items'                      => $purchaseOrder->items->map(function ($item) {
+                        return [
+                            'ingredient_id'  => $item->ingredient_id,
+                            'name'           => $item->ingredient->name ?? 'Ingredient',
+                            'quantity'       => (float) $item->quantity,
+                            'purchase_price' => (float) $item->purchase_price,
+                            'unit'           => $item->unit,
+                            'subtotal'       => (float) $item->subtotal,
+                        ];
+                    })->values()->all(),
+                    'routes'                     => [
+                        'update' => route('admin.purchase-orders.update', $purchaseOrder->id),
+                    ]
+                ]
+            ]);
+        }
 
-        return view('admin.purchase_orders.edit', compact('purchaseOrder', 'suppliers', 'ingredients', 'ingredientsJson'));
+        return redirect()->route('admin.purchase-orders.index', ['edit_po' => $purchaseOrder->id]);
     }
 
     public function update(Request $request, PurchaseOrder $purchaseOrder)
     {
         if (!$purchaseOrder->isDraft()) {
-            return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Only draft purchase orders can be updated.'], 422);
+            }
+            return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
                 ->with('error', 'Only draft purchase orders can be updated.');
         }
 
@@ -279,7 +307,15 @@ class PurchaseOrderController extends Controller
                 ]);
             });
 
-            return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Purchase Order #{$purchaseOrder->po_number} updated successfully!",
+                    'purchase_order' => $purchaseOrder->fresh(['supplier', 'items.ingredient']),
+                ]);
+            }
+
+            return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
                 ->with('success', "Purchase Order #{$purchaseOrder->po_number} updated successfully!");
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Failed to update Purchase Order: ' . $e->getMessage());
@@ -301,7 +337,7 @@ class PurchaseOrderController extends Controller
             \Illuminate\Support\Facades\Log::warning("Failed to dispatch PO ordered notification: " . $e->getMessage());
         }
 
-        return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+        return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
             ->with('success', "Purchase Order #{$purchaseOrder->po_number} marked as Ordered. Awaiting vendor delivery.");
     }
 
@@ -378,7 +414,7 @@ class PurchaseOrderController extends Controller
                 \Illuminate\Support\Facades\Log::warning("Failed to dispatch PO received notification: " . $e->getMessage());
             }
 
-            return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+            return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
                 ->with('success', "Purchase Order #{$purchaseOrder->po_number} received successfully! Raw material inventory and purchase costs updated.");
         } catch (\Exception $e) {
             return back()->with('error', 'Receiving failed: ' . $e->getMessage());
@@ -393,7 +429,7 @@ class PurchaseOrderController extends Controller
 
         $purchaseOrder->update(['status' => 'cancelled']);
 
-        return redirect()->route('admin.purchase-orders.show', $purchaseOrder->id)
+        return redirect()->route('admin.purchase-orders.index', ['open_po' => $purchaseOrder->id])
             ->with('success', "Purchase Order #{$purchaseOrder->po_number} has been cancelled.");
     }
 

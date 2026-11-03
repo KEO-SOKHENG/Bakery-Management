@@ -1,3 +1,7 @@
+:root {
+    --sidebar-bg: #141312;
+}
+
 /* Bakery Management System - Complete Sidebar System */
 
 /* Anti-flash rule when page loads with sidebar closed */
@@ -22,197 +26,144 @@ html.sidebar-initially-closed .bakery-main-content {
     padding: 1.85rem 3rem !important;
 }
 
+/* Anti-flash rule when page loads with collapsed sidebar rail */
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    transition: none !important;
+}
+
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .bakery-logo-text,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .sidebar-section-header,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .sidebar-submenu,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .sidebar-dropdown-btn,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .sidebar-badge,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .logout-btn span,
+html.sidebar-initially-collapsed .bakery-sidebar.sidebar-collapsed .sidebar-nav-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
 .bakery-sidebar,
 .sidebar {
-    width: 240px;
-    background-color: var(--sidebar-bg, #ffffff);
-    border-right: 1px solid var(--border-color, #eee9e0);
-    border-left: none !important;
-    display: flex;
-    flex-direction: column;
-    padding: 0.85rem 0.75rem;
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    height: 100vh;
-    max-height: 100vh;
-    box-sizing: border-box;
-    overflow: hidden;
-    transition: background 0.3s ease, border-color 0.3s ease, width 0.32s cubic-bezier(0.16, 1, 0.3, 1), padding 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    width: 250px;
+    min-width: 72px;
+    max-width: 250px;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #eee9e0 !important;
+    border-radius: 28px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1.5rem 14px 1.25rem 14px !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 14px !important;
+    margin: 14px 0 14px 14px !important;
+    z-index: 1000 !important;
+    height: calc(100vh - 28px) !important;
+    max-height: calc(100vh - 28px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    will-change: width;
+    transform: translateZ(0);
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                background 0.3s ease,
+                background-color 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease !important;
 }
 
-/* Dark Theme Premium Sidebar Surface (Refined depth and smooth finish) */
 [data-theme="dark"] .bakery-sidebar,
-[data-theme="dark"] .sidebar {
-    background: linear-gradient(180deg, #18181c 0%, #131316 100%) !important;
-    background-color: #141417 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-left: none !important;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45) !important;
-}
-
-[data-theme="dark"] .bakery-logo-area {
-    border-bottom-color: rgba(255, 255, 255, 0.07);
-}
-
-/* Glass Theme Premium Sidebar Surface */
+[data-theme="dark"] .sidebar,
 [data-theme="glass"] .bakery-sidebar,
-[data-theme="glass"] .sidebar {
-    background: rgba(24, 24, 28, 0.65) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-left: none !important;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45) !important;
+[data-theme="glass"] .sidebar,
+body.dark-mode .bakery-sidebar,
+body.theme-dark .bakery-sidebar {
+    background: #181514 !important;
+    background-color: #181514 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
 }
 
 .sidebar-toggle-btn {
     display: none !important;
 }
 
-/* Sidebar Header In-Drawer Toggle Button (Desktop Collapse & Mobile Close) */
+/* Sidebar Header Toggle Button (Obsolete - Replaced by interactive logo/brand toggle) */
 .sidebar-header-toggle-btn {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    color: var(--text-muted, #71717a);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    user-select: none;
-}
-
-.sidebar-header-toggle-btn:hover {
-    background: rgba(245, 158, 11, 0.12);
-    border-color: rgba(245, 158, 11, 0.35);
-    color: #d97706;
-    transform: scale(1.08);
-}
-
-[data-theme="dark"] .sidebar-header-toggle-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #a1a1aa;
-}
-
-[data-theme="dark"] .sidebar-header-toggle-btn:hover {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-}
-
-[data-theme="glass"] .sidebar-header-toggle-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-}
-
-/* Icon visibility */
-.sidebar-header-toggle-btn .icon-close-mobile {
-    display: none;
-}
-
-.sidebar-header-toggle-btn .icon-chevron-toggle {
-    display: block;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* When collapsed to 72px rail: button stays visible, centered, with chevron rotated to point right (Expand / Open) */
-.bakery-sidebar.sidebar-collapsed .sidebar-header-toggle-btn {
-    display: inline-flex !important;
-    margin: 4px auto 0 auto !important;
-    position: relative;
-}
-
-.bakery-sidebar.sidebar-collapsed .sidebar-header-toggle-btn .icon-chevron-toggle {
-    display: block !important;
-    transform: rotate(180deg) !important;
-}
-
-/* Floating Tooltip on Hover for Toggle Button in Collapsed Rail */
-@media (hover: hover) {
-    .bakery-sidebar.sidebar-collapsed .sidebar-header-toggle-btn:hover::after {
-        content: attr(title);
-        position: absolute;
-        left: calc(100% + 14px);
-        top: 50%;
-        transform: translateY(-50%);
-        background: #1e293b;
-        color: #ffffff !important;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 6px 12px;
-        border-radius: 8px;
-        white-space: nowrap;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        z-index: 99999 !important;
-        pointer-events: none;
-    }
-
-    .bakery-sidebar.sidebar-collapsed .sidebar-header-toggle-btn:hover::before {
-        content: '';
-        position: absolute;
-        left: calc(100% + 4px);
-        top: 50%;
-        transform: translateY(-50%);
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent #1e293b transparent transparent;
-        z-index: 99999 !important;
-        pointer-events: none;
-    }
-}
-
-/* Mobile & Tablet Drawer Expanded */
-@media (max-width: 1199px) {
-    .bakery-sidebar:not(.sidebar-expanded) .sidebar-header-toggle-btn {
-        display: inline-flex !important;
-        margin: 4px auto 0 auto !important;
-    }
-
-    .bakery-sidebar:not(.sidebar-expanded) .sidebar-header-toggle-btn .icon-chevron-toggle {
-        display: block !important;
-        transform: rotate(180deg) !important;
-    }
-
-    .bakery-sidebar:not(.sidebar-expanded) .sidebar-header-toggle-btn .icon-close-mobile {
-        display: none !important;
-    }
-
-    .bakery-sidebar.sidebar-expanded .sidebar-header-toggle-btn .icon-chevron-toggle {
-        display: none !important;
-    }
-
-    .bakery-sidebar.sidebar-expanded .sidebar-header-toggle-btn .icon-close-mobile {
-        display: block !important;
-    }
-
-    .bakery-sidebar.sidebar-expanded .sidebar-header-toggle-btn:hover {
-        background: rgba(239, 68, 68, 0.12);
-        color: #ef4444;
-        border-color: rgba(239, 68, 68, 0.3);
-    }
+    display: none !important;
 }
 
 /* Brand / Logo Area */
 .bakery-logo-area {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    padding-bottom: 0.55rem;
-    margin-bottom: 0.55rem;
-    border-bottom: 1px solid var(--border-subtle, #f3efe9);
-    flex-shrink: 0;
-    width: 100%;
-    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0.25rem 0 1.25rem 0 !important;
+    margin: 0 auto 0.25rem auto !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    border-radius: 12px !important;
+    font: inherit !important;
+    color: inherit !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease !important;
+    user-select: none !important;
+}
+
+.bakery-logo-area:hover,
+#sidebar_brand_toggle:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 0.88;
+}
+
+.bakery-logo-area:active,
+#sidebar_brand_toggle:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    transform: scale(0.98);
+}
+
+.bakery-logo-area:focus-visible,
+#sidebar_brand_toggle:focus-visible {
+    background: transparent !important;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Orange Bakery Cloud Emblem with Wheat (matching design mockup) */
+.bakery-logo-area::before {
+    content: '' !important;
+    display: block !important;
+    width: 38px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
+    margin: 0 auto !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none'%3E%3Cpath d='M10 26C6.7 26 4 23.3 4 20C4 17.2 6.1 14.8 8.8 14.2C8.5 13.5 8.3 12.8 8.3 12C8.3 7.6 11.9 4 16.3 4C19.7 4 22.6 6.1 23.8 9.2C24.8 8.5 26 8 27.3 8C31 8 34 11 34 14.7C34 15.2 33.9 15.7 33.7 16.2C35.6 17.3 36.8 19.4 36.8 21.8C36.8 25.2 34 28 30.5 28H10' stroke='%23f97316' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 25L25 12' stroke='%23f97316' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M16 19C15 17.5 16 16 17.5 16.5C18.5 17.5 18 19 16 19Z' fill='%23f97316'/%3E%3Cpath d='M19.5 15.5C18.5 14 19.5 12.5 21 13C22 14 21.5 15.5 19.5 15.5Z' fill='%23f97316'/%3E%3Cpath d='M23 12C22 10.5 23 9 24.5 9.5C25.5 10.5 25 12 23 12Z' fill='%23f97316'/%3E%3Cpath d='M17.5 22.5C16.5 21 17.5 19.5 19 20C20 21 19.5 22.5 17.5 22.5Z' fill='%23f97316'/%3E%3Cpath d='M21 19C20 17.5 21 16 22.5 16.5C23.5 17.5 23 19 21 19Z' fill='%23f97316'/%3E%3C/svg%3E") !important;
 }
 
 /* =========================================================
@@ -307,33 +258,46 @@ html.sidebar-initially-closed .bakery-main-content {
 /* Desktop Persistent & Collapsible Sidebar (>= 1200px) */
 @media (min-width: 1200px) {
     .bakery-sidebar {
-        width: 240px;
-        min-width: 240px;
-        max-width: 240px;
+        width: 250px !important;
+        min-width: 72px !important;
+        max-width: 250px !important;
         opacity: 1 !important;
         visibility: visible !important;
         pointer-events: auto !important;
         position: sticky !important;
-        top: 0 !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        top: 14px !important;
+        height: calc(100vh - 28px) !important;
+        max-height: calc(100vh - 28px) !important;
+        margin: 14px 0 14px 14px !important;
+        padding: 1.5rem 14px 1.25rem 14px !important;
+        border-radius: 28px !important;
         display: flex !important;
         flex-direction: column !important;
-        transform: none !important;
-        transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.3s ease, max-width 0.3s ease, padding 0.3s ease !important;
+        transform: translateZ(0) !important;
+        will-change: width;
+        transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                    max-width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                    background 0.3s ease,
+                    border-color 0.3s ease,
+                    box-shadow 0.3s ease !important;
     }
 
     .bakery-sidebar.sidebar-collapsed {
         width: 72px !important;
         min-width: 72px !important;
-        max-width: 72px !important;
-        padding: 1.15rem 0.65rem 0.75rem 0.65rem !important;
+        max-width: 250px !important;
+        padding: 1.5rem 14px 1.25rem 14px !important;
+        border-radius: 28px !important;
+        margin: 14px 0 14px 14px !important;
+        height: calc(100vh - 28px) !important;
+        max-height: calc(100vh - 28px) !important;
+        transform: translateZ(0) !important;
     }
 
     .bakery-main-content {
         flex: 1 !important;
         margin-left: 0 !important;
-        transition: padding 0.3s ease;
+        transition: padding 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
     }
 }
 
@@ -351,7 +315,7 @@ html.sidebar-initially-closed .bakery-main-content {
         background-color: var(--sidebar-bg, #ffffff) !important;
         background: var(--sidebar-bg, #ffffff) !important;
         border-right: 1px solid var(--border-color, #eee9e0) !important;
-        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.28) !important;
+        box-shadow: none !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease !important;
         display: flex !important;
@@ -365,7 +329,7 @@ html.sidebar-initially-closed .bakery-main-content {
     [data-theme="dark"] .bakery-sidebar {
         background: #141417 !important;
         border-right-color: rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.6) !important;
+        box-shadow: none !important;
     }
 
     [data-theme="glass"] .bakery-sidebar {
@@ -601,18 +565,17 @@ body.dark-mode .top-header-bar {
     padding: 1.5rem 1.75rem;
     position: relative;
     z-index: 1;
-    transition: padding 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: padding 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
-/* When Sidebar is Closed: Main Content Expands BIGGER and Fuller across the viewport */
+/* When Sidebar is Closed: Main Content Expands Smoothly */
 body.sidebar-is-closed .bakery-main-content {
     width: 100% !important;
     max-width: 100% !important;
     flex: 1 1 100% !important;
-    padding: 1.85rem 3rem !important;
+    padding: 1.5rem 1.75rem !important;
     margin-left: 0 !important;
+    transform: translateZ(0);
 }
 
 @media (max-width: 768px) {
@@ -621,79 +584,129 @@ body.sidebar-is-closed .bakery-main-content {
     }
 }
 
-/* Stat Cards & Grid Expand Bigger when Sidebar is Closed (Desktop only) */
-@media (min-width: 1200px) {
-    body.sidebar-is-closed .dash-stat-row {
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-        gap: 1.5rem !important;
-    }
-
-    body.sidebar-is-closed .stat-card {
-        padding: 1.5rem 1.45rem !important;
-        border-radius: 26px !important;
-        box-shadow: 0 10px 30px rgba(86, 48, 32, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
-    }
-
-    body.sidebar-is-closed .stat-value {
-        font-size: 2.15rem !important;
-    }
-
-    body.sidebar-is-closed .stat-label {
-        font-size: 0.9rem !important;
-    }
-
-    body.sidebar-is-closed .stat-icon-box {
-        width: 58px !important;
-        height: 58px !important;
-    }
-
-    body.sidebar-is-closed .stat-icon-box svg {
-        width: 28px !important;
-        height: 28px !important;
-    }
-
-    /* Dashboard Cards, Tables & Views Expand Bigger when Sidebar is Closed */
-    body.sidebar-is-closed .dashboard-card,
-    body.sidebar-is-closed .table-card,
-    body.sidebar-is-closed .table-container,
-    body.sidebar-is-closed .chart-card {
-        border-radius: 26px !important;
-        padding: 1.75rem 2rem !important;
-    }
-
-    body.sidebar-is-closed table th,
-    body.sidebar-is-closed table td {
-        padding: 1.05rem 1.35rem !important;
-        font-size: 0.925rem !important;
-    }
-}
-
 /* Desktop Collapsed Sidebar Rail State */
 .bakery-sidebar.sidebar-collapsed {
     width: 72px !important;
     min-width: 72px !important;
-    max-width: 72px !important;
+    max-width: 250px !important;
     z-index: 1000 !important;
-    padding: 1.15rem 0.65rem 0.75rem 0.65rem !important;
+    padding: 1.5rem 14px 1.25rem 14px !important;
+    border-radius: 28px !important;
+    margin: 14px 0 14px 14px !important;
+    height: calc(100vh - 28px) !important;
+    max-height: calc(100vh - 28px) !important;
+    overflow: hidden !important;
+    will-change: width;
+    transform: translateZ(0);
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                background 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease !important;
+}
+
+.bakery-sidebar.sidebar-collapsed:not(.is-animating):hover {
     overflow: visible !important;
-    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.35s ease, max-width 0.35s ease, padding 0.3s ease;
+}
+
+.bakery-sidebar.sidebar-collapsed:not(.is-animating):hover .sidebar-nav {
+    overflow: visible !important;
+}
+
+.bakery-sidebar.is-animating,
+.bakery-sidebar.is-animating:hover,
+.bakery-sidebar.is-animating .sidebar-nav,
+.bakery-sidebar.is-animating:hover .sidebar-nav {
+    overflow: hidden !important;
+}
+
+.bakery-sidebar .sidebar-nav {
+    gap: 3px !important;
+    padding: 2px 0 !important;
 }
 
 .bakery-sidebar.sidebar-collapsed .sidebar-nav {
-    overflow: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    gap: 3px !important;
+    padding: 2px 0 !important;
 }
 
-.bakery-sidebar.sidebar-collapsed .bakery-logo-text,
-.bakery-sidebar.sidebar-collapsed .sidebar-section-header,
-.bakery-sidebar.sidebar-collapsed .sidebar-submenu,
-.bakery-sidebar.sidebar-collapsed .sidebar-dropdown-btn,
-.bakery-sidebar.sidebar-collapsed .sidebar-badge,
-.bakery-sidebar.sidebar-collapsed .logout-btn span {
+/* Smoothly hide text labels & headers during collapse without layout snapping */
+.bakery-sidebar.sidebar-collapsed .bakery-logo-text {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    pointer-events: none !important;
     display: none !important;
 }
 
+.bakery-sidebar.sidebar-collapsed .sidebar-section-header {
+    display: none !important;
+    opacity: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: translateY(-4px) !important;
+    pointer-events: none !important;
+    transition: opacity 0.12s ease-out,
+                max-height 0.25s cubic-bezier(0.2, 0, 0, 1),
+                margin 0.25s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-submenu {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: max-height 0.28s cubic-bezier(0.2, 0, 0, 1),
+                opacity 0.18s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-dropdown-btn {
+    opacity: 0 !important;
+    transform: scale(0.6) !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.12s ease-out,
+                transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+                width 0.25s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-badge {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.12s ease-out,
+                width 0.25s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn span {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    transform: translateX(-8px) !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    transition: opacity 0.12s ease-out,
+                transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.28s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
 .bakery-sidebar.sidebar-collapsed .sidebar-nav-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
-    display: none;
+    opacity: 0 !important;
+    max-width: 0 !important;
+    transform: translateX(-8px) !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    transition: opacity 0.12s ease-out,
+                transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.28s cubic-bezier(0.2, 0, 0, 1) !important;
 }
 
 .bakery-sidebar.sidebar-collapsed .bakery-logo-area {
@@ -701,100 +714,228 @@ body.sidebar-is-closed .bakery-main-content {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px !important;
-    padding-bottom: 0.6rem !important;
+    gap: 0 !important;
+    padding: 0.25rem 0 1.25rem 0 !important;
+    margin: 0 auto 0.25rem auto !important;
+    border: none !important;
+    border-bottom: none !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 44px !important;
+    cursor: pointer !important;
+    border-radius: 12px !important;
 }
 
-.bakery-sidebar.sidebar-collapsed .sidebar-brand-icon,
-.bakery-sidebar.sidebar-collapsed {
-    margin: 0 auto;
+.bakery-sidebar.sidebar-collapsed .bakery-logo-area:hover,
+.bakery-sidebar.sidebar-collapsed #sidebar_brand_toggle:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    transform: scale(1.05) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .bakery-logo-area:focus,
+.bakery-sidebar.sidebar-collapsed #sidebar_brand_toggle:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .bakery-logo-area::before {
+    margin: 0 auto !important;
+    width: 38px !important;
+    height: 38px !important;
 }
 
 .bakery-sidebar.sidebar-collapsed .sidebar-nav-item {
-    justify-content: center !important;
-    padding: 0 !important;
-    width: 44px !important;
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+    width: 100% !important;
     height: 44px !important;
-    margin: 0 auto;
-    position: relative;
+    margin: 0 !important;
+    border-radius: 9999px !important;
+    position: relative !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item svg {
+    margin: 0 !important;
+    color: #e4e4e7 !important;
+    flex-shrink: 0 !important;
+}
+
+/* Fallback static active item ONLY when liquid pill is completely absent */
+.sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active {
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 9999px !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+    color: #ffffff !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item.active {
+    width: 44px !important;
+    max-width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+    color: #ffffff !important;
+}
+
+.sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active svg,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active svg {
+    color: #ffffff !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-logout {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 12px !important;
+    margin-top: auto !important;
 }
 
 .bakery-sidebar.sidebar-collapsed .logout-btn {
-    width: 40px !important;
-    height: 40px !important;
-    margin: 0 auto;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    width: 100% !important;
+    height: 44px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border-radius: 9999px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
+    background: transparent !important;
+    border: none !important;
+    color: #e4e4e7 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn svg {
+    margin: 0 !important;
+    color: #e4e4e7 !important;
+    flex-shrink: 0 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn:hover svg {
+    color: #f87171 !important;
 }
 
 /* Floating Tooltip on Hover for Desktop Collapsed Rail */
 @media (hover: hover) {
     .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
         display: flex !important;
-        position: absolute;
-        left: calc(100% + 14px);
-        top: 50%;
-        transform: translateY(-50%);
-        background: #1e293b;
+        position: absolute !important;
+        left: calc(100% + 14px) !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: #29150d !important;
         color: #ffffff !important;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 6px 12px;
-        border-radius: 8px;
-        white-space: nowrap;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        padding: 6px 12px !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
         z-index: 99999 !important;
-        pointer-events: none;
+        pointer-events: none !important;
+        opacity: 1 !important;
+        max-width: 250px !important;
     }
 
     .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before {
-        content: '';
-        position: absolute;
-        right: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent #1e293b transparent transparent;
+        content: '' !important;
+        position: absolute !important;
+        right: 100% !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        border-width: 5px !important;
+        border-style: solid !important;
+        border-color: transparent #29150d transparent transparent !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    [data-theme="glass"] .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    body.dark-mode .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    body.theme-dark .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+        background: #181514 !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before,
+    [data-theme="glass"] .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before,
+    body.dark-mode .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before,
+    body.theme-dark .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before {
+        border-color: transparent #181514 transparent transparent !important;
     }
 }
 
-
 .bakery-logo-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    display: none !important;
 }
 
 .bakery-logo-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--text-title, #29150d);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    color: #29150d !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.15 !important;
+    transition: color 0.3s ease !important;
+}
+
+[data-theme="dark"] .bakery-logo-title,
+[data-theme="glass"] .bakery-logo-title,
+body.dark-mode .bakery-logo-title,
+body.theme-dark .bakery-logo-title {
+    color: #ffffff !important;
 }
 
 .bakery-logo-subtitle {
-    font-size: 0.725rem;
-    font-weight: 500;
-    color: #9ca3af;
-    letter-spacing: 0.02em;
+    font-size: 0.725rem !important;
+    font-weight: 500 !important;
+    color: #78716c !important;
+    letter-spacing: 0.01em !important;
+    margin-top: 2px !important;
+    transition: color 0.3s ease !important;
+}
+
+[data-theme="dark"] .bakery-logo-subtitle,
+[data-theme="glass"] .bakery-logo-subtitle,
+body.dark-mode .bakery-logo-subtitle,
+body.theme-dark .bakery-logo-subtitle {
+    color: #9ca3af !important;
 }
 
 /* Sidebar Logout Container */
 .sidebar-logout {
-    margin-top: auto;
-    padding-top: 0.45rem;
-    flex-shrink: 0;
-    z-index: 10;
-    width: 100%;
-    border-top: 1px solid var(--border-subtle, #f3efe9);
-    box-sizing: border-box;
+    margin-top: auto !important;
+    padding-top: 14px !important;
+    flex-shrink: 0 !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    border-top: 1px solid #eee9e0 !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.3s ease !important;
+}
+
+[data-theme="dark"] .sidebar-logout,
+[data-theme="glass"] .sidebar-logout,
+body.dark-mode .sidebar-logout,
+body.theme-dark .sidebar-logout {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .sidebar-nav,
@@ -818,11 +959,12 @@ body.sidebar-is-closed .bakery-main-content {
     box-sizing: border-box;
 }
 
-/* Subtle, Modern Universal Scrollbar (WebKit / Blink) */
+/* Subtle, Modern Universal Scrollbar (WebKit / Blink) - Hidden for Ultra-Clean Capsule */
 .sidebar-nav::-webkit-scrollbar,
 .menu::-webkit-scrollbar {
-    width: 3.5px !important;
-    height: 3.5px !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .sidebar-nav::-webkit-scrollbar-track,
@@ -832,14 +974,7 @@ body.sidebar-is-closed .bakery-main-content {
 
 .sidebar-nav::-webkit-scrollbar-thumb,
 .menu::-webkit-scrollbar-thumb {
-    background: rgba(217, 119, 6, 0.3) !important;
-    border-radius: 9999px !important;
-    transition: background 0.2s ease;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover,
-.menu::-webkit-scrollbar-thumb:hover {
-    background: #d97706 !important;
+    display: none !important;
 }
 
 /* Suppress native Windows scrollbar stepper buttons (removes ▲ arrow) */
@@ -850,42 +985,63 @@ body.sidebar-is-closed .bakery-main-content {
     height: 0 !important;
 }
 
-/* Theme Scrollbar adjustments */
-[data-theme="light"] .sidebar-nav,
-[data-theme="light"] .menu {
-    scrollbar-color: rgba(217, 119, 6, 0.35) transparent !important;
-}
-
-[data-theme="light"] .sidebar-nav::-webkit-scrollbar-thumb,
-[data-theme="light"] .menu::-webkit-scrollbar-thumb {
-    background: rgba(217, 119, 6, 0.3) !important;
-}
-
-[data-theme="dark"] .sidebar-nav,
-[data-theme="dark"] .menu {
-    scrollbar-color: rgba(245, 158, 11, 0.4) transparent !important;
-}
-
-[data-theme="dark"] .sidebar-nav::-webkit-scrollbar-thumb,
-[data-theme="dark"] .menu::-webkit-scrollbar-thumb {
-    background: rgba(245, 158, 11, 0.35) !important;
-}
-
-/* Static fallback active state before JS initializes or when pill is hidden */
-.sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item.active,
-.menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item.active {
-    background-color: #563020 !important;
+/* Static fallback active state & Base Active State (Glowing warm orange pill) */
+/* Static fallback active state before JS initializes or when collapsed */
+.sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active {
+    background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
     color: #ffffff !important;
-    border-radius: 50px !important;
-    box-shadow: 0 3px 12px rgba(86, 48, 32, 0.28) !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5), 0 2px 6px rgba(234, 88, 12, 0.35) !important;
 }
 
-.sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item.active svg,
-.sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item.active span {
+.sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active svg,
+.sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active span {
     color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
-/* Layer 1: Liquid Moving Pointer Pill (Apple / macOS Elastic Hover Animation) */
+/* When the liquid moving pill is active, remove static active background so ONLY ONE moving pill is ever rendered */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+.sidebar-nav:has(#nav_pointer_pill) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Item currently under the liquid pill */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted svg,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Items NOT under the liquid pill */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #57534e !important;
+    font-weight: 500 !important;
+}
+
+[data-theme="dark"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+[data-theme="dark"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+[data-theme="dark"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+[data-theme="glass"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+[data-theme="glass"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+[data-theme="glass"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+body.dark-mode .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+body.dark-mode .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+body.dark-mode .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #e4e4e7 !important;
+    font-weight: 500 !important;
+}
+
+/* Layer 1: Liquid Moving Pointer Pill (Glowing warm orange pill matching design mockup) */
+#nav_pointer_pill,
 .nav-pointer-pill,
 .hover-background {
     display: block !important;
@@ -893,27 +1049,34 @@ body.sidebar-is-closed .bakery-main-content {
     top: 0;
     left: 0;
     width: 100%;
-    height: 46px;
-    background: #563020;
-    border-radius: 50px !important;
-    box-shadow: 0 4px 14px rgba(86, 48, 32, 0.28);
+    height: 44px;
+    background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5), 0 2px 6px rgba(234, 88, 12, 0.35) !important;
     box-sizing: border-box !important;
     pointer-events: none;
     z-index: 1;
     opacity: 0;
     will-change: transform, width, height, opacity;
     transition: transform 0.28s cubic-bezier(.22, 1, .36, 1),
-                width 0.24s cubic-bezier(.22, 1, .36, 1),
+                width 0.3s cubic-bezier(0.2, 0, 0, 1),
                 height 0.24s cubic-bezier(.22, 1, .36, 1),
                 opacity 0.2s ease;
+}
+
+.bakery-sidebar.sidebar-collapsed #nav_pointer_pill,
+.bakery-sidebar.sidebar-collapsed .nav-pointer-pill {
+    width: 100% !important;
+    left: 0 !important;
+    display: block !important;
 }
 
 [data-theme="dark"] .nav-pointer-pill,
 [data-theme="dark"] .hover-background,
 [data-theme="glass"] .nav-pointer-pill,
 [data-theme="glass"] .hover-background {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.4) !important;
+    background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5), 0 2px 6px rgba(234, 88, 12, 0.35) !important;
 }
 
 /* Layer 2: Base Navigation Item Setup */
@@ -921,30 +1084,46 @@ body.sidebar-is-closed .bakery-main-content {
 .menu-item {
     position: relative;
     z-index: 2;
-    height: 46px;
+    height: 44px;
+    width: 100% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 0 16px !important;
-    gap: 13px !important;
-    border-radius: 50px !important;
+    padding: 0 12px !important;
+    gap: 12px !important;
+    border-radius: 9999px !important;
     text-decoration: none;
-    color: #64748b;
-    font-size: 15px;
+    color: #57534e !important;
+    font-size: 0.9rem !important;
     font-weight: 500;
     cursor: pointer !important;
     pointer-events: auto !important;
     background: transparent;
     box-shadow: none;
-    transition: color 0.18s ease;
+    box-sizing: border-box !important;
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                padding 0.3s cubic-bezier(0.2, 0, 0, 1),
+                color 0.18s ease,
+                background-color 0.18s ease !important;
+}
+
+[data-theme="dark"] .sidebar-nav-item,
+[data-theme="dark"] .menu-item,
+[data-theme="glass"] .sidebar-nav-item,
+[data-theme="glass"] .menu-item,
+body.dark-mode .sidebar-nav-item,
+body.dark-mode .menu-item,
+body.theme-dark .sidebar-nav-item,
+body.theme-dark .menu-item {
+    color: #e4e4e7 !important;
 }
 
 /* Menu Icons and Text */
 .sidebar-nav-item svg,
 .menu-item svg {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2;
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 1.8 !important;
     flex-shrink: 0;
     align-self: center !important;
     position: relative;
@@ -960,7 +1139,30 @@ body.sidebar-is-closed .bakery-main-content {
     position: relative;
     z-index: 2;
     color: inherit;
-    transition: color 0.18s ease;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.22s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.28s cubic-bezier(0.2, 0, 0, 1),
+                color 0.18s ease !important;
+}
+
+/* Inactive Hover */
+.sidebar-nav-item:hover:not(.active),
+.menu-item:hover:not(.active) {
+    background: rgba(77, 44, 32, 0.06) !important;
+    color: #29150d !important;
+}
+
+.sidebar-nav-item:hover:not(.active) svg,
+.menu-item:hover:not(.active) svg,
+.sidebar-nav-item:hover:not(.active) span,
+.menu-item:hover:not(.active) span {
+    color: #29150d !important;
 }
 
 /* Target item currently highlighted by the liquid moving pill */
@@ -977,7 +1179,7 @@ body.sidebar-is-closed .bakery-main-content {
 .sidebar-nav-item.pill-highlighted span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
 .sidebar-nav-item.highlighted span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
     color: #ffffff !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
 }
 
 /* When pill is at active item */
@@ -992,98 +1194,136 @@ body.sidebar-is-closed .bakery-main-content {
 
 /* When pill temporarily hovers another item, active item text stays readable */
 .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) {
-    color: #64748b !important;
+    color: #57534e !important;
 }
 
 .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) svg {
-    color: #64748b !important;
+    color: #57534e !important;
 }
 
 .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
-    color: #64748b !important;
+    color: #57534e !important;
     font-weight: 500 !important;
+}
+
+[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted),
+[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) svg,
+[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted),
+[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) svg,
+[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+body.dark-mode .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted),
+body.dark-mode .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) svg,
+body.dark-mode .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+body.theme-dark .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted),
+body.theme-dark .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) svg,
+body.theme-dark .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.active:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #e4e4e7 !important;
 }
 
 /* Dark Mode Navigation Items */
 [data-theme="dark"] .sidebar-nav-item,
-[data-theme="dark"] .menu-item {
-    color: #94a3b8;
+[data-theme="dark"] .menu-item,
+body.dark-mode .sidebar-nav-item,
+body.dark-mode .menu-item,
+body.theme-dark .sidebar-nav-item,
+body.theme-dark .menu-item {
+    color: #e4e4e7 !important;
 }
 
-[data-theme="dark"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item:hover:not(.active),
-[data-theme="dark"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item:hover:not(.active) {
+[data-theme="dark"] .sidebar-nav-item:hover:not(.active),
+[data-theme="dark"] .menu-item:hover:not(.active),
+body.dark-mode .sidebar-nav-item:hover:not(.active),
+body.dark-mode .menu-item:hover:not(.active),
+body.theme-dark .sidebar-nav-item:hover:not(.active),
+body.theme-dark .menu-item:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar-nav-item:hover:not(.active) svg,
+[data-theme="dark"] .menu-item:hover:not(.active) svg,
+body.dark-mode .sidebar-nav-item:hover:not(.active) svg,
+body.dark-mode .menu-item:hover:not(.active) svg,
+body.theme-dark .sidebar-nav-item:hover:not(.active) svg,
+body.theme-dark .menu-item:hover:not(.active) svg {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar-nav-item:hover:not(.active) span,
+[data-theme="dark"] .menu-item:hover:not(.active) span,
+body.dark-mode .sidebar-nav-item:hover:not(.active) span,
+body.dark-mode .menu-item:hover:not(.active) span,
+body.theme-dark .sidebar-nav-item:hover:not(.active) span,
+body.theme-dark .menu-item:hover:not(.active) span {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar-nav:not(.has-liquid-pill) .sidebar-nav-item.active,
+[data-theme="dark"] .menu-item.active,
+body.dark-mode .sidebar-nav:not(.has-liquid-pill) .sidebar-nav-item.active,
+body.dark-mode .menu-item.active,
+body.theme-dark .sidebar-nav:not(.has-liquid-pill) .sidebar-nav-item.active,
+body.theme-dark .menu-item.active {
+    background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5), 0 2px 6px rgba(234, 88, 12, 0.35) !important;
+}
+
+/* Glass Mode Navigation Items */
+[data-theme="glass"] .sidebar-nav-item,
+[data-theme="glass"] .menu-item {
+    color: #e4e4e7 !important;
+}
+
+[data-theme="glass"] .sidebar-nav-item:hover:not(.active),
+[data-theme="glass"] .menu-item:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.08) !important;
     color: #ffffff !important;
 }
 
-[data-theme="dark"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item:hover:not(.active) svg,
-[data-theme="dark"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item:hover:not(.active) svg {
-    color: #fbbf24 !important;
-}
-
-[data-theme="dark"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item:hover:not(.active) span,
-[data-theme="dark"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item:hover:not(.active) span {
+[data-theme="glass"] .sidebar-nav:not(.has-liquid-pill) .sidebar-nav-item.active,
+[data-theme="glass"] .menu-item.active {
+    background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
     color: #ffffff !important;
-}
-
-[data-theme="dark"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item.active,
-[data-theme="dark"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item.active {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35) !important;
-}
-
-/* When pill is active in Dark Theme */
-[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted),
-[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg,
-[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
-    color: #94a3b8 !important;
-}
-
-/* Glass Mode Navigation Items */
-[data-theme="glass"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item:hover:not(.active),
-[data-theme="glass"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.12) !important;
-    color: #ffffff !important;
-}
-
-[data-theme="glass"] .sidebar-nav:not(:has(.nav-pointer-pill[style*="opacity: 1"])) .sidebar-nav-item.active,
-[data-theme="glass"] .menu:not(:has(.hover-background[style*="opacity: 1"])) .menu-item.active {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35) !important;
-}
-
-/* When pill is active in Glass Theme */
-[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted),
-[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg,
-[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
-    color: rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5), 0 2px 6px rgba(234, 88, 12, 0.35) !important;
 }
 
 /* =========================================================
    Sidebar Section Headers & Submenus
    ========================================================= */
 .sidebar-section-header {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #a1a1aa;
-    padding: 8px 14px 2px 14px;
-    user-select: none;
+    display: none !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #8c7b75 !important;
+    padding: 0 0 0 12px !important;
+    margin: 1.25rem 0 0.45rem 0 !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    max-height: 24px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1),
+                max-height 0.28s cubic-bezier(0.2, 0, 0, 1),
+                margin 0.28s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+                color 0.3s ease !important;
 }
 
 .sidebar-section-header:first-of-type {
-    padding-top: 2px;
+    margin-top: 0.25rem !important;
 }
 
-[data-theme="dark"] .sidebar-section-header {
-    color: #71717a;
-}
-
-[data-theme="glass"] .sidebar-section-header {
-    color: rgba(255, 255, 255, 0.5);
+[data-theme="dark"] .sidebar-section-header,
+[data-theme="glass"] .sidebar-section-header,
+body.dark-mode .sidebar-section-header,
+body.theme-dark .sidebar-section-header {
+    display: none !important;
+    color: #71717a !important;
 }
 
 .sidebar-group {
@@ -1127,10 +1367,18 @@ body.sidebar-is-closed .bakery-main-content {
 
 .sidebar-dropdown-btn:hover {
     opacity: 1;
-    background-color: rgba(0, 0, 0, 0.09) !important;
+    background-color: rgba(77, 44, 32, 0.08) !important;
 }
 
-.sidebar-nav-item.active .sidebar-dropdown-btn:hover {
+[data-theme="dark"] .sidebar-dropdown-btn:hover,
+[data-theme="glass"] .sidebar-dropdown-btn:hover,
+body.dark-mode .sidebar-dropdown-btn:hover,
+body.theme-dark .sidebar-dropdown-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.sidebar-nav-item.active .sidebar-dropdown-btn:hover,
+.sidebar-nav-item.pill-highlighted .sidebar-dropdown-btn:hover {
     background-color: rgba(255, 255, 255, 0.22) !important;
     color: #ffffff !important;
 }
@@ -1151,7 +1399,7 @@ body.sidebar-is-closed .bakery-main-content {
     gap: 2px;
     padding: 2px 4px 4px 10px;
     margin-left: 18px;
-    border-left: 1.5px solid rgba(161, 161, 170, 0.28);
+    border-left: 1.5px solid rgba(77, 44, 32, 0.15);
     overflow: hidden;
     max-height: 400px;
     opacity: 1;
@@ -1163,7 +1411,8 @@ body.sidebar-is-closed .bakery-main-content {
                 opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
                 padding 0.3s ease,
-                margin 0.3s ease;
+                margin 0.3s ease,
+                border-color 0.3s ease;
 }
 
 /* Closed / Collapsed State */
@@ -1179,12 +1428,14 @@ body.sidebar-is-closed .bakery-main-content {
     pointer-events: none;
 }
 
-[data-theme="dark"] .sidebar-submenu {
+[data-theme="dark"] .sidebar-group .sidebar-submenu,
+[data-theme="dark"] .sidebar-submenu,
+[data-theme="glass"] .sidebar-submenu,
+body.dark-mode .sidebar-group .sidebar-submenu,
+body.dark-mode .sidebar-submenu,
+body.theme-dark .sidebar-group .sidebar-submenu,
+body.theme-dark .sidebar-submenu {
     border-left-color: rgba(255, 255, 255, 0.12);
-}
-
-[data-theme="glass"] .sidebar-submenu {
-    border-left-color: rgba(255, 255, 255, 0.18);
 }
 
 .sidebar-submenu-item {
@@ -1225,33 +1476,41 @@ body.sidebar-is-closed .bakery-main-content {
 }
 
 .sidebar-submenu-item.active {
-    color: #563020;
+    color: #ea580c;
     font-weight: 700;
-    background: rgba(86, 48, 32, 0.12);
+    background: rgba(234, 88, 12, 0.1);
     border-radius: 50px;
 }
 
 .sidebar-submenu-item.active .submenu-dot {
     opacity: 1;
-    background-color: #563020;
+    background-color: #ea580c;
     transform: scale(1.4);
 }
 
-[data-theme="dark"] .sidebar-submenu-item {
+[data-theme="dark"] .sidebar-submenu-item,
+body.dark-mode .sidebar-submenu-item,
+body.theme-dark .sidebar-submenu-item {
     color: #94a3b8;
 }
 
-[data-theme="dark"] .sidebar-submenu-item:hover {
+[data-theme="dark"] .sidebar-submenu-item:hover,
+body.dark-mode .sidebar-submenu-item:hover,
+body.theme-dark .sidebar-submenu-item:hover {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="dark"] .sidebar-submenu-item.active {
+[data-theme="dark"] .sidebar-submenu-item.active,
+body.dark-mode .sidebar-submenu-item.active,
+body.theme-dark .sidebar-submenu-item.active {
     color: #f59e0b;
     background: rgba(245, 158, 11, 0.15);
 }
 
-[data-theme="dark"] .sidebar-submenu-item.active .submenu-dot {
+[data-theme="dark"] .sidebar-submenu-item.active .submenu-dot,
+body.dark-mode .sidebar-submenu-item.active .submenu-dot,
+body.theme-dark .sidebar-submenu-item.active .submenu-dot {
     background-color: #f59e0b;
 }
 
@@ -1280,55 +1539,77 @@ body.sidebar-is-closed .bakery-main-content {
     height: 44px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border-radius: 50px !important;
-    color: #ff0015;
-    background: #ffffff;
-    border: 1.5px solid #ff0000;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 14px !important;
+    border-radius: 9999px !important;
+    color: #57534e !important;
+    background: transparent !important;
+    border: none !important;
     text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    transition: background 0.3s ease,
-        transform 0.4s cubic-bezier(.22, 1, .36, 1),
-        box-shadow 0.3s ease;
+    font-size: 0.9rem !important;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+.logout-btn svg,
+.logout svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 1.8 !important;
+    color: inherit !important;
+    flex-shrink: 0;
 }
 
 .logout-btn:hover,
 .logout:hover {
-    background: #ff0000;
-    color: white;
-    box-shadow: 0 5px 15px rgba(230, 57, 70, 0.10);
+    background: rgba(239, 68, 68, 0.08) !important;
+    color: #ef4444 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.logout-btn:hover svg,
+.logout:hover svg {
+    color: #ef4444 !important;
 }
 
 [data-theme="dark"] .logout-btn,
-[data-theme="dark"] .logout {
-    background: rgba(239, 68, 68, 0.12) !important;
-    color: #f87171 !important;
-    border-color: rgba(239, 68, 68, 0.35) !important;
+[data-theme="dark"] .logout,
+[data-theme="glass"] .logout-btn,
+[data-theme="glass"] .logout,
+body.dark-mode .logout-btn,
+body.dark-mode .logout,
+body.theme-dark .logout-btn,
+body.theme-dark .logout {
+    background: transparent !important;
+    color: #e4e4e7 !important;
+    border: none !important;
 }
 
 [data-theme="dark"] .logout-btn:hover,
-[data-theme="dark"] .logout:hover {
-    background: #dc2626 !important;
-    color: #ffffff !important;
-    border-color: #dc2626 !important;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4) !important;
-}
-
-[data-theme="glass"] .logout-btn,
-[data-theme="glass"] .logout {
-    background: rgba(239, 68, 68, 0.15) !important;
-    color: #fca5a5 !important;
-    border-color: rgba(239, 68, 68, 0.4) !important;
-    backdrop-filter: blur(12px) !important;
-}
-
+[data-theme="dark"] .logout:hover,
 [data-theme="glass"] .logout-btn:hover,
-[data-theme="glass"] .logout:hover {
-    background: rgba(220, 38, 38, 0.85) !important;
-    color: #ffffff !important;
-    border-color: #dc2626 !important;
+[data-theme="glass"] .logout-btn:hover,
+body.dark-mode .logout-btn:hover,
+body.dark-mode .logout:hover,
+body.theme-dark .logout-btn:hover,
+body.theme-dark .logout:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .logout-btn:hover svg,
+[data-theme="dark"] .logout:hover svg,
+[data-theme="glass"] .logout-btn:hover svg,
+[data-theme="glass"] .logout-btn:hover svg,
+body.dark-mode .logout-btn:hover svg,
+body.dark-mode .logout:hover svg,
+body.theme-dark .logout-btn:hover svg,
+body.theme-dark .logout:hover svg {
+    color: #f87171 !important;
 }
 
 /* =========================================================
@@ -1514,37 +1795,46 @@ body.sidebar-is-closed .bakery-main-content {
 @media (max-height: 820px) {
     .bakery-sidebar,
     .sidebar {
-        padding: 0.65rem 0.6rem !important;
+        margin: 10px 0 10px 10px !important;
+        height: calc(100vh - 20px) !important;
+        max-height: calc(100vh - 20px) !important;
+        padding: 1rem 0.75rem 0.85rem 0.75rem !important;
     }
 
     .bakery-logo-area {
-        padding-bottom: 0.45rem !important;
-        margin-bottom: 0.45rem !important;
+        padding-bottom: 0.65rem !important;
+        margin-bottom: 0.15rem !important;
     }
 
+    .bakery-logo-area::before {
+        width: 32px !important;
+        height: 32px !important;
+    }
 
     .bakery-logo-title {
-        font-size: 1.05rem !important;
+        font-size: 1.1rem !important;
     }
 
     .sidebar-section-header {
-        padding: 4px 10px 1px 10px !important;
-        font-size: 9.5px !important;
+    display: none !important;
+        padding: 0 0 0 10px !important;
+        font-size: 0.65rem !important;
+        margin: 0.85rem 0 0.35rem 0 !important;
     }
 
     .sidebar-nav-item,
     .menu-item {
-        height: 42px !important;
-        padding: 0 15px !important;
-        gap: 11px !important;
-        font-size: 14.5px !important;
-        border-radius: 50px !important;
+        height: 40px !important;
+        padding: 0 12px !important;
+        gap: 10px !important;
+        font-size: 0.85rem !important;
+        border-radius: 9999px !important;
     }
 
     .sidebar-nav-item svg,
     .menu-item svg {
-        width: 19px !important;
-        height: 19px !important;
+        width: 18px !important;
+        height: 18px !important;
     }
 
     .sidebar-group .sidebar-submenu {
@@ -1557,18 +1847,18 @@ body.sidebar-is-closed .bakery-main-content {
         height: 30px !important;
         font-size: 12.5px !important;
         padding: 0 10px !important;
-        border-radius: 50px !important;
+        border-radius: 9999px !important;
     }
 
     .logout-btn,
     .logout {
         height: 40px !important;
-        font-size: 13.5px !important;
-        border-radius: 50px !important;
+        font-size: 0.85rem !important;
+        border-radius: 9999px !important;
     }
 
     .sidebar-logout {
-        padding-top: 0.35rem !important;
+        padding-top: 10px !important;
     }
 }
 
@@ -1576,12 +1866,20 @@ body.sidebar-is-closed .bakery-main-content {
 @media (max-height: 680px) {
     .bakery-sidebar,
     .sidebar {
-        padding: 0.45rem 0.45rem !important;
+        margin: 6px 0 6px 6px !important;
+        height: calc(100vh - 12px) !important;
+        max-height: calc(100vh - 12px) !important;
+        padding: 0.75rem 0.5rem 0.65rem 0.5rem !important;
     }
 
     .bakery-logo-area {
-        padding-bottom: 0.35rem !important;
-        margin-bottom: 0.35rem !important;
+        padding-bottom: 0.45rem !important;
+        margin-bottom: 0.1rem !important;
+    }
+
+    .bakery-logo-area::before {
+        width: 28px !important;
+        height: 28px !important;
     }
 
     .bakery-logo-title {
@@ -1593,23 +1891,25 @@ body.sidebar-is-closed .bakery-main-content {
     }
 
     .sidebar-section-header {
-        padding: 3px 8px 1px 8px !important;
-        font-size: 9px !important;
+    display: none !important;
+        padding: 0 0 0 8px !important;
+        font-size: 0.6rem !important;
+        margin: 0.6rem 0 0.25rem 0 !important;
     }
 
     .sidebar-nav-item,
     .menu-item {
         height: 36px !important;
-        padding: 0 13px !important;
-        gap: 9px !important;
-        font-size: 13.5px !important;
-        border-radius: 50px !important;
+        padding: 0 10px !important;
+        gap: 8px !important;
+        font-size: 0.8rem !important;
+        border-radius: 9999px !important;
     }
 
     .sidebar-nav-item svg,
     .menu-item svg {
-        width: 17px !important;
-        height: 17px !important;
+        width: 16px !important;
+        height: 16px !important;
     }
 
     .sidebar-group .sidebar-submenu {
@@ -1622,13 +1922,767 @@ body.sidebar-is-closed .bakery-main-content {
         height: 26px !important;
         font-size: 12px !important;
         padding: 0 8px !important;
-        border-radius: 50px !important;
+        border-radius: 9999px !important;
     }
 
     .logout-btn,
     .logout {
         height: 36px !important;
-        font-size: 13px !important;
-        border-radius: 50px !important;
+        font-size: 0.8rem !important;
+        border-radius: 9999px !important;
     }
+}
+/* =========================================================
+   Liquid Moving Pill Enforcement (Zero Dual Buttons)
+   ========================================================= */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+[data-theme="dark"] .sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+[data-theme="glass"] .sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+.sidebar-nav:has(.nav-pointer-pill) .sidebar-nav-item.active,
+.sidebar-nav:has(#nav_pointer_pill) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:has(#nav_pointer_pill) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill) .sidebar-nav-item.active,
+[data-theme="dark"] .sidebar-nav:has(.nav-pointer-pill) .sidebar-nav-item.active,
+[data-theme="glass"] .sidebar-nav:has(.nav-pointer-pill) .sidebar-nav-item.active,
+body.dark-mode .bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active,
+body.theme-dark .bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:hover,
+[data-theme="dark"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:hover,
+[data-theme="glass"] .sidebar-nav.has-liquid-pill .sidebar-nav-item:hover {
+    background: transparent !important;
+}
+
+.bakery-sidebar.sidebar-collapsed #nav_pointer_pill,
+.bakery-sidebar.sidebar-collapsed .nav-pointer-pill {
+    display: block !important;
+    width: 100% !important;
+    left: 0 !important;
+}
+
+/* =========================================================
+   Sidebar Zero-Shadow Architecture (Open, Closed, Hover)
+   ========================================================= */
+.bakery-sidebar,
+.bakery-sidebar:hover,
+.bakery-sidebar.sidebar-collapsed,
+.bakery-sidebar.sidebar-collapsed:hover,
+.bakery-sidebar.sidebar-expanded,
+.bakery-sidebar.sidebar-expanded:hover,
+.sidebar,
+.sidebar:hover,
+[data-theme="dark"] .bakery-sidebar,
+[data-theme="dark"] .bakery-sidebar:hover,
+[data-theme="dark"] .bakery-sidebar.sidebar-collapsed,
+[data-theme="dark"] .bakery-sidebar.sidebar-collapsed:hover,
+[data-theme="glass"] .bakery-sidebar,
+[data-theme="glass"] .bakery-sidebar:hover,
+[data-theme="glass"] .bakery-sidebar.sidebar-collapsed,
+[data-theme="glass"] .bakery-sidebar.sidebar-collapsed:hover,
+body.dark-mode .bakery-sidebar,
+body.dark-mode .bakery-sidebar:hover,
+body.theme-dark .bakery-sidebar,
+body.theme-dark .bakery-sidebar:hover {
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   MODERN DARK SIDEBAR REDESIGN (Reference Design Parity)
+   ========================================================= */
+
+/* Sidebar Container */
+.bakery-sidebar,
+.sidebar {
+    width: 250px !important;
+    min-width: 72px !important;
+    max-width: 250px !important;
+    background: #181514 !important;
+    background-color: #181514 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 28px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1.5rem 12px 1.25rem 12px !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 14px !important;
+    margin: 14px 0 14px 14px !important;
+    z-index: 1000 !important;
+    height: calc(100vh - 28px) !important;
+    max-height: calc(100vh - 28px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    will-change: width;
+    transform: translateZ(0);
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                background 0.3s ease,
+                background-color 0.3s ease,
+                border-color 0.3s ease !important;
+}
+
+[data-theme="dark"] .bakery-sidebar,
+[data-theme="dark"] .sidebar,
+[data-theme="glass"] .bakery-sidebar,
+[data-theme="glass"] .sidebar,
+body.dark-mode .bakery-sidebar,
+body.theme-dark .bakery-sidebar {
+    background: #181514 !important;
+    background-color: #181514 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+
+/* Branding Area (Expanded) */
+.bakery-logo-area {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    padding: 0.25rem 6px 1.25rem 6px !important;
+    margin: 0 0 0.25rem 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    border-radius: 12px !important;
+    font: inherit !important;
+    color: inherit !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: opacity 0.18s ease !important;
+    user-select: none !important;
+}
+
+.bakery-logo-area:hover,
+#sidebar_brand_toggle:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 0.88 !important;
+}
+
+.bakery-logo-area::before {
+    display: none !important;
+}
+
+.bakery-logo-icon {
+    width: 38px !important;
+    height: 38px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.bakery-logo-icon svg {
+    width: 38px !important;
+    height: 38px !important;
+    display: block !important;
+}
+
+.bakery-logo-text {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 1px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
+
+.bakery-logo-title {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.2 !important;
+}
+
+.bakery-logo-subtitle {
+    font-size: 0.72rem !important;
+    font-weight: 500 !important;
+    color: #9ca3af !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.2 !important;
+}
+
+/* Section Headers */
+.sidebar-section-header {
+    display: block !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #71717a !important;
+    padding: 0 0 0 14px !important;
+    margin: 1.15rem 0 0.35rem 0 !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    max-height: 24px !important;
+    opacity: 1 !important;
+    line-height: 1 !important;
+    transform: translateY(0) !important;
+    transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.sidebar-section-header:first-of-type {
+    margin-top: 0.25rem !important;
+}
+
+[data-theme="dark"] .sidebar-section-header,
+[data-theme="glass"] .sidebar-section-header,
+body.dark-mode .sidebar-section-header,
+body.theme-dark .sidebar-section-header {
+    display: block !important;
+    color: #71717a !important;
+}
+
+/* Navigation items (Expanded) */
+.sidebar-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    padding: 2px 0 !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.sidebar-nav-item,
+.menu-item {
+    position: relative !important;
+    z-index: 2 !important;
+    height: 44px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 14px !important;
+    gap: 12px !important;
+    border-radius: 9999px !important;
+    text-decoration: none !important;
+    color: #e4e4e7 !important;
+    font-size: 0.885rem !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    transition: background-color 0.18s ease, color 0.18s ease !important;
+}
+
+.sidebar-nav-item svg,
+.menu-item svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 2 !important;
+    flex-shrink: 0 !important;
+    color: #ffffff !important;
+    transition: color 0.18s ease !important;
+}
+
+.sidebar-nav-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+.menu-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #e4e4e7 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1 !important;
+    font-size: 0.885rem !important;
+    font-weight: 500 !important;
+    transition: color 0.18s ease !important;
+}
+
+/* Inactive Hover */
+.sidebar-nav-item:not(.active):hover,
+.menu-item:not(.active):hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+}
+
+.sidebar-nav-item:not(.active):hover svg,
+.menu-item:not(.active):hover svg {
+    color: #ffffff !important;
+}
+
+.sidebar-nav-item:not(.active):hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+.menu-item:not(.active):hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #ffffff !important;
+}
+
+/* Active State (Full rounded orange pill with soft glow) */
+.sidebar-nav-item.active,
+.menu-item.active {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+}
+
+.sidebar-nav-item.active svg,
+.menu-item.active svg {
+    color: #ffffff !important;
+}
+
+.sidebar-nav-item.active span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+.menu-item.active span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Dropdown chevrons */
+.sidebar-nav-item .sidebar-dropdown-btn {
+    margin-left: auto !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    color: inherit !important;
+    opacity: 0.7 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.25s ease, opacity 0.2s ease !important;
+}
+
+.sidebar-nav-item.active .sidebar-dropdown-btn {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+}
+
+.sidebar-nav-item .sidebar-dropdown-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke-width: 2.2 !important;
+    color: inherit !important;
+}
+
+.sidebar-group.is-open .sidebar-dropdown-btn svg {
+    transform: rotate(180deg) !important;
+}
+
+/* Submenu items */
+.sidebar-group .sidebar-submenu {
+    border-left-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar-submenu-item {
+    color: #a1a1aa !important;
+}
+
+.sidebar-submenu-item:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.sidebar-submenu-item.active {
+    color: #f97316 !important;
+    background: rgba(249, 115, 22, 0.12) !important;
+}
+
+.sidebar-submenu-item.active .submenu-dot {
+    background-color: #f97316 !important;
+}
+
+/* Hide dynamic liquid pill so CSS directly drives the active state */
+#nav_pointer_pill,
+.nav-pointer-pill {
+    display: none !important;
+}
+
+/* Logout Area (Expanded) */
+.sidebar-logout {
+    margin-top: auto !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.logout-btn {
+    height: 44px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    padding: 0 14px !important;
+    border-radius: 9999px !important;
+    color: #e4e4e7 !important;
+    background: transparent !important;
+    border: none !important;
+    text-decoration: none !important;
+    font-size: 0.885rem !important;
+    font-weight: 500 !important;
+    transition: background-color 0.18s ease, color 0.18s ease !important;
+}
+
+.logout-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 2 !important;
+    color: #ffffff !important;
+    flex-shrink: 0 !important;
+}
+
+.logout-btn span {
+    color: #e4e4e7 !important;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+}
+
+.logout-btn:hover svg {
+    color: #ffffff !important;
+}
+
+.logout-btn:hover span {
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   COLLAPSED SIDEBAR (72px Icon Rail)
+   ========================================================= */
+.bakery-sidebar.sidebar-collapsed {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    z-index: 1000 !important;
+    padding: 1.5rem 0 1.25rem 0 !important;
+    border-radius: 28px !important;
+    margin: 14px 0 14px 14px !important;
+    height: calc(100vh - 28px) !important;
+    max-height: calc(100vh - 28px) !important;
+    overflow: hidden !important;
+    will-change: width;
+    transform: translateZ(0);
+    transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                max-width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                background 0.3s ease,
+                border-color 0.3s ease !important;
+}
+
+.bakery-sidebar.sidebar-collapsed:not(.is-animating):hover {
+    overflow: visible !important;
+}
+
+.bakery-sidebar.sidebar-collapsed:not(.is-animating):hover .sidebar-nav {
+    overflow: visible !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .bakery-logo-area {
+    justify-content: center !important;
+    padding: 0.25rem 0 1.25rem 0 !important;
+    margin: 0 auto 0.25rem auto !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .bakery-logo-icon {
+    margin: 0 auto !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .bakery-logo-text {
+    display: none !important;
+    opacity: 0 !important;
+    max-width: 0 !important;
+    pointer-events: none !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-section-header {
+    display: none !important;
+    opacity: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-submenu {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-dropdown-btn {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    margin: 0 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-badge {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn span,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    display: none;
+    opacity: 0;
+    max-width: 0;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav {
+    align-items: center !important;
+    padding: 2px 0 !important;
+    gap: 4px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item svg {
+    margin: 0 !important;
+    color: #ffffff !important;
+    width: 20px !important;
+    height: 20px !important;
+    stroke-width: 2 !important;
+    flex-shrink: 0 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item:not(.active):hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 50% !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item.active {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 50% !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item.active svg {
+    color: #ffffff !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-logout {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 12px !important;
+    margin-top: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn svg {
+    margin: 0 !important;
+    color: #ffffff !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+}
+
+/* Tooltip on hover in collapsed mode */
+@media (hover: hover) {
+    .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    .bakery-sidebar.sidebar-collapsed .logout-btn:hover span {
+        display: flex !important;
+        position: absolute !important;
+        left: calc(100% + 14px) !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: #181514 !important;
+        color: #ffffff !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        padding: 6px 12px !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        z-index: 99999 !important;
+        pointer-events: none !important;
+        opacity: 1 !important;
+        max-width: 250px !important;
+    }
+
+    .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:hover span:not(.sidebar-badge):not(.sidebar-dropdown-btn)::before,
+    .bakery-sidebar.sidebar-collapsed .logout-btn:hover span::before {
+        content: '' !important;
+        position: absolute !important;
+        right: 100% !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        border-width: 5px !important;
+        border-style: solid !important;
+        border-color: transparent #181514 transparent transparent !important;
+    }
+}
+
+
+/* Collapsed active circle & logout divider strict enforcement */
+.bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:not(.has-liquid-pill):not(:has(#nav_pointer_pill)) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav-item.active {
+    width: 44px !important;
+    max-width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-logout {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-logout::before {
+    content: '' !important;
+    display: block !important;
+    width: 32px !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    margin: 0 auto 12px auto !important;
+}
+
+
+/* User Request: Remove only text: Main, Management, Analytics and System in the sidebar */
+.sidebar-section-header,
+[data-theme="dark"] .sidebar-section-header,
+[data-theme="glass"] .sidebar-section-header,
+body.dark-mode .sidebar-section-header,
+body.theme-dark .sidebar-section-header {
+    display: none !important;
+    opacity: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   RESTORED LIQUID MOVING POINTER PILL (Elastic Hover Animation)
+   ========================================================= */
+#nav_pointer_pill,
+.nav-pointer-pill {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 44px !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45) !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+    opacity: 0;
+    will-change: transform, width, height, opacity !important;
+    transition: transform 0.28s cubic-bezier(.22, 1, .36, 1),
+                width 0.3s cubic-bezier(0.2, 0, 0, 1),
+                height 0.24s cubic-bezier(.22, 1, .36, 1),
+                opacity 0.2s ease !important;
+}
+
+.bakery-sidebar.sidebar-collapsed #nav_pointer_pill,
+.bakery-sidebar.sidebar-collapsed .nav-pointer-pill {
+    width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    left: calc(50% - 22px) !important;
+    display: block !important;
+}
+
+/* When the liquid moving pill is active, avoid static duplicate background on active item */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.active,
+.sidebar-nav:has(#nav_pointer_pill) .sidebar-nav-item.active,
+.sidebar-nav:has(.nav-pointer-pill) .sidebar-nav-item.active,
+.bakery-sidebar.sidebar-collapsed .sidebar-nav .sidebar-nav-item.active {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Item currently under the liquid moving pill */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted svg,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item.pill-highlighted span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Items NOT under the liquid moving pill */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted),
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) svg,
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlighted) span:not(.sidebar-badge):not(.sidebar-dropdown-btn) {
+    color: #e4e4e7 !important;
+    font-weight: 500 !important;
+}
+
+/* Let the smooth moving pill handle the hover glow */
+.sidebar-nav.has-liquid-pill .sidebar-nav-item:hover,
+.sidebar-nav:has(#nav_pointer_pill) .sidebar-nav-item:hover {
+    background: transparent !important;
 }

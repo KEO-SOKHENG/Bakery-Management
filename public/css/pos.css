@@ -487,6 +487,16 @@ body.dark-mode .pos-category-tabs:not(.has-liquid-pill) .pos-cat-pill.active {
     font-size: 2.2rem;
     margin-bottom: 0.75rem;
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.pos-item-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    display: block;
 }
 
 .pos-item-name {

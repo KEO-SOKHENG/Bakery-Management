@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Ingredient;
+use App\Models\Recipe;
+use App\Models\RecipeIngredient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with(['category', 'recipe.recipeIngredients.ingredient']);
 
         if ($request->has('search') && !empty($request->search)) {
             $search = trim($request->search);
@@ -33,8 +37,22 @@ class ProductController extends Controller
 
         $products = $query->orderBy('id', 'desc')->get();
         $categories = Category::where('status', 'active')->get();
+        $ingredients = Ingredient::where('status', 'active')->orderBy('name', 'asc')->get();
 
-        return view('admin.products', compact('products', 'categories'));
+        return view('admin.products', compact('products', 'categories', 'ingredients'));
+    }
+
+    public function ingredientsList()
+    {
+        $ingredients = Ingredient::where('status', 'active')
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name', 'unit', 'quantity', 'cost', 'status']);
+
+        return response()->json([
+            'success' => true,
+            'count' => $ingredients->count(),
+            'ingredients' => $ingredients,
+        ]);
     }
 
     public function store(Request $request)
@@ -53,6 +71,7 @@ class ProductController extends Controller
             'status' => 'nullable|string|in:active,inactive',
             'image_emoji' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'ingredients' => 'nullable',
         ]);
 
         $imagePath = null;
@@ -89,6 +108,49 @@ class ProductController extends Controller
             'image_path' => $imagePath,
         ]);
 
+        // Process Recipe & Ingredients if provided
+        $rawIngredients = $request->input('ingredients');
+        if (is_string($rawIngredients)) {
+            $rawIngredients = json_decode($rawIngredients, true) ?: [];
+        }
+        $validIngredients = collect($rawIngredients)
+            ->filter(function ($item) {
+                return !empty($item['ingredient_id']) && isset($item['quantity']) && (float) $item['quantity'] > 0;
+            })
+            ->values();
+
+        if ($validIngredients->isNotEmpty()) {
+            $recipe = Recipe::create([
+                'product_id' => $product->id,
+                'name' => $product->name . ' Recipe',
+                'description' => 'Recipe formula for ' . $product->name,
+                'instructions' => 'Standard recipe preparation',
+                'yield_quantity' => 1,
+                'production_time' => 30,
+                'status' => 'active',
+            ]);
+
+            $calculatedCost = 0.0;
+            foreach ($validIngredients as $item) {
+                $ing = Ingredient::find($item['ingredient_id']);
+                if ($ing) {
+                    $unit = !empty($item['unit']) ? $item['unit'] : $ing->unit;
+                    $qty = (float) $item['quantity'];
+                    RecipeIngredient::create([
+                        'recipe_id' => $recipe->id,
+                        'ingredient_id' => $ing->id,
+                        'quantity' => $qty,
+                        'unit' => $unit,
+                    ]);
+                    $calculatedCost += $qty * (float) $ing->cost;
+                }
+            }
+
+            if (empty($validated['cost']) || (float) $validated['cost'] == 0) {
+                $product->update(['cost' => round($calculatedCost, 2)]);
+            }
+        }
+
         return redirect()->route('admin.products')->with('success', 'Product created successfully!');
     }
 
@@ -108,6 +170,7 @@ class ProductController extends Controller
             'status' => 'nullable|string|in:active,inactive',
             'image_emoji' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'ingredients' => 'nullable',
         ]);
 
         $validated['status'] = $validated['status'] ?? $product->status ?? 'active';
@@ -123,6 +186,57 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
+
+        // Process Recipe & Ingredients if provided
+        if ($request->has('ingredients')) {
+            $rawIngredients = $request->input('ingredients');
+            if (is_string($rawIngredients)) {
+                $rawIngredients = json_decode($rawIngredients, true) ?: [];
+            }
+            $validIngredients = collect($rawIngredients)
+                ->filter(function ($item) {
+                    return !empty($item['ingredient_id']) && isset($item['quantity']) && (float) $item['quantity'] > 0;
+                })
+                ->values();
+
+            if ($validIngredients->isNotEmpty()) {
+                $recipe = $product->recipe ?: Recipe::create([
+                    'product_id' => $product->id,
+                    'name' => $product->name . ' Recipe',
+                    'description' => 'Recipe formula for ' . $product->name,
+                    'instructions' => 'Standard recipe preparation',
+                    'yield_quantity' => 1,
+                    'production_time' => 30,
+                    'status' => 'active',
+                ]);
+
+                // Sync recipe ingredients
+                $recipe->recipeIngredients()->delete();
+
+                $calculatedCost = 0.0;
+                foreach ($validIngredients as $item) {
+                    $ing = Ingredient::find($item['ingredient_id']);
+                    if ($ing) {
+                        $unit = !empty($item['unit']) ? $item['unit'] : $ing->unit;
+                        $qty = (float) $item['quantity'];
+                        RecipeIngredient::create([
+                            'recipe_id' => $recipe->id,
+                            'ingredient_id' => $ing->id,
+                            'quantity' => $qty,
+                            'unit' => $unit,
+                        ]);
+                        $calculatedCost += $qty * (float) $ing->cost;
+                    }
+                }
+
+                if (empty($validated['cost']) || (float) $validated['cost'] == 0) {
+                    $product->update(['cost' => round($calculatedCost, 2)]);
+                }
+            } elseif ($product->recipe) {
+                // If ingredients array was submitted empty, clear recipe ingredients
+                $product->recipe->recipeIngredients()->delete();
+            }
+        }
 
         return redirect()->route('admin.products')->with('success', 'Product updated successfully!');
     }

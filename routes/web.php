@@ -171,6 +171,7 @@ Route::middleware(['auth'])->group(function () {
     // -------------------------------------------------------------
     Route::middleware(['role:admin,manager,cashier'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products');
+        Route::get('/products/ingredients-list', [ProductController::class, 'ingredientsList'])->name('products.ingredients-list');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');

@@ -4,6 +4,54 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
+    <style>
+        .ingredient-supplier-link {
+            color: #b45309;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.15s ease;
+        }
+        .ingredient-supplier-link:hover {
+            color: #f97316;
+            text-decoration: underline;
+        }
+        [data-theme="dark"] .ingredient-supplier-link,
+        body.dark-mode .ingredient-supplier-link,
+        [data-theme="glass"] .ingredient-supplier-link {
+            color: #fb923c !important;
+        }
+        [data-theme="dark"] .ingredient-supplier-link:hover,
+        body.dark-mode .ingredient-supplier-link:hover,
+        [data-theme="glass"] .ingredient-supplier-link:hover {
+            color: #fdba74 !important;
+        }
+
+        .ingredient-unit-badge {
+            display: inline-block;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.03em;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="dark"] .ingredient-unit-badge,
+        body.dark-mode .ingredient-unit-badge,
+        [data-theme="glass"] .ingredient-unit-badge {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #e4e4e7 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+
+        [data-theme="dark"] .ingredient-stock-qty:not(.is-out):not(.is-low),
+        body.dark-mode .ingredient-stock-qty:not(.is-out):not(.is-low),
+        [data-theme="glass"] .ingredient-stock-qty:not(.is-out):not(.is-low) {
+            color: #f4f4f5 !important;
+        }
+    </style>
 @endpush
 
 @section('header_toolbar')
@@ -96,13 +144,55 @@
         @if(request('stock_status'))
             <input type="hidden" name="stock_status" value="{{ request('stock_status') }}">
         @endif
+        @php
+            $currentSupplierId = request('supplier_id');
+            $currentSupplier = $suppliers->firstWhere('id', $currentSupplierId);
+            $selectedSupplierLabel = $currentSupplier ? $currentSupplier->name : 'All Suppliers';
+        @endphp
         <div class="supplier-filter-pill-card">
-            <select name="supplier_id" id="supplier_select">
+            <!-- Hidden native select for form submission & backward compatibility -->
+            <select name="supplier_id" id="supplier_select" style="display: none;">
                 <option value="all">All Suppliers</option>
                 @foreach($suppliers as $supplier)
-                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+                    <option value="{{ $supplier->id }}" {{ $currentSupplierId == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
                 @endforeach
             </select>
+
+            <!-- Custom Styled Supplier Dropdown -->
+            <div class="custom-supplier-dropdown" id="ingredients_supplier_dropdown">
+                <button type="button" class="custom-supplier-trigger" id="ingredients_supplier_trigger" aria-haspopup="true" aria-expanded="false">
+                    <span class="custom-supplier-label" id="ingredients_supplier_label">{{ $selectedSupplierLabel }}</span>
+                    <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="custom-supplier-menu" id="ingredients_supplier_menu">
+                    <div class="custom-supplier-search-wrap">
+                        <svg class="custom-supplier-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" class="custom-supplier-search-input" placeholder="Search supplier..." autocomplete="off">
+                    </div>
+                    <ul class="custom-supplier-list">
+                        <li class="custom-supplier-item {{ (!$currentSupplierId || $currentSupplierId === 'all') ? 'is-active' : '' }}" data-value="all">
+                            <span>All Suppliers</span>
+                            @if(!$currentSupplierId || $currentSupplierId === 'all')
+                                <svg class="item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            @endif
+                        </li>
+                        @foreach($suppliers as $supplier)
+                            <li class="custom-supplier-item {{ $currentSupplierId == $supplier->id ? 'is-active' : '' }}" data-value="{{ $supplier->id }}">
+                                <span>{{ $supplier->name }}</span>
+                                @if($currentSupplierId == $supplier->id)
+                                    <svg class="item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
             <button type="submit" class="btn" style="border-radius: 50px; padding: 0.45rem 1.35rem; font-weight: 700; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem;">Filter</button>
             @if(request()->filled('supplier_id') && request('supplier_id') !== 'all')
                 <a href="{{ route('admin.ingredients', request('stock_status') ? ['stock_status' => request('stock_status')] : []) }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-weight: 600; height: 34px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.825rem;">Clear</a>
@@ -112,10 +202,6 @@
 
     <!-- Right: Action Buttons (Purchase Order & Add Ingredient) -->
     <div class="ingredients-action-group" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-        <a href="{{ route('admin.purchase-orders.index', ['action' => 'create']) }}" class="btn" id="btn_create_po" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; background: #d97706; border: 1px solid #d97706; color: #ffffff; text-decoration: none; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            <span>Purchase Order</span>
-        </a>
         <button type="button" class="btn" id="btn_open_ingredient_modal" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #f59e0b; border: 1px solid #f59e0b; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Add Ingredient</span>
@@ -150,39 +236,39 @@
                     @endphp
                     <tr>
                         <td>
-                            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary, #0f172a);">
+                            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title, #ffffff);">
                                 {{ $ing->name }}
                             </div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted, #71717a);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted, #a1a1aa);">
                                 In {{ $ing->recipes_count }} recipes | {{ $ing->purchase_order_items_count }} PO items
                             </div>
                         </td>
                         <td>
-                            <span style="font-weight: 800; font-size: 1.05rem; {{ $isOut ? 'color: #ef4444;' : ($isLow ? 'color: #d97706;' : 'color: #0f172a;') }}">
+                            <span class="ingredient-stock-qty {{ $isOut ? 'is-out' : ($isLow ? 'is-low' : '') }}" style="font-weight: 800; font-size: 1.05rem; {{ $isOut ? 'color: #ef4444;' : ($isLow ? 'color: #f59e0b;' : 'color: var(--text-title, #ffffff);') }}">
                                 {{ number_format($ing->quantity, 2) }}
                             </span>
                         </td>
                         <td>
-                            <span style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.75rem; color: #334155;">
+                            <span class="ingredient-unit-badge">
                                 {{ strtoupper($ing->unit) }}
                             </span>
                         </td>
-                        <td style="font-weight: 700; color: #0f172a;">
+                        <td style="font-weight: 700; color: var(--text-title, #ffffff);">
                             ${{ number_format($ing->cost, 2) }}
                         </td>
-                        <td style="font-size: 0.85rem; color: var(--text-muted, #64748b);">
+                        <td style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
                             {{ number_format($ing->minimum_quantity, 2) }} {{ $ing->unit }}
                         </td>
                         <td>
                             @if($ing->supplier)
-                                <a href="{{ route('admin.suppliers.show', $ing->supplier->id) }}" style="color: #4d2c20; font-weight: 700; text-decoration: none; font-size: 0.85rem;">
+                                <a href="{{ route('admin.suppliers.show', $ing->supplier->id) }}" class="ingredient-supplier-link">
                                     {{ $ing->supplier->name }}
                                 </a>
                             @else
-                                <span style="color: #a1a1aa; font-size: 0.85rem;">Unassigned</span>
+                                <span style="color: var(--text-muted, #a1a1aa); font-size: 0.85rem;">Unassigned</span>
                             @endif
                         </td>
-                        <td style="font-size: 0.85rem; color: var(--text-muted, #64748b);">
+                        <td style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
                             {{ $ing->expiry_date ? $ing->expiry_date->format('M d, Y') : '—' }}
                         </td>
                         <td>
@@ -196,9 +282,6 @@
                         </td>
                         <td style="text-align: right;">
                             <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4rem;">
-                                <a href="{{ route('admin.purchase-orders.index', ['action' => 'create', 'ingredient_id' => $ing->id]) }}" class="table-icon-btn" title="Procure Ingredient via PO">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                </a>
                                 <button type="button" class="table-icon-btn btn-edit-ing" title="Edit Ingredient"
                                     data-id="{{ $ing->id }}"
                                     data-name="{{ $ing->name }}"
@@ -304,24 +387,6 @@
             <option value="inactive">Inactive</option>
         </x-select>
 
-        <!-- Danger Zone / Delete Ingredient Action Card -->
-        <div style="margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-            <div class="user-action-card user-action-card-danger">
-                <div>
-                    <div class="user-action-card-title" style="color: #ef4444;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        <span>Delete Ingredient</span>
-                    </div>
-                    <div class="user-action-card-desc">
-                        Permanently delete this ingredient from bakery inventory records
-                    </div>
-                </div>
-                <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit_ing">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    <span>Delete</span>
-                </button>
-            </div>
-        </div>
 
         <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_ing">Cancel</x-button>
@@ -507,6 +572,120 @@
                 formDeleteIngredient.submit();
             });
         }
+
+        // Custom Supplier Filter Dropdown
+        function initCustomSupplierDropdown(config) {
+            const dropdown = document.getElementById(config.dropdownId);
+            if (!dropdown) return;
+
+            const trigger = dropdown.querySelector('.custom-supplier-trigger');
+            const menu = dropdown.querySelector('.custom-supplier-menu');
+            const label = dropdown.querySelector('.custom-supplier-label');
+            const hiddenSelect = document.getElementById(config.selectId);
+            const searchInput = dropdown.querySelector('.custom-supplier-search-input');
+            const items = dropdown.querySelectorAll('.custom-supplier-item');
+
+            function toggleMenu(open) {
+                const isOpen = open !== undefined ? open : !dropdown.classList.contains('is-open');
+                if (isOpen) {
+                    document.querySelectorAll('.custom-supplier-dropdown.is-open').forEach(d => {
+                        if (d !== dropdown) d.classList.remove('is-open');
+                    });
+                    dropdown.classList.add('is-open');
+                    trigger.setAttribute('aria-expanded', 'true');
+                    if (searchInput) {
+                        searchInput.value = '';
+                        filterItems('');
+                        setTimeout(() => searchInput.focus(), 50);
+                    }
+                } else {
+                    dropdown.classList.remove('is-open');
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            function filterItems(query) {
+                const q = query.toLowerCase().trim();
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = (!q || text.includes(q)) ? 'flex' : 'none';
+                });
+            }
+
+            if (trigger) {
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    filterItems(this.value);
+                });
+                searchInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') toggleMenu(false);
+                });
+            }
+
+            items.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const val = this.getAttribute('data-value');
+                    const itemText = this.querySelector('span') ? this.querySelector('span').textContent.trim() : this.textContent.trim();
+
+                    if (label) label.textContent = itemText;
+
+                    if (hiddenSelect) {
+                        hiddenSelect.value = val;
+                        hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    items.forEach(it => {
+                        it.classList.remove('is-active');
+                        const check = it.querySelector('.item-check');
+                        if (check) check.remove();
+                    });
+
+                    this.classList.add('is-active');
+                    if (!this.querySelector('.item-check')) {
+                        const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        checkSvg.setAttribute('class', 'item-check');
+                        checkSvg.setAttribute('width', '14');
+                        checkSvg.setAttribute('height', '14');
+                        checkSvg.setAttribute('viewBox', '0 0 24 24');
+                        checkSvg.setAttribute('fill', 'none');
+                        checkSvg.setAttribute('stroke', 'currentColor');
+                        checkSvg.setAttribute('stroke-width', '2.5');
+                        checkSvg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                        this.appendChild(checkSvg);
+                    }
+
+                    toggleMenu(false);
+
+                    if (typeof config.onSelect === 'function') {
+                        config.onSelect(val);
+                    }
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) toggleMenu(false);
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && dropdown.classList.contains('is-open')) toggleMenu(false);
+            });
+        }
+
+        initCustomSupplierDropdown({
+            dropdownId: 'ingredients_supplier_dropdown',
+            selectId: 'supplier_select'
+        });
 
         // Real-time instant search filtering for ingredients table
         const searchInput = document.getElementById('ingredient_search_input');

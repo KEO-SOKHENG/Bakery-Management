@@ -465,27 +465,37 @@ input[type="file"].form-control-input {
     width: 100% !important;
     height: 46px !important;
     min-height: 46px !important;
-    display: flex !important;
-    align-items: center !important;
-    padding: 0 0.75rem !important;
+    max-height: 46px !important;
+    padding: 6px 0.75rem !important;
     border-radius: 12px !important;
+    border: 1px solid var(--border-color, #eee9e0) !important;
+    background-color: var(--bg-surface-subtle, #faf7f3) !important;
+    color: var(--text-body, #57534e) !important;
     font-size: 0.875rem !important;
     font-weight: 500 !important;
     box-sizing: border-box !important;
     cursor: pointer !important;
-    line-height: normal !important;
+    line-height: 32px !important;
+    outline: none !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+input[type="file"].form-control-input:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15) !important;
 }
 
 input[type="file"].form-control-input::file-selector-button,
 input[type="file"].form-control-input::-webkit-file-upload-button {
     height: 32px !important;
-    padding: 0 14px !important;
+    padding: 0 16px !important;
     margin-right: 14px !important;
     border-radius: 8px !important;
     border: none !important;
-    background: #ea580c !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
     color: #ffffff !important;
-    font-size: 0.8rem !important;
+    font-family: inherit !important;
+    font-size: 0.825rem !important;
     font-weight: 700 !important;
     cursor: pointer !important;
     line-height: 32px !important;
@@ -493,12 +503,15 @@ input[type="file"].form-control-input::-webkit-file-upload-button {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: background 0.2s ease !important;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25) !important;
+    transition: all 0.2s ease !important;
 }
 
 input[type="file"].form-control-input::file-selector-button:hover,
 input[type="file"].form-control-input::-webkit-file-upload-button:hover {
-    background: #c2410c !important;
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+    transform: translateY(-0.5px);
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35) !important;
 }
 
 [data-theme="dark"] input[type="file"].form-control-input {

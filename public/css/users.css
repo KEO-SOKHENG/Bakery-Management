@@ -846,27 +846,19 @@
     padding: 0.95rem 1.15rem;
     border-radius: 14px;
     border: 1px solid var(--user-border);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.02);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .user-action-card:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(0, 0, 0, 0.15);
 }
 
-.user-action-card-permissions {
-    background: rgba(59, 130, 246, 0.05);
-    border-color: rgba(59, 130, 246, 0.2);
-}
-
-.user-action-card-password {
-    background: rgba(245, 158, 11, 0.06);
-    border-color: rgba(245, 158, 11, 0.22);
-}
-
+.user-action-card-permissions,
+.user-action-card-password,
 .user-action-card-danger {
-    background: rgba(239, 68, 68, 0.06);
-    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(0, 0, 0, 0.02);
+    border-color: var(--user-border);
 }
 
 .user-action-card-title {
@@ -885,64 +877,54 @@
     line-height: 1.35;
 }
 
-/* Action Card Button Pills */
+/* Action Card Button Pills - Styled cleanly the same as btn save and cancel */
 .btn-action-card-btn {
-    height: 36px;
-    padding: 0 1rem;
-    border-radius: 10px;
+    height: 38px;
+    padding: 0 1.25rem;
+    border-radius: 9999px !important;
     font-weight: 700;
-    font-size: 0.825rem;
+    font-size: 0.85rem;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.45rem;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
-    border: 1px solid transparent;
+    box-shadow: none !important;
 }
 
-.btn-permissions-action {
-    background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
-    border-color: rgba(59, 130, 246, 0.35);
-}
-
-.btn-permissions-action:hover {
-    background: #2563eb;
-    color: #ffffff;
-    border-color: #2563eb;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-    transform: translateY(-1px);
-}
-
+.btn-permissions-action,
 .btn-password-action {
-    background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
-    border-color: rgba(245, 158, 11, 0.35);
+    background: none;
+    border: 1px solid var(--user-border);
+    color: var(--user-muted);
+    border-radius: 9999px !important;
 }
 
+.btn-permissions-action:hover,
 .btn-password-action:hover {
-    background: #d97706;
-    color: #ffffff;
-    border-color: #d97706;
-    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+    background: var(--user-border);
+    color: var(--user-text);
     transform: translateY(-1px);
+    box-shadow: none !important;
 }
 
 .btn-danger-action {
-    background: rgba(239, 68, 68, 0.12);
+    background: none;
+    border: 1px solid rgba(239, 68, 68, 0.35);
     color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.35);
+    border-radius: 9999px !important;
 }
 
 .btn-danger-action:hover {
     background: #dc2626;
     color: #ffffff;
     border-color: #dc2626;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
 /* Higher z-index for sub-modals (Permissions, Password Reset, Status, Delete Confirmation, View) */
@@ -955,26 +937,62 @@
 }
 
 [data-theme="dark"] .user-action-card,
-body.dark-mode .user-action-card {
-    background: rgba(15, 23, 42, 0.4);
-}
-
+body.dark-mode .user-action-card,
 [data-theme="dark"] .user-action-card-permissions,
-body.dark-mode .user-action-card-permissions {
-    background: rgba(59, 130, 246, 0.08);
-    border-color: rgba(59, 130, 246, 0.25);
-}
-
 [data-theme="dark"] .user-action-card-password,
-body.dark-mode .user-action-card-password {
-    background: rgba(245, 158, 11, 0.08);
-    border-color: rgba(245, 158, 11, 0.25);
+[data-theme="dark"] .user-action-card-danger,
+body.dark-mode .user-action-card-permissions,
+body.dark-mode .user-action-card-password,
+body.dark-mode .user-action-card-danger {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
 }
 
-[data-theme="dark"] .user-action-card-danger,
-body.dark-mode .user-action-card-danger {
-    background: rgba(239, 68, 68, 0.08);
-    border-color: rgba(239, 68, 68, 0.3);
+[data-theme="dark"] .user-action-card:hover,
+body.dark-mode .user-action-card:hover {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-theme="dark"] .btn-action-card-btn,
+body.dark-mode .btn-action-card-btn {
+    border-radius: 9999px !important;
+}
+
+[data-theme="dark"] .btn-permissions-action,
+[data-theme="dark"] .btn-password-action,
+body.dark-mode .btn-permissions-action,
+body.dark-mode .btn-password-action {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #f1f5f9 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-permissions-action:hover,
+[data-theme="dark"] .btn-password-action:hover,
+body.dark-mode .btn-permissions-action:hover,
+body.dark-mode .btn-password-action:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-danger-action,
+body.dark-mode .btn-danger-action {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    color: #ef4444 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-danger-action:hover,
+body.dark-mode .btn-danger-action:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35) !important;
 }
 
 /* Permissions Modules & Checkbox Grid */
@@ -1085,51 +1103,102 @@ body.dark-mode .user-action-card-danger {
 /* Dark Mode Overrides */
 [data-theme="dark"],
 body.dark-mode {
-    --user-card-bg: #1e293b;
-    --user-text: #f1f5f9;
-    --user-muted: #94a3b8;
-    --user-border: #334155;
-    --bg-primary: #0f172a;
+    --user-card-bg: #1c1c21;
+    --user-text: #f8fafc;
+    --user-muted: #a1a1aa;
+    --user-border: rgba(255, 255, 255, 0.12);
+    --bg-primary: #131316;
 }
 
 [data-theme="dark"] .user-modal-card,
 body.dark-mode .user-modal-card {
-    background: #1e293b;
-    border-color: #334155;
+    background: #1c1c21 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .user-modal-header,
+[data-theme="dark"] .user-modal-footer,
+body.dark-mode .user-modal-header,
+body.dark-mode .user-modal-footer {
+    background: #17171a !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .user-modal-body,
+body.dark-mode .user-modal-body {
+    background: #1c1c21 !important;
+}
+
+[data-theme="dark"] .form-field-group input,
+[data-theme="dark"] .form-field-group select,
+[data-theme="dark"] .form-field-group textarea,
+body.dark-mode .form-field-group input,
+body.dark-mode .form-field-group select,
+body.dark-mode .form-field-group textarea {
+    background: #131316 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .form-field-group input:focus,
+[data-theme="dark"] .form-field-group select:focus,
+[data-theme="dark"] .form-field-group textarea:focus,
+body.dark-mode .form-field-group input:focus,
+body.dark-mode .form-field-group select:focus,
+body.dark-mode .form-field-group textarea:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15) !important;
+}
+
+/* Browser Autofill styling in dark mode */
+.user-modal-card input:-webkit-autofill,
+.user-modal-card input:-webkit-autofill:hover,
+.user-modal-card input:-webkit-autofill:focus,
+.user-modal-card input:-webkit-autofill:active,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #131316 inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: #ffffff;
 }
 
 [data-theme="dark"] .permission-module-card,
 body.dark-mode .permission-module-card {
-    background: #0f172a;
-    border-color: #334155;
+    background: #17171a;
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .btn-icon-action,
 body.dark-mode .btn-icon-action {
-    background: #0f172a;
-    border-color: #334155;
+    background: #17171a;
+    border-color: rgba(255, 255, 255, 0.12);
     color: #f1f5f9;
 }
 
 [data-theme="dark"] .btn-action-btn,
 body.dark-mode .btn-action-btn {
-    background: #0f172a;
-    border-color: #334155;
+    background: #17171a;
+    border-color: rgba(255, 255, 255, 0.12);
     color: #f1f5f9;
 }
 
 [data-theme="dark"] .btn-action-btn:hover,
 body.dark-mode .btn-action-btn:hover {
-    background: #1e293b;
-    border-color: #475569;
+    background: #232328;
+    border-color: rgba(255, 255, 255, 0.2);
     color: #f8fafc;
 }
 
 [data-theme="dark"] .user-more-menu,
 body.dark-mode .user-more-menu {
-    background: #1e293b;
-    border-color: #334155;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    background: #1c1c21;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="dark"] .dropdown-item,

@@ -622,12 +622,9 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header-flex">
             <div>
                 <h2 data-lang-key="stock_expiry_alerts">{{ __('messages.stock_expiry_alerts') }}</h2>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">
-                    @if($expiredIngredientsCount > 0)
-                        <span style="color: #dc2626; font-weight: 700;">{{ $expiredIngredientsCount }} expired!</span> &bull;
-                    @endif
-                    Critical inventory requiring replenishment
-                </span>
+                @if($expiredIngredientsCount > 0)
+                    <span style="font-size: 0.8rem; color: #dc2626; font-weight: 700;">{{ $expiredIngredientsCount }} expired!</span>
+                @endif
             </div>
             <a href="{{ route('admin.ingredients') }}" class="link-action">Manage &rarr;</a>
         </div>
@@ -690,7 +687,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header-flex">
             <div>
                 <h2 data-lang-key="procurement_production_overview">{{ __('messages.procurement_production_overview') }}</h2>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Suppliers, Purchase Orders & Production KPIs</span>
             </div>
             <a href="{{ route('admin.purchase-orders.index') }}" class="link-action">Procurement &rarr;</a>
         </div>
@@ -699,22 +695,18 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="status-dist-box">
                 <span class="status-dist-label">Active Suppliers</span>
                 <span class="status-dist-val" style="color: var(--text-title);">{{ number_format($suppliersCount) }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Partners in supply chain</span>
             </div>
             <div class="status-dist-box">
                 <span class="status-dist-label">Total Procurement Spend</span>
                 <span class="status-dist-val" style="color: #16a34a;">{{ $currency }}{{ number_format($totalProcurementSpend, 2) }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">From {{ $receivedPosCount }} received POs</span>
             </div>
             <div class="status-dist-box">
                 <span class="status-dist-label">Active Productions</span>
                 <span class="status-dist-val" style="color: #d97706;">{{ number_format($activeProductionsCount) }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Batches in bakery oven</span>
             </div>
             <div class="status-dist-box">
                 <span class="status-dist-label">Total Units Produced</span>
                 <span class="status-dist-val" style="color: #9333ea;">{{ number_format($totalUnitsProduced) }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted);">From completed batches</span>
             </div>
         </div>
 
@@ -722,7 +714,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="dash-loyalty-box" style="padding: 1rem; background: #faf6f0; border-radius: 12px; border: 1px solid rgba(238, 233, 224, 0.8); display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div style="font-weight: 700; color: var(--text-title); font-size: 0.9rem;">Customer Loyalty Program</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">{{ number_format($vipCustomersCount) }} VIP Members &bull; {{ number_format($totalLoyaltyPoints) }} Reward Points Issued</div>
             </div>
             <a href="{{ route('admin.customers.index') }}" class="btn-card-outline" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">View Customers</a>
         </div>

@@ -4,7 +4,7 @@
 @section('body_class', 'is-catalog-page is-settings-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/settings.css') }}?v={{ @filemtime(public_path('css/settings.css')) ?: '1.0' }}">
     <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
 @endpush
 
@@ -408,7 +408,16 @@
                     this.classList.add('active');
                     const theme = this.getAttribute('data-theme');
                     if (hiddenThemeInput) hiddenThemeInput.value = theme;
-                    document.documentElement.setAttribute('data-theme', theme);
+                    if (typeof window.applyTheme === 'function') {
+                        window.applyTheme(theme);
+                    } else {
+                        document.documentElement.setAttribute('data-theme', theme);
+                        if (document.body) {
+                            document.body.classList.toggle('dark-mode', theme === 'dark');
+                            document.body.classList.toggle('theme-dark', theme === 'dark');
+                        }
+                        localStorage.setItem('bakery_theme', theme);
+                    }
                 });
             });
         });

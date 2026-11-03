@@ -59,6 +59,25 @@ class Product extends Model
         return $this->stock <= $this->minimum_stock;
     }
 
+    public function getImageUrl(): ?string
+    {
+        if (!empty($this->image_path) && file_exists(public_path($this->image_path))) {
+            return asset($this->image_path);
+        }
+        if (!empty($this->image) && file_exists(public_path($this->image))) {
+            return asset($this->image);
+        }
+        if (!empty($this->image) && file_exists(public_path('storage/' . $this->image))) {
+            return asset('storage/' . $this->image);
+        }
+        return null;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->getImageUrl();
+    }
+
     public function isExpired(): bool
     {
         return $this->expiry_date !== null && $this->expiry_date->isPast();

@@ -5,41 +5,45 @@
    Polished 72px Compact Sidebar & Overlay Drawer
    ========================================== */
 @media (min-width: 768px) and (max-width: 1199px) {
-    /* Clean Compact 72px Sidebar Rail for iPad / Tablets */
+    /* Clean Compact 72px Floating Sidebar Capsule for iPad / Tablets */
     .bakery-sidebar {
         width: 72px !important;
-        padding: 1.15rem 0.65rem 0.75rem 0.65rem !important;
-        background-color: var(--sidebar-bg, #ffffff) !important;
-        background: var(--sidebar-bg, #ffffff) !important;
-        border-right: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
-        border-radius: 0;
-        margin: 0;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        padding: 1.25rem 0.5rem 1rem 0.5rem !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border: 1px solid #eee9e0 !important;
+        border-radius: 28px !important;
+        margin: 12px 0 12px 12px !important;
+        height: calc(100vh - 24px) !important;
+        max-height: calc(100vh - 24px) !important;
         box-sizing: border-box !important;
         position: sticky;
-        top: 0;
+        top: 12px;
         left: 0;
         z-index: 1000;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         flex-shrink: 0;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
-        transition: width 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        box-shadow: none !important;
+        transition: width 0.3s ease, transform 0.3s ease, background 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
         overflow: visible !important;
     }
 
     .bakery-sidebar.sidebar-expanded {
         overflow: hidden !important;
+        width: 250px !important;
+        border-radius: 28px !important;
     }
 
     [data-theme="dark"] .bakery-sidebar,
-    [data-theme="glass"] .bakery-sidebar {
-        background-color: #0b101d !important;
-        background: #0b101d !important;
-        border-right-color: rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    [data-theme="glass"] .bakery-sidebar,
+    body.dark-mode .bakery-sidebar,
+    body.theme-dark .bakery-sidebar {
+        background-color: #181514 !important;
+        background: #181514 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: none !important;
     }
 
     /* Brand / Logo Area with Hamburger Toggle */
@@ -50,9 +54,10 @@
         justify-content: center !important;
         padding-bottom: 0.85rem;
         margin-bottom: 0.85rem;
-        border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.06)) !important;
+        border-bottom: none !important;
+        border: none !important;
         width: 100%;
-        gap: 10px;
+        gap: 0 !important;
         flex-shrink: 0 !important;
     }
 
@@ -61,15 +66,40 @@
         border-bottom-color: rgba(255, 255, 255, 0.08) !important;
     }
 
-    /* Hide text labels, section headers, submenus, dropdown carets, and badges in collapsed 72px rail */
+    /* Hide text labels, section headers, submenus, dropdown carets, and badges in collapsed 72px rail with smooth transitions */
     .bakery-sidebar:not(.sidebar-expanded) .bakery-logo-text,
     .bakery-sidebar:not(.sidebar-expanded) .bakery-logo-title,
-    .bakery-sidebar:not(.sidebar-expanded) .bakery-logo-subtitle,
-    .bakery-sidebar:not(.sidebar-expanded) .sidebar-section-header,
-    .bakery-sidebar:not(.sidebar-expanded) .sidebar-submenu,
+    .bakery-sidebar:not(.sidebar-expanded) .bakery-logo-subtitle {
+        opacity: 0 !important;
+        max-width: 0 !important;
+        pointer-events: none !important;
+        display: none !important;
+    }
+
+    .bakery-sidebar:not(.sidebar-expanded) .sidebar-section-header {
+        opacity: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .bakery-sidebar:not(.sidebar-expanded) .sidebar-submenu {
+        max-height: 0 !important;
+        opacity: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     .bakery-sidebar:not(.sidebar-expanded) .sidebar-dropdown-btn,
     .bakery-sidebar:not(.sidebar-expanded) .sidebar-badge {
-        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
     }
 
     /* Suppress duplicate legacy header button */
@@ -77,7 +107,7 @@
         display: none !important;
     }
 
-    .bakery-sidebar:not(.sidebar-expanded) {
+    .bakery-sidebar:not(.sidebar-expanded) .bakery-logo-area {
         display: flex !important;
         align-items: center;
         justify-content: center;
@@ -88,7 +118,7 @@
     }
 
     /* Tablet (768px - 1180px) when sidebar is closed: clean full-width content */
-    body.sidebar-is-closed .bakery-sidebar {
+    body.sidebar-is-closed .bakery-sidebar:not(.sidebar-collapsed) {
         width: 0 !important;
         min-width: 0 !important;
         max-width: 0 !important;
@@ -298,7 +328,7 @@
         align-items: stretch !important;
         padding: 1.15rem 1rem 0.75rem 1rem !important;
         z-index: 1100;
-        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.2);
+        box-shadow: none !important;
         background-color: var(--sidebar-bg, #ffffff) !important;
         background: var(--sidebar-bg, #ffffff) !important;
         overflow: hidden !important;
@@ -308,14 +338,14 @@
     [data-theme="glass"] .bakery-sidebar.sidebar-expanded {
         background-color: #0b101d !important;
         background: #0b101d !important;
-        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.5);
+        box-shadow: none !important;
     }
 
     .bakery-sidebar.sidebar-expanded .bakery-logo-area {
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 12px;
+        justify-content: center !important;
+        gap: 0 !important;
         flex-shrink: 0 !important;
     }
 
@@ -484,7 +514,7 @@
         max-width: 165px;
     }
 
-    [data-theme="dark"] .user-profile-pill {
+    [data-theme="dark"] .user-profile-pill:not(.user-profile-circle) {
         background: rgba(255, 255, 255, 0.08) !important;
         border-color: rgba(255, 255, 255, 0.12) !important;
     }
@@ -730,12 +760,13 @@
         height: 100vh !important;
         max-height: 100vh !important;
         z-index: 1100 !important;
-        background-color: var(--sidebar-bg, #ffffff) !important;
-        background: var(--sidebar-bg, #ffffff) !important;
-        border-right: 1px solid var(--border-color, #eee9e0) !important;
-        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.28) !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        border-right: 1px solid #eee9e0 !important;
+        border-radius: 0 28px 28px 0 !important;
+        box-shadow: none !important;
         transform: translateX(-100%) !important;
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease !important;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
         display: flex !important;
         flex-direction: column !important;
         padding: 1.25rem 1rem !important;
@@ -744,6 +775,16 @@
         pointer-events: auto !important;
         box-sizing: border-box !important;
         overflow-y: auto !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar,
+    [data-theme="glass"] .bakery-sidebar,
+    body.dark-mode .bakery-sidebar,
+    body.theme-dark .bakery-sidebar {
+        background-color: #181514 !important;
+        background: #181514 !important;
+        border-right-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: none !important;
     }
 
     .bakery-sidebar.sidebar-expanded {
@@ -756,18 +797,13 @@
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 12px !important;
+        justify-content: center !important;
+        gap: 0 !important;
         padding-bottom: 0.85rem !important;
         margin-bottom: 0.85rem !important;
-        border-bottom: 1px solid var(--border-subtle, #f3efe9) !important;
+        border-bottom: none !important;
+        border: none !important;
         width: 100% !important;
-    }
-
-    .bakery-sidebar  {
-        display: flex !important;
-        width: 38px !important;
-        height: 38px !important;
     }
 
     .bakery-sidebar .bakery-logo-text {
@@ -811,8 +847,15 @@
         justify-content: flex-start !important;
         gap: 14px !important;
         font-size: 0.925rem !important;
-        color: #60636d !important;
+        color: #57534e !important;
         box-sizing: border-box !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar .sidebar-nav-item,
+    [data-theme="glass"] .bakery-sidebar .sidebar-nav-item,
+    body.dark-mode .bakery-sidebar .sidebar-nav-item,
+    body.theme-dark .bakery-sidebar .sidebar-nav-item {
+        color: #e4e4e7 !important;
     }
 
     .bakery-sidebar .sidebar-nav-item span {
@@ -824,9 +867,16 @@
         display: block !important;
         font-size: 0.725rem !important;
         font-weight: 800 !important;
-        color: var(--text-muted, #9ca3af) !important;
+        color: #8c7b75 !important;
         text-transform: uppercase !important;
         padding: 0.75rem 0.5rem 0.25rem !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar .sidebar-section-header,
+    [data-theme="glass"] .bakery-sidebar .sidebar-section-header,
+    body.dark-mode .bakery-sidebar .sidebar-section-header,
+    body.theme-dark .bakery-sidebar .sidebar-section-header {
+        color: #71717a !important;
     }
 
     .bakery-sidebar .sidebar-logout {
@@ -846,6 +896,14 @@
         gap: 8px !important;
         padding: 0 1rem !important;
         box-sizing: border-box !important;
+        color: #57534e !important;
+    }
+
+    [data-theme="dark"] .bakery-sidebar .logout-btn,
+    [data-theme="glass"] .bakery-sidebar .logout-btn,
+    body.dark-mode .bakery-sidebar .logout-btn,
+    body.theme-dark .bakery-sidebar .logout-btn {
+        color: #e4e4e7 !important;
     }
 
     .bakery-sidebar .logout-btn span {
@@ -1402,4 +1460,30 @@
         box-sizing: border-box !important;
         width: 100% !important;
     }
+}
+
+/* =========================================================
+   Universal Sidebar Zero-Shadow Override (Open, Closed, Hover)
+   ========================================================= */
+.bakery-sidebar,
+.bakery-sidebar:hover,
+.bakery-sidebar.sidebar-collapsed,
+.bakery-sidebar.sidebar-collapsed:hover,
+.bakery-sidebar.sidebar-expanded,
+.bakery-sidebar.sidebar-expanded:hover,
+.sidebar,
+.sidebar:hover,
+[data-theme="dark"] .bakery-sidebar,
+[data-theme="dark"] .bakery-sidebar:hover,
+[data-theme="dark"] .bakery-sidebar.sidebar-collapsed,
+[data-theme="dark"] .bakery-sidebar.sidebar-collapsed:hover,
+[data-theme="glass"] .bakery-sidebar,
+[data-theme="glass"] .bakery-sidebar:hover,
+[data-theme="glass"] .bakery-sidebar.sidebar-collapsed,
+[data-theme="glass"] .bakery-sidebar.sidebar-collapsed:hover,
+body.dark-mode .bakery-sidebar,
+body.dark-mode .bakery-sidebar:hover,
+body.theme-dark .bakery-sidebar,
+body.theme-dark .bakery-sidebar:hover {
+    box-shadow: none !important;
 }

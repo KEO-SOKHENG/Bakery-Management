@@ -90,6 +90,10 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
 
+            if ($user->must_change_password) {
+                return redirect()->route('password.change')->with('warning', 'You are logged in with a temporary password. Please set a new password to continue.');
+            }
+
             return match (strtolower($user->role)) {
                 'admin' => redirect()->route('admin.dashboard')->with('success', 'Welcome back, Admin!'),
                 'manager' => redirect()->route('manager.dashboard')->with('success', 'Welcome back, Manager!'),

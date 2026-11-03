@@ -265,7 +265,7 @@
         <div class="user-modal-header">
             <h3 data-lang-key="create_user">{{ __('messages.create_user') }}</h3>
         </div>
-        <form action="{{ route('admin.users.store') }}" method="POST">
+        <form action="{{ route('admin.users.store') }}" method="POST" autocomplete="off">
             @csrf
             <div class="user-modal-body">
                 <div class="form-field-group">
@@ -312,7 +312,7 @@
 
                 <div class="form-field-group">
                     <label for="create_user_password">Password * (min 6 chars)</label>
-                    <input type="password" id="create_user_password" name="password" required minlength="6" placeholder="••••••••••••">
+                    <input type="password" id="create_user_password" name="password" required minlength="6" autocomplete="new-password" placeholder="••••••••••••">
                 </div>
             </div>
             <div class="user-modal-footer">
@@ -330,8 +330,9 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3 data-lang-key="edit_user">{{ __('messages.edit_user') }}</h3>
+            <button type="button" class="btn-modal-close" id="btn_close_edit_user" aria-label="Close">&times;</button>
         </div>
-        <form id="form_edit_user" method="POST">
+        <form id="form_edit_user" method="POST" autocomplete="off">
             @csrf
             @method('PUT')
             <div class="user-modal-body">
@@ -389,7 +390,7 @@
                                 Manage granular module access and custom permission overrides
                             </div>
                         </div>
-                        <button type="button" class="btn btn-action-card-btn btn-permissions-action" id="edit_btn_manage_permissions">
+                        <button type="button" class="btn btn-modal-cancel btn-action-card-btn btn-permissions-action" id="edit_btn_manage_permissions">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                             <span>Permissions</span>
                         </button>
@@ -408,7 +409,7 @@
                                 Reset account password
                             </div>
                         </div>
-                        <button type="button" class="btn btn-action-card-btn btn-password-action" id="edit_btn_open_reset_pwd">
+                        <button type="button" class="btn btn-modal-cancel btn-action-card-btn btn-password-action" id="edit_btn_open_reset_pwd">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                             <span>Change Password</span>
                         </button>
@@ -430,7 +431,7 @@
                                 Permanently delete account while preserving all historical business records
                             </div>
                         </div>
-                        <button type="button" class="btn btn-action-card-btn btn-danger-action" id="btn_delete_from_edit">
+                        <button type="button" class="btn btn-modal-cancel btn-action-card-btn btn-danger-action" id="btn_delete_from_edit">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             <span>Delete Account</span>
                         </button>
@@ -459,6 +460,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <span>Delete Staff Account</span>
             </h3>
+            <button type="button" class="btn-modal-close" id="btn_close_delete_confirm" aria-label="Close">&times;</button>
         </div>
         <div class="user-modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
             <p style="font-size: 0.925rem; margin: 0; color: var(--user-text); line-height: 1.5;">
@@ -492,8 +494,9 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                 <span>{{ __('messages.reset_password') }}</span>
             </h3>
+            <button type="button" class="btn-modal-close" id="btn_close_reset_pwd" aria-label="Close">&times;</button>
         </div>
-        <form id="form_reset_password" method="POST">
+        <form id="form_reset_password" method="POST" autocomplete="off">
             @csrf
             <div class="user-modal-body">
                 <div style="padding: 0.75rem 1rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #f59e0b; display: flex; align-items: center; gap: 0.5rem;">
@@ -503,12 +506,12 @@
 
                 <div class="form-field-group">
                     <label for="reset_pwd_input">New Password * (min 6 characters)</label>
-                    <input type="password" id="reset_pwd_input" name="password" required minlength="6" placeholder="Enter new password">
+                    <input type="password" id="reset_pwd_input" name="password" required minlength="6" autocomplete="new-password" placeholder="Enter new password">
                 </div>
             </div>
             <div class="user-modal-footer">
                 <x-button variant="secondary" id="btn_cancel_reset_pwd" class="btn-modal-cancel" data-lang-key="cancel">{{ __('messages.cancel') }}</x-button>
-                <button type="submit" class="btn btn-action-card-btn btn-password-action" style="height: 40px; padding: 0 1.25rem; font-size: 0.875rem;">
+                <button type="submit" class="btn btn-user-primary" id="btn_submit_reset_pwd" style="height: 40px; padding: 0 1.25rem; font-size: 0.875rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     <span>Save New Password</span>
                 </button>
@@ -524,6 +527,7 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3>Update Account Status</h3>
+            <button type="button" class="btn-modal-close" id="btn_close_status_modal" aria-label="Close">&times;</button>
         </div>
         <form id="form_status_user" method="POST">
             @csrf
@@ -565,6 +569,7 @@
                     Configuring permissions for Staff Member
                 </div>
             </div>
+            <button type="button" class="btn-modal-close" id="btn_close_perm_modal" aria-label="Close">&times;</button>
         </div>
         <form id="form_update_permissions" method="POST">
             @csrf
@@ -620,6 +625,7 @@
     <div class="user-modal-card">
         <div class="user-modal-header">
             <h3 data-lang-key="user_details">{{ __('messages.user_details') }}</h3>
+            <button type="button" class="btn-modal-close" id="btn_close_view_user" aria-label="Close">&times;</button>
         </div>
         <div class="user-modal-body">
             <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--user-border); padding-bottom: 1rem;">
@@ -682,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             const wrapper = this.closest('.user-more-wrapper');
             const row = this.closest('tr');
-            const isOpen = wrapper.classList.contains('is-open');
+            const isOpen = wrapper ? wrapper.classList.contains('is-open') : false;
 
             // Close other open dropdowns
             document.querySelectorAll('.user-more-wrapper.is-open').forEach(w => {
@@ -695,14 +701,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            if (isOpen) {
-                wrapper.classList.remove('is-open');
-                if (row) row.classList.remove('has-open-dropdown');
-                this.setAttribute('aria-expanded', 'false');
-            } else {
-                wrapper.classList.add('is-open');
-                if (row) row.classList.add('has-open-dropdown');
-                this.setAttribute('aria-expanded', 'true');
+            if (wrapper) {
+                if (isOpen) {
+                    wrapper.classList.remove('is-open');
+                    if (row) row.classList.remove('has-open-dropdown');
+                    this.setAttribute('aria-expanded', 'false');
+                } else {
+                    wrapper.classList.add('is-open');
+                    if (row) row.classList.add('has-open-dropdown');
+                    this.setAttribute('aria-expanded', 'true');
+                }
             }
         });
     });
@@ -744,19 +752,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 const t = w.querySelector('.btn-more-toggle');
                 if (t) t.setAttribute('aria-expanded', 'false');
             });
+            document.querySelectorAll('.user-modal-backdrop.is-active').forEach(modal => {
+                closeModal(modal);
+            });
         }
     });
 
     // 1. Create User Modal
     const createModal = document.getElementById('create_user_modal');
     const btnOpenCreate = document.getElementById('btn_open_create_user_modal');
+    const btnCloseCreate = document.getElementById('btn_close_create_user');
     const btnCancelCreate = document.getElementById('btn_cancel_create_user');
 
     if (btnOpenCreate) btnOpenCreate.addEventListener('click', () => openModal(createModal));
+    if (btnCloseCreate) btnCloseCreate.addEventListener('click', () => closeModal(createModal));
     if (btnCancelCreate) btnCancelCreate.addEventListener('click', () => closeModal(createModal));
 
     // 2. Edit User Modal & Integrated Features (Permissions, Password, Delete)
     const editModal = document.getElementById('edit_user_modal');
+    const btnCloseEdit = document.getElementById('btn_close_edit_user');
     const btnCancelEdit = document.getElementById('btn_cancel_edit_user');
     const formEdit = document.getElementById('form_edit_user');
     const btnManagePermFromEdit = document.getElementById('edit_btn_manage_permissions');
@@ -769,32 +783,43 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentEditUserUsername = '';
     let currentEditUserRole = '';
 
+    function populateAndOpenEdit(btn) {
+        currentEditUserId = btn.dataset.id;
+        currentEditUserName = btn.dataset.name || '';
+        currentEditUserUsername = btn.dataset.username || '';
+        currentEditUserRole = btn.dataset.role || 'cashier';
+        const isSelf = btn.dataset.isself === '1';
+
+        if (formEdit) formEdit.action = `/admin/users/${currentEditUserId}`;
+        const nameInput = document.getElementById('edit_user_name');
+        if (nameInput) nameInput.value = currentEditUserName;
+        const usernameInput = document.getElementById('edit_user_username');
+        if (usernameInput) usernameInput.value = currentEditUserUsername;
+        const emailInput = document.getElementById('edit_user_email');
+        if (emailInput) emailInput.value = btn.dataset.email || '';
+        const phoneInput = document.getElementById('edit_user_phone');
+        if (phoneInput) phoneInput.value = btn.dataset.phone || '';
+        const roleInput = document.getElementById('edit_user_role');
+        if (roleInput) roleInput.value = currentEditUserRole;
+        const statusInput = document.getElementById('edit_user_status');
+        if (statusInput) statusInput.value = btn.dataset.status || 'active';
+        if (document.getElementById('edit_must_change_password')) {
+            document.getElementById('edit_must_change_password').checked = false;
+        }
+        const pwdInput = document.getElementById('edit_user_password');
+        if (pwdInput) pwdInput.value = '';
+
+        const dangerZone = document.getElementById('edit_danger_zone');
+        if (dangerZone) {
+            dangerZone.style.display = isSelf ? 'none' : 'block';
+        }
+
+        openModal(editModal);
+    }
+
     document.querySelectorAll('.btn-edit-user').forEach(btn => {
         btn.addEventListener('click', function() {
-            currentEditUserId = this.dataset.id;
-            currentEditUserName = this.dataset.name || '';
-            currentEditUserUsername = this.dataset.username || '';
-            currentEditUserRole = this.dataset.role || 'cashier';
-            const isSelf = this.dataset.isself === '1';
-
-            formEdit.action = `/admin/users/${currentEditUserId}`;
-            document.getElementById('edit_user_name').value = currentEditUserName;
-            document.getElementById('edit_user_username').value = currentEditUserUsername;
-            document.getElementById('edit_user_email').value = this.dataset.email || '';
-            document.getElementById('edit_user_phone').value = this.dataset.phone || '';
-            document.getElementById('edit_user_role').value = currentEditUserRole;
-            document.getElementById('edit_user_status').value = this.dataset.status || 'active';
-            if (document.getElementById('edit_must_change_password')) {
-                document.getElementById('edit_must_change_password').checked = false;
-            }
-            document.getElementById('edit_user_password').value = '';
-
-            const dangerZone = document.getElementById('edit_danger_zone');
-            if (dangerZone) {
-                dangerZone.style.display = isSelf ? 'none' : 'block';
-            }
-
-            openModal(editModal);
+            populateAndOpenEdit(this);
         });
     });
 
@@ -803,7 +828,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Open Permissions from inside Edit Modal
     if (btnManagePermFromEdit) {
-        btnManagePermFromEdit.addEventListener('click', function() {
+        btnManagePermFromEdit.addEventListener('click', function(e) {
+            e.preventDefault();
             if (!currentEditUserId) return;
             const selectedRole = document.getElementById('edit_user_role') ? document.getElementById('edit_user_role').value : currentEditUserRole;
             openPermissionsForUser(currentEditUserId, currentEditUserName, selectedRole);
@@ -812,11 +838,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Open Reset Password Modal from inside Edit Modal
     if (btnOpenResetPwdFromEdit) {
-        btnOpenResetPwdFromEdit.addEventListener('click', function() {
+        btnOpenResetPwdFromEdit.addEventListener('click', function(e) {
+            e.preventDefault();
             if (!currentEditUserId) return;
-            formReset.action = `/admin/users/${currentEditUserId}/reset-password`;
-            resetTitle.textContent = `${currentEditUserName} (@${currentEditUserUsername})`;
-            document.getElementById('reset_pwd_input').value = '';
+            if (formReset) formReset.action = `/admin/users/${currentEditUserId}/reset-password`;
+            if (resetTitle) resetTitle.textContent = `${currentEditUserName} (@${currentEditUserUsername})`;
+            const resetPwdInput = document.getElementById('reset_pwd_input');
+            if (resetPwdInput) resetPwdInput.value = '';
             openModal(resetModal);
         });
     }
@@ -829,7 +857,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteModalUsername = document.getElementById('delete_modal_username');
 
     if (btnDeleteFromEdit) {
-        btnDeleteFromEdit.addEventListener('click', function() {
+        btnDeleteFromEdit.addEventListener('click', function(e) {
+            e.preventDefault();
             if (!currentEditUserId) return;
             if (deleteModalUsername) {
                 deleteModalUsername.textContent = `@${currentEditUserUsername}`;
@@ -849,13 +878,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!currentEditUserId) return;
             btnConfirmDeleteExecute.disabled = true;
             btnConfirmDeleteExecute.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Deleting...</span>';
-            formDeleteFromModal.action = `/admin/users/${currentEditUserId}`;
-            formDeleteFromModal.submit();
+            if (formDeleteFromModal) {
+                formDeleteFromModal.action = `/admin/users/${currentEditUserId}`;
+                formDeleteFromModal.submit();
+            }
         });
     }
 
     // 3. Reset Password Modal
     const resetModal = document.getElementById('reset_password_modal');
+    const btnCloseResetPwd = document.getElementById('btn_close_reset_pwd');
     const btnCancelReset = document.getElementById('btn_cancel_reset_pwd');
     const formReset = document.getElementById('form_reset_password');
     const resetTitle = document.getElementById('reset_pwd_user_title');
@@ -866,18 +898,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = this.dataset.name || currentEditUserName;
             const username = this.dataset.username || currentEditUserUsername;
             if (id) {
-                formReset.action = `/admin/users/${id}/reset-password`;
-                resetTitle.textContent = `${name} (@${username})`;
-                document.getElementById('reset_pwd_input').value = '';
+                if (formReset) formReset.action = `/admin/users/${id}/reset-password`;
+                if (resetTitle) resetTitle.textContent = `${name} (@${username})`;
+                const resetPwdInput = document.getElementById('reset_pwd_input');
+                if (resetPwdInput) resetPwdInput.value = '';
                 openModal(resetModal);
             }
         });
     });
 
+    if (btnCloseResetPwd) btnCloseResetPwd.addEventListener('click', () => closeModal(resetModal));
     if (btnCancelReset) btnCancelReset.addEventListener('click', () => closeModal(resetModal));
 
     // 4. Status Quick Update Modal
     const statusModal = document.getElementById('status_user_modal');
+    const btnCloseStatusModal = document.getElementById('btn_close_status_modal');
     const btnCancelStatus = document.getElementById('btn_cancel_status_modal');
     const formStatus = document.getElementById('form_status_user');
     const statusUserName = document.getElementById('status_user_name');
@@ -888,17 +923,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = this.dataset.id;
             const name = this.dataset.name;
             const currentStatus = this.dataset.status;
-            formStatus.action = `/admin/users/${id}/status`;
-            statusUserName.textContent = name;
-            statusSelect.value = currentStatus;
+            if (formStatus) formStatus.action = `/admin/users/${id}/status`;
+            if (statusUserName) statusUserName.textContent = name;
+            if (statusSelect) statusSelect.value = currentStatus;
             openModal(statusModal);
         });
     });
 
+    if (btnCloseStatusModal) btnCloseStatusModal.addEventListener('click', () => closeModal(statusModal));
     if (btnCancelStatus) btnCancelStatus.addEventListener('click', () => closeModal(statusModal));
 
     // 5. Permissions Management Modal
     const permModal = document.getElementById('permissions_user_modal');
+    const btnClosePermModal = document.getElementById('btn_close_perm_modal');
     const btnCancelPerm = document.getElementById('btn_cancel_perm_modal');
     const formPerm = document.getElementById('form_update_permissions');
     const permSubtitle = document.getElementById('perm_user_subtitle');
@@ -906,8 +943,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnSavePerm = document.getElementById('btn_save_permissions');
 
     async function openPermissionsForUser(userId, userName, userRole) {
-        formPerm.action = `/admin/users/${userId}/permissions`;
-        permSubtitle.textContent = `Configuring permissions for ${userName} (${(userRole || '').toUpperCase()})`;
+        if (!userId) return;
+        if (formPerm) formPerm.action = `/admin/users/${userId}/permissions`;
+        if (permSubtitle) permSubtitle.textContent = `Configuring permissions for ${userName} (${(userRole || '').toUpperCase()})`;
 
         const permBtn = document.getElementById('edit_btn_manage_permissions');
         let originalHtml = '';
@@ -917,7 +955,6 @@ document.addEventListener('DOMContentLoaded', function() {
             permBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Loading...</span>';
         }
 
-        // Fetch current permissions state
         try {
             const response = await fetch(`/admin/users/${userId}/permissions`, {
                 headers: { 'Accept': 'application/json' }
@@ -925,16 +962,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             const isAdmin = (userRole && userRole.toLowerCase() === 'admin');
-            if (isAdmin) {
-                permAdminNotice.style.display = 'block';
-                btnSavePerm.disabled = true;
-            } else {
-                permAdminNotice.style.display = 'none';
-                btnSavePerm.disabled = false;
+            if (permAdminNotice) {
+                permAdminNotice.style.display = isAdmin ? 'block' : 'none';
+            }
+            if (btnSavePerm) {
+                btnSavePerm.disabled = isAdmin;
             }
 
             const defaults = data.role_defaults || [];
-            const overrides = data.custom_overrides || {};
             const effective = data.effective_permissions || [];
 
             document.querySelectorAll('.perm-checkbox').forEach(cb => {
@@ -942,12 +977,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const safeKey = key.replace(/\./g, '_');
                 const defaultTag = document.getElementById(`tag_default_${safeKey}`);
 
-                // Show or hide default badge
                 if (defaultTag) {
                     defaultTag.style.display = defaults.includes(key) ? 'inline-block' : 'none';
                 }
 
-                // Checked state
                 if (isAdmin) {
                     cb.checked = true;
                     cb.disabled = true;
@@ -980,10 +1013,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    if (btnClosePermModal) btnClosePermModal.addEventListener('click', () => closeModal(permModal));
     if (btnCancelPerm) btnCancelPerm.addEventListener('click', () => closeModal(permModal));
 
     // 6. View User Details & Audit Trail Modal
     const viewModal = document.getElementById('view_user_modal');
+    const btnCloseViewUser = document.getElementById('btn_close_view_user');
     const btnCloseViewFooter = document.getElementById('btn_close_view_footer');
     const viewName = document.getElementById('view_user_name');
     const viewUsername = document.getElementById('view_user_username');
@@ -995,34 +1030,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const viewProd = document.getElementById('view_prod_count');
     const viewTimeline = document.getElementById('view_user_audit_timeline');
 
-    document.querySelectorAll('.btn-view-user').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const userId = this.dataset.id;
+    async function openUserDetails(userId) {
+        if (!userId) return;
+        if (viewTimeline) {
             viewTimeline.innerHTML = '<div style="font-size: 0.8rem; color: var(--user-muted); padding: 0.5rem 0;">Loading activity history...</div>';
-            openModal(viewModal);
+        }
+        openModal(viewModal);
 
-            try {
-                const response = await fetch(`/admin/users/${userId}`, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await response.json();
-                const u = data.user;
+        try {
+            const response = await fetch(`/admin/users/${userId}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await response.json();
+            const u = data.user;
 
-                viewName.textContent = u.name;
-                viewUsername.textContent = `@${u.username}`;
-                viewAvatar.textContent = (u.name || '').substring(0, 2).toUpperCase();
+            if (viewName) viewName.textContent = u.name;
+            if (viewUsername) viewUsername.textContent = `@${u.username}`;
+            if (viewAvatar) viewAvatar.textContent = (u.name || '').substring(0, 2).toUpperCase();
 
+            if (viewRolePill) {
                 viewRolePill.className = `role-pill role-${u.role}`;
-                viewRolePill.textContent = u.role.toUpperCase();
+                viewRolePill.textContent = (u.role || '').toUpperCase();
+            }
 
+            if (viewStatusBadge) {
                 viewStatusBadge.className = `status-badge status-${u.status}`;
-                viewStatusBadge.innerHTML = `<span class="status-dot"></span> ${u.status.toUpperCase()}`;
+                viewStatusBadge.innerHTML = `<span class="status-dot"></span> ${(u.status || '').toUpperCase()}`;
+            }
 
-                viewOrders.textContent = u.orders_count || 0;
-                viewSales.textContent = u.sales_count || 0;
-                viewProd.textContent = u.productions_count || 0;
+            if (viewOrders) viewOrders.textContent = u.orders_count || 0;
+            if (viewSales) viewSales.textContent = u.sales_count || 0;
+            if (viewProd) viewProd.textContent = u.productions_count || 0;
 
-                const audits = data.recent_audits || [];
+            const audits = data.recent_audits || [];
+            if (viewTimeline) {
                 if (audits.length === 0) {
                     viewTimeline.innerHTML = '<div style="font-size: 0.8rem; color: var(--user-muted); padding: 0.5rem 0;">No recorded audit events yet.</div>';
                 } else {
@@ -1038,13 +1079,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         `;
                     }).join('');
                 }
-            } catch (err) {
-                console.error('Error fetching user details:', err);
+            }
+        } catch (err) {
+            console.error('Error fetching user details:', err);
+            if (viewTimeline) {
                 viewTimeline.innerHTML = '<div style="font-size: 0.8rem; color: #ef4444; padding: 0.5rem 0;">Failed to load user details.</div>';
             }
+        }
+    }
+
+    document.querySelectorAll('.btn-view-user').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openUserDetails(this.dataset.id);
         });
     });
 
+    // Delegated click listener for table action buttons (both View and Edit)
+    document.addEventListener('click', function(e) {
+        const viewBtn = e.target.closest('.btn-view-user');
+        if (viewBtn && viewBtn.dataset.id) {
+            e.preventDefault();
+            openUserDetails(viewBtn.dataset.id);
+            return;
+        }
+        const editBtn = e.target.closest('.btn-edit-user');
+        if (editBtn && editBtn.dataset.id) {
+            e.preventDefault();
+            populateAndOpenEdit(editBtn);
+            return;
+        }
+    });
+
+    if (btnCloseViewUser) btnCloseViewUser.addEventListener('click', () => closeModal(viewModal));
     if (btnCloseViewFooter) btnCloseViewFooter.addEventListener('click', () => closeModal(viewModal));
 
     // Close on backdrop click

@@ -205,7 +205,7 @@
                 @forelse($supplier->purchaseOrders as $po)
                     <tr>
                         <td>
-                            <a href="{{ route('admin.purchase-orders.show', $po->id) }}" style="font-family: monospace; font-weight: 800; color: #4d2c20; text-decoration: none;">
+                            <a href="{{ route('admin.purchase-orders.index', ['open_po' => $po->id]) }}" style="font-family: monospace; font-weight: 800; color: #4d2c20; text-decoration: none;">
                                 #{{ $po->po_number }}
                             </a>
                         </td>
@@ -233,7 +233,7 @@
                             ${{ number_format($po->total_cost, 2) }}
                         </td>
                         <td style="text-align: right;">
-                            <a href="{{ route('admin.purchase-orders.show', $po->id) }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; border: 1px solid #e2e8f0; color: #4d2c20;">
+                            <a href="{{ route('admin.purchase-orders.index', ['open_po' => $po->id]) }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; border: 1px solid #e2e8f0; color: #4d2c20;">
                                 View PO
                             </a>
                         </td>

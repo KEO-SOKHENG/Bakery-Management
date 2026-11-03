@@ -9,139 +9,271 @@
     flex-wrap: wrap;
 }
 
+/* ==========================================================================
+   Products Grid & Cards System
+   ========================================================================== */
 .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 1.5rem;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    grid-auto-rows: max-content !important;
+    align-content: start !important;
+    gap: 1.25rem !important;
+    padding-bottom: 2.5rem;
 }
 
 .product-card {
-    background: var(--card-bg, #ffffff);
-    border: 1px solid var(--border-color, #eee9e0);
-    border-radius: var(--radius-xl, 20px);
-    overflow: hidden;
-    box-shadow: var(--shadow-card, 0 4px 20px rgba(0, 0, 0, 0.03));
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-color, #e4e4e7);
+    border-radius: 20px;
+    padding: 1.25rem 1.15rem 1.15rem 1.15rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease, border-color 0.24s ease;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    min-height: 330px;
     position: relative;
+    box-sizing: border-box;
 }
 
 .product-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    border-color: rgba(234, 88, 12, 0.45);
+    box-shadow: 0 14px 32px rgba(234, 88, 12, 0.12);
 }
 
-.product-card-preview {
-    height: 140px;
-    background: linear-gradient(135deg, #fdfbf7 0%, #f4ede6 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3.75rem;
-    position: relative;
-    border-bottom: 1px solid var(--border-subtle, #f3efe9);
-    overflow: hidden;
-}
-
-.product-card-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.product-image-preview-box {
-    margin-top: 0.65rem;
-    display: none;
-    text-align: center;
-    background: #fafafa;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    border: 1.5px dashed #d4d4d8;
-    position: relative;
-    overflow: hidden;
-}
-
-.product-image-preview-box img {
-    max-width: 100%;
-    max-height: 130px;
-    border-radius: 8px;
-    object-fit: contain;
-    display: inline-block;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.btn-delete-product-icon {
-    position: absolute;
-    top: 0.65rem;
-    right: 0.65rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-}
-
-.product-card:hover .btn-delete-product-icon {
-    opacity: 1;
-}
-
-.btn-delete-product-icon:hover {
-    background-color: #fee2e2;
-}
-
-
-.product-card-body {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.product-card-title {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: var(--text-title, #29150d);
-    margin-bottom: 0.25rem;
-}
-
-.product-category-tag {
-    font-size: 0.75rem;
-    color: var(--text-muted, #6b7280);
-    font-weight: 600;
-    margin-bottom: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.product-description-text {
-    font-size: 0.825rem;
-    color: var(--text-secondary, #4b5563);
-    line-height: 1.45;
-    margin-bottom: 1rem;
-    flex-grow: 1;
-}
-
-.product-card-footer {
+/* Card Top Header: Category & Status */
+.product-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 0.85rem;
-    border-top: 1px solid var(--border-subtle, #f3efe9);
+    margin-bottom: 0.85rem;
+    gap: 0.5rem;
 }
 
-.product-price-badge {
+.product-category-chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.22rem 0.55rem;
+    border-radius: 8px;
+    background: rgba(234, 88, 12, 0.09);
+    color: #ea580c;
+    border: 1px solid rgba(234, 88, 12, 0.2);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+}
+
+.product-status-pill.status-pill-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.product-status-pill.status-pill-inactive {
+    background: rgba(113, 113, 122, 0.1);
+    color: #71717a;
+    border: 1px solid rgba(113, 113, 122, 0.25);
+}
+
+.status-pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+}
+
+/* Card Visual Icon / Photo */
+.product-card-visual-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+}
+
+.product-card-visual {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+
+.product-card:hover .product-card-visual {
+    transform: scale(1.08);
+}
+
+.product-card-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    display: block;
+}
+
+/* Main Titles & SKU */
+.product-card-main-info {
+    text-align: center;
+    margin-bottom: 0.65rem;
+}
+
+.product-card-title {
     font-weight: 800;
-    font-size: 1.15rem;
-    color: var(--accent-brown, #4d2c20);
+    font-size: 1.05rem;
+    color: var(--text-title, #18181b);
+    line-height: 1.35;
+    margin: 0 0 0.25rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+.product-card-sku-code {
+    font-size: 0.775rem;
+    color: var(--text-muted, #71717a);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.product-card-sku-code .sku-label {
+    opacity: 0.7;
+}
+
+.product-card-sku-code .sku-value {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Middle Badges Area */
+.product-card-tags-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+    min-height: 24px;
+}
+
+.product-meta-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 0.32rem 0.6rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: var(--text-muted, #71717a);
+    gap: 0.35rem;
+}
+
+.product-meta-pill.pill-recipe {
+    background: rgba(245, 158, 11, 0.09);
+    border-color: rgba(245, 158, 11, 0.25);
+    color: #d97706;
+    font-weight: 600;
+}
+
+.product-meta-pill.pill-expired {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.product-meta-pill.pill-expiring {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+/* Bottom Footer: Price, Stock, Actions */
+.product-card-footer {
+    margin-top: auto;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.product-card-pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-price-val {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #16a34a;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 1px;
+}
+
+.product-price-val .price-symbol {
+    font-size: 0.9rem;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+.product-stock-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.product-stock-tag.stock-ok {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.product-stock-tag.stock-low {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.product-stock-tag.stock-empty {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.product-card-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.45rem;
 }
 
 /* Modal Window for Add Product */
@@ -323,48 +455,65 @@
 }
 
 /* Theme Overrides */
-[data-theme="dark"] .product-card {
-    background-color: #171717 !important;
-    border-color: #292929 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+[data-theme="dark"] .product-card,
+body.dark-mode .product-card {
+    background-color: #17171a !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
 }
 
-[data-theme="dark"] .product-card-preview {
-    background: linear-gradient(135deg, #222224 0%, #171717 100%) !important;
-    border-color: #292929 !important;
+[data-theme="dark"] .product-card:hover,
+body.dark-mode .product-card:hover {
+    border-color: rgba(234, 88, 12, 0.55) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(234, 88, 12, 0.25) !important;
 }
 
-[data-theme="dark"] .product-card-preview svg {
-    stroke: #f97316 !important;
+[data-theme="dark"] .product-category-chip,
+body.dark-mode .product-category-chip {
+    background: rgba(234, 88, 12, 0.15) !important;
+    color: #fb923c !important;
+    border-color: rgba(234, 88, 12, 0.3) !important;
 }
 
-[data-theme="dark"] .btn-delete-product-icon {
-    background-color: #242424 !important;
-    border-color: #383838 !important;
+[data-theme="dark"] .product-status-pill.status-pill-inactive,
+body.dark-mode .product-status-pill.status-pill-inactive {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #a1a1aa !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-[data-theme="dark"] .product-card-body {
-    background-color: #171717 !important;
-}
-
-[data-theme="dark"] .product-card-title {
+[data-theme="dark"] .product-card-title,
+body.dark-mode .product-card-title {
     color: #ffffff !important;
 }
 
-[data-theme="dark"] .product-category-tag {
-    color: #a3a3a3 !important;
+[data-theme="dark"] .product-card-sku-code,
+body.dark-mode .product-card-sku-code {
+    color: #a1a1aa !important;
 }
 
-[data-theme="dark"] .product-description-text {
-    color: #d4d4d8 !important;
+[data-theme="dark"] .product-meta-pill,
+body.dark-mode .product-meta-pill {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #a1a1aa !important;
 }
 
-[data-theme="dark"] .product-card-footer {
-    border-top-color: #292929 !important;
+[data-theme="dark"] .product-meta-pill.pill-recipe,
+body.dark-mode .product-meta-pill.pill-recipe {
+    background: rgba(245, 158, 11, 0.14) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24 !important;
 }
 
-[data-theme="dark"] .product-price-badge {
-    color: #f97316 !important;
+[data-theme="dark"] .product-card-footer,
+body.dark-mode .product-card-footer {
+    border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .product-price-val,
+body.dark-mode .product-price-val {
+    color: #34d399 !important;
 }
 
 [data-theme="dark"] .product-modal-content {
@@ -402,45 +551,29 @@
     background: rgba(255, 255, 255, 0.04) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
 }
 
-[data-theme="glass"] .product-card-preview {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-[data-theme="glass"] .product-card-preview svg {
-    stroke: #fb923c !important;
-}
-
-[data-theme="glass"] .btn-delete-product-icon {
-    background: rgba(255, 255, 255, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-[data-theme="glass"] .product-card-body {
-    background: transparent !important;
+[data-theme="glass"] .product-card:hover {
+    border-color: rgba(234, 88, 12, 0.5) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 [data-theme="glass"] .product-card-title {
     color: #ffffff !important;
 }
 
-[data-theme="glass"] .product-category-tag {
+[data-theme="glass"] .product-card-sku-code {
     color: rgba(255, 255, 255, 0.7) !important;
-}
-
-[data-theme="glass"] .product-description-text {
-    color: rgba(255, 255, 255, 0.85) !important;
 }
 
 [data-theme="glass"] .product-card-footer {
     border-top-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-[data-theme="glass"] .product-price-badge {
-    color: #fb923c !important;
+[data-theme="glass"] .product-price-val {
+    color: #34d399 !important;
 }
 
 [data-theme="glass"] .product-modal-content {
@@ -467,4 +600,797 @@
 [data-theme="glass"] .modal-form .ios-select-field,
 [data-theme="glass"] .modal-form select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+}
+
+
+/* ==========================================================================
+   Product Modal Status Button Group (Segmented Pill Switch)
+   ========================================================================== */
+.product-status-btn-group {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 3px;
+    gap: 4px;
+    height: 42px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .product-status-btn-group {
+    background: #f4f4f5;
+    border-color: #e4e4e7;
+}
+
+[data-theme="dark"] .product-status-btn-group,
+body.dark-mode .product-status-btn-group {
+    background: #131316 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="glass"] .product-status-btn-group {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.btn-status-toggle {
+    flex: 1;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: #71717a;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    padding: 0 0.5rem;
+    outline: none;
+}
+
+.btn-status-toggle:hover:not(.is-active-state) {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e4e4e7;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-status-toggle:hover:not(.is-active-state) {
+    background: rgba(0, 0, 0, 0.05);
+    color: #27272a;
+}
+
+/* Active Status Selected */
+.btn-status-toggle[data-value="active"].is-active-state {
+    background: rgba(16, 185, 129, 0.16) !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    color: #10b981 !important;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25) !important;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-status-toggle[data-value="active"].is-active-state {
+    background: #ecfdf5 !important;
+    border-color: #6ee7b7 !important;
+    color: #059669 !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Inactive Status Selected */
+.btn-status-toggle[data-value="inactive"].is-active-state {
+    background: rgba(239, 68, 68, 0.16) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #f87171 !important;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.25) !important;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-status-toggle[data-value="inactive"].is-active-state {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    color: #dc2626 !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Indicator Dots */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dot-active {
+    background: #71717a;
+}
+
+.btn-status-toggle[data-value="active"].is-active-state .dot-active {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+    transform: scale(1.15);
+}
+
+.dot-inactive {
+    background: #71717a;
+}
+
+.btn-status-toggle[data-value="inactive"].is-active-state .dot-inactive {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    transform: scale(1.15);
+}
+
+/* ==========================================================================
+   Recipe Ingredients Builder in Product Modals (Professional SaaS UI)
+   ========================================================================== */
+
+.product-recipe-builder-section {
+    background: rgba(24, 24, 27, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 0.95rem;
+    margin-top: 1rem;
+    margin-bottom: 0.85rem;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .product-recipe-builder-section {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.recipe-builder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-builder-header {
+    border-bottom-color: #e2e8f0;
+}
+
+.recipe-builder-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.recipe-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.recipe-section-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.recipe-title-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-section-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #f4f4f5;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-section-title {
+    color: #0f172a;
+}
+
+.recipe-section-sub {
+    font-size: 0.71rem;
+    color: #71717a;
+    font-weight: 500;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-section-sub {
+    color: #64748b;
+}
+
+.recipe-items-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    white-space: nowrap;
+}
+
+.btn-sync-ingredients {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.32rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-sync-ingredients:hover {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.38);
+    color: #f59e0b;
+    transform: translateY(-1px);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-sync-ingredients {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-sync-ingredients:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #b45309;
+}
+
+.btn-sync-ingredients .sync-icon {
+    width: 13px;
+    height: 13px;
+    transition: transform 0.4s ease;
+}
+
+.btn-sync-ingredients.is-syncing .sync-icon {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Column Sub-Headers */
+.recipe-ingredients-col-headers {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.8fr) minmax(130px, 1fr) 75px 32px;
+    gap: 0.6rem;
+    padding: 0.35rem 0.65rem 0.45rem 0.65rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #71717a;
+    user-select: none;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-ingredients-col-headers {
+    color: #64748b;
+}
+
+.col-head-cost {
+    text-align: right;
+}
+
+.recipe-ingredients-table-wrap {
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.recipe-ingredients-table-wrap::-webkit-scrollbar {
+    width: 5px;
+}
+.recipe-ingredients-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.recipe-ingredients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.recipe-ingredients-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: #71717a;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    gap: 0.35rem;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-ingredients-empty-state {
+    color: #64748b;
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.empty-icon-wrap {
+    color: #f59e0b;
+    opacity: 0.85;
+    margin-bottom: 0.2rem;
+}
+
+.empty-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #e4e4e7;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .empty-title {
+    color: #1e293b;
+}
+
+.empty-desc {
+    font-size: 0.74rem;
+    color: #71717a;
+    max-width: 340px;
+    line-height: 1.4;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .empty-desc {
+    color: #64748b;
+}
+
+/* Individual Ingredient Row */
+.recipe-ingredient-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.8fr) minmax(130px, 1fr) 75px 32px;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.45rem 0.65rem;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.recipe-ingredient-row:hover {
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-ingredient-row {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-ingredient-row:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ingredient-select-col {
+    width: 100%;
+}
+
+.ingredient-select {
+    width: 100%;
+    height: 36px;
+    padding: 0 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: #141416;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fafafa;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.ingredient-select:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-select {
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-select:focus {
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.ingredient-qty-col {
+    width: 100%;
+}
+
+.ingredient-qty-wrap {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    background: #141416;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.ingredient-qty-wrap:focus-within {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-qty-wrap {
+    background: #ffffff;
+    border-color: #d1d5db;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-qty-wrap:focus-within {
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+}
+
+.ingredient-qty-input {
+    width: 100%;
+    height: 100%;
+    padding: 0 0.5rem;
+    font-size: 0.825rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: #fafafa;
+    outline: none;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-qty-input {
+    color: #111827;
+}
+
+.ingredient-unit-badge {
+    padding: 0 0.55rem;
+    font-size: 0.725rem;
+    font-weight: 700;
+    color: #a1a1aa;
+    background: rgba(255, 255, 255, 0.06);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    user-select: none;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .ingredient-unit-badge {
+    color: #475569;
+    background: #f1f5f9;
+    border-left-color: #e2e8f0;
+}
+
+.ingredient-cost-col {
+    text-align: right;
+}
+
+.ingredient-row-cost {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #10b981;
+    white-space: nowrap;
+}
+
+.ingredient-action-col {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-remove-ingredient-row {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #71717a;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-remove-ingredient-row:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+    transform: scale(1.05);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-remove-ingredient-row {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-remove-ingredient-row:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #ef4444;
+}
+
+.btn-remove-ingredient-row svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Footer & Controls */
+.recipe-builder-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-builder-footer {
+    border-top-color: #e2e8f0;
+}
+
+.btn-add-ingredient-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-add-ingredient-row:hover {
+    background: rgba(245, 158, 11, 0.22);
+    border-color: #f59e0b;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.22);
+    transform: translateY(-1px);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-add-ingredient-row {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    color: #b45309;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-add-ingredient-row:hover {
+    background: #fde68a;
+    border-color: #f59e0b;
+}
+
+.btn-add-ingredient-row svg {
+    width: 14px;
+    height: 14px;
+}
+
+.recipe-summary-cost-box {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.recipe-cost-calc {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-cost-calc {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.recipe-cost-label {
+    font-size: 0.72rem;
+    color: #a1a1aa;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .recipe-cost-label {
+    color: #166534;
+}
+
+.recipe-cost-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #10b981;
+}
+
+.btn-apply-cost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.75rem;
+    border-radius: 8px;
+    background: #10b981;
+    border: 1px solid #059669;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-apply-cost:hover {
+    background: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Product Image Custom Upload Dropzone Component
+   ========================================================================== */
+.product-file-upload-card {
+    position: relative;
+    width: 100%;
+}
+
+.file-upload-input-real {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.file-upload-dropzone {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.file-upload-dropzone:hover {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.04);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .file-upload-dropzone {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .file-upload-dropzone:hover {
+    border-color: #ea580c;
+    background: #fff7ed;
+}
+
+.dropzone-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.file-upload-dropzone:hover .dropzone-icon {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .dropzone-icon {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    color: #64748b;
+}
+
+.dropzone-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.dropzone-text {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.dropzone-main {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #d4d4d8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .dropzone-main {
+    color: #1e293b;
+}
+
+.dropzone-main.has-file {
+    color: #10b981 !important;
+    font-weight: 700 !important;
+}
+
+.dropzone-hint {
+    font-size: 0.7rem;
+    color: #71717a;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .dropzone-hint {
+    color: #64748b;
+}
+
+.btn-dropzone-browse {
+    padding: 0.32rem 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e4e4e7;
+    font-size: 0.725rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.file-upload-dropzone:hover .btn-dropzone-browse {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+:root:not([data-theme="dark"]):not([data-theme="glass"]) .btn-dropzone-browse {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #334155;
 }

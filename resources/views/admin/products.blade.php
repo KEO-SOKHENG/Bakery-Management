@@ -18,6 +18,10 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/products.css') }}?v={{ @filemtime(public_path('css/products.css')) ?: '1.0' }}">
+@endpush
+
 @section('content')
 <div class="products-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
 
@@ -37,76 +41,121 @@
     </div>
 
     <!-- Products Card Grid -->
-    <div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
+    <div class="products-grid">
     @forelse($products as $product)
-        <div class="product-card" id="product_card_{{ $product->id }}" style="background: #fff; border-radius: 12px; border: 1px solid #e4e4e7; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;">
+        <div class="product-card" id="product_card_{{ $product->id }}">
             @php $theme = $product->getIconTheme(); @endphp
-            <div style="display: flex; justify-content: center; margin-bottom: 0.85rem;">
-                <div style="width: 64px; height: 64px; border-radius: 16px; background: {{ $theme['bg'] }}; border: 1.5px solid {{ $theme['border'] }}; display: flex; align-items: center; justify-content: center; color: {{ $theme['color'] }}; box-shadow: 0 4px 12px {{ $theme['shadow'] }}; overflow: hidden;">
-                    @if($product->image_path && file_exists(public_path($product->image_path)))
-                        <img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+
+            <!-- Top Header: Category & Status -->
+            <div class="product-card-header">
+                <span class="product-category-chip">
+                    {{ $product->category->name ?? 'Bakery' }}
+                </span>
+                <span class="product-status-pill {{ $product->status === 'inactive' ? 'status-pill-inactive' : 'status-pill-active' }}">
+                    <span class="status-pulse-dot"></span>
+                    {{ ucfirst($product->status ?? 'active') }}
+                </span>
+            </div>
+
+            <!-- Visual Icon / Image -->
+            <div class="product-card-visual-wrap">
+                <div class="product-card-visual" style="background: {{ $theme['bg'] }}; border: 1.5px solid {{ $theme['border'] }}; color: {{ $theme['color'] }}; box-shadow: 0 4px 14px {{ $theme['shadow'] }};">
+                    @if($product->image_url)
+                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy">
                     @else
-                        {!! $product->getIconSvg(32) !!}
+                        {!! $product->getIconSvg(36) !!}
                     @endif
                 </div>
             </div>
-            <div style="font-weight: 800; font-size: 1.05rem; color: #27272a; text-align: center;">{{ $product->name }}</div>
-            <div style="font-size: 0.8rem; color: #71717a; text-align: center; margin-top: 0.2rem;">
-                SKU: {{ $product->sku }} | Category: {{ $product->category->name ?? 'Uncategorized' }}
+
+            <!-- Product Title & SKU -->
+            <div class="product-card-main-info">
+                <h3 class="product-card-title" title="{{ $product->name }}">{{ $product->name }}</h3>
+                <div class="product-card-sku-code">
+                    <span class="sku-label">SKU:</span>
+                    <span class="sku-value">{{ $product->sku ?: 'PRD-' . str_pad($product->id, 4, '0', STR_PAD_LEFT) }}</span>
+                </div>
             </div>
-            <div style="font-size: 0.825rem; color: #52525b; margin-top: 0.5rem; text-align: center;">
-                {{ $product->description ?: 'No description' }}
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f4f4f5;">
-                <span style="font-weight: 800; color: #16a34a; font-size: 1.1rem;">${{ number_format($product->price, 2) }}</span>
-                <x-badge :variant="$product->stock <= $product->minimum_stock ? 'danger' : 'success'">
-                    Stock: {{ $product->stock }}
-                </x-badge>
-            </div>
-            @if($product->shelf_life || $product->expiry_date)
-                <div style="display: flex; justify-content: space-between; font-size: 0.775rem; color: #71717a; margin-top: 0.4rem; padding: 0.25rem 0.5rem; background: #fafafa; border-radius: 6px;">
-                    @if($product->shelf_life)
-                        <span>Shelf Life: <strong>{{ $product->shelf_life }} days</strong></span>
-                    @endif
-                    @if($product->expiry_date)
-                        <span style="{{ $product->isExpired() ? 'color: #dc2626; font-weight: 800;' : ($product->isExpiringSoon() ? 'color: #d97706; font-weight: 700;' : '') }}">
-                            Exp: {{ $product->expiry_date->format('M d, Y') }}
+
+            <!-- Meta Badges: Expiry & Formula -->
+            <div class="product-card-tags-area">
+                @if($product->shelf_life || $product->expiry_date)
+                    <div class="product-meta-pill {{ $product->isExpired() ? 'pill-expired' : ($product->isExpiringSoon() ? 'pill-expiring' : '') }}" title="Shelf life & Expiration">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>
+                            @if($product->shelf_life) {{ $product->shelf_life }}d @endif
+                            @if($product->expiry_date) &bull; Exp {{ $product->expiry_date->format('M d') }} @endif
                         </span>
-                    @endif
+                    </div>
+                @endif
+
+                @if($product->recipe && $product->recipe->recipeIngredients->count() > 0)
+                    <div class="product-meta-pill pill-recipe" title="Recipe formula configured">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+                        <span>Formula: {{ $product->recipe->recipeIngredients->count() }} items</span>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Card Bottom: Pricing, Stock & Actions -->
+            <div class="product-card-footer">
+                <div class="product-card-pricing-row">
+                    <div class="product-price-val">
+                        <span class="price-symbol">$</span>{{ number_format($product->price, 2) }}
+                    </div>
+                    <div class="product-stock-tag {{ $product->stock <= 0 ? 'stock-empty' : ($product->stock <= $product->minimum_stock ? 'stock-low' : 'stock-ok') }}">
+                        @if($product->stock <= 0)
+                            <span>Out of stock</span>
+                        @elseif($product->stock <= $product->minimum_stock)
+                            <span>Low: {{ $product->stock }}</span>
+                        @else
+                            <span>{{ $product->stock }} in stock</span>
+                        @endif
+                    </div>
                 </div>
-            @endif
-            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.75rem;">
-                <button type="button" class="btn-icon-action edit btn-edit-product" title="Edit Product"
-                    data-id="{{ $product->id }}"
-                    data-name="{{ $product->name }}"
-                    data-sku="{{ $product->sku }}"
-                    data-category-id="{{ $product->category_id }}"
-                    data-price="{{ $product->price }}"
-                    data-cost="{{ $product->cost }}"
-                    data-stock="{{ $product->stock }}"
-                    data-minimum-stock="{{ $product->minimum_stock }}"
-                    data-shelf-life="{{ $product->shelf_life }}"
-                    data-expiry-date="{{ $product->expiry_date ? $product->expiry_date->format('Y-m-d') : '' }}"
-                    data-status="{{ $product->status }}"
-                    data-description="{{ $product->description }}"
-                    data-update-url="{{ route('admin.products.update', $product->id) }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                </button>
-                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete product \'{{ $product->name }}\'?');" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-icon-action delete" title="Delete Product">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
+
+                <div class="product-card-actions-row">
+                    <button type="button" class="btn-icon-action edit btn-edit-product" title="Edit Product"
+                        data-id="{{ $product->id }}"
+                        data-name="{{ $product->name }}"
+                        data-sku="{{ $product->sku }}"
+                        data-category-id="{{ $product->category_id }}"
+                        data-price="{{ $product->price }}"
+                        data-cost="{{ $product->cost }}"
+                        data-stock="{{ $product->stock }}"
+                        data-minimum-stock="{{ $product->minimum_stock }}"
+                        data-shelf-life="{{ $product->shelf_life }}"
+                        data-expiry-date="{{ $product->expiry_date ? $product->expiry_date->format('Y-m-d') : '' }}"
+                        data-status="{{ $product->status }}"
+                        data-description="{{ $product->description }}"
+                        data-recipe="{{ json_encode($product->recipe ? $product->recipe->recipeIngredients->map(function($ri) {
+                            return [
+                                'ingredient_id' => $ri->ingredient_id,
+                                'quantity' => (float)$ri->quantity,
+                                'unit' => $ri->unit ?? ($ri->ingredient ? $ri->ingredient->unit : ''),
+                                'name' => $ri->ingredient ? $ri->ingredient->name : '',
+                                'cost' => (float)($ri->ingredient ? $ri->ingredient->cost : 0),
+                            ];
+                        }) : []) }}"
+                        data-update-url="{{ route('admin.products.update', $product->id) }}">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
-                </form>
+                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete product \'{{ $product->name }}\'?');" style="display: inline; margin: 0;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-icon-action delete" title="Delete Product">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     @empty
@@ -114,12 +163,12 @@
             No products found. Click "Add Product" to create one.
         </div>
     @endforelse
-</div>
+    </div>
 
 
 
 <!-- ADD NEW PRODUCT MODAL DIALOG -->
-<x-modal id="create_product_modal" title="Add Product" maxWidth="520px" class="product-modal-overlay">
+<x-modal id="create_product_modal" title="Add Product" maxWidth="620px" class="product-modal-overlay" :showClose="false">
     <form id="form_create_product" action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <x-select name="category_id" label="Category">
@@ -131,7 +180,7 @@
         <x-input name="name" label="Product Name" placeholder="e.g. Chocolate Cake" :required="true" />
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
             <x-input type="number" step="0.01" name="price" label="Price ($)" placeholder="0.00" :required="true" />
-            <x-input type="number" step="0.01" name="cost" label="Cost ($)" placeholder="0.00" />
+            <x-input type="number" step="0.01" name="cost" id="create_product_cost" label="Cost ($)" placeholder="0.00" />
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
             <x-input type="number" name="stock" label="Stock Quantity" value="10" :required="true" />
@@ -143,13 +192,104 @@
         </div>
         <div class="form-group">
             <label class="form-label" for="create_product_image">Product Image</label>
-            <input type="file" name="image" id="create_product_image" class="form-control" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+            <div class="product-file-upload-card">
+                <input type="file" name="image" id="create_product_image" class="file-upload-input-real" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+                <label for="create_product_image" class="file-upload-dropzone">
+                    <div class="dropzone-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <div class="dropzone-text">
+                        <span class="dropzone-main" id="create_image_filename">Choose product photo or drop here</span>
+                        <span class="dropzone-hint">PNG, JPG, WEBP (Max 4MB)</span>
+                    </div>
+                    <span class="btn-dropzone-browse">Browse</span>
+                </label>
+            </div>
         </div>
-        <div class="form-group">
-            <label class="form-label">Description</label>
-            <textarea name="description" rows="2" class="form-control-textarea" placeholder="Brief description..."></textarea>
+
+        <!-- RECIPE INGREDIENTS BUILDER SECTION (CREATE) -->
+        <div class="product-recipe-builder-section">
+            <div class="recipe-builder-header">
+                <div class="recipe-builder-title-wrap">
+                    <div class="recipe-icon-box">
+                        <svg class="recipe-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <div class="recipe-title-meta">
+                        <span class="recipe-section-title">Recipe Ingredients</span>
+                        <span class="recipe-section-sub">Link raw ingredients to calculate costs and automate inventory</span>
+                    </div>
+                    <span class="recipe-items-badge" id="create_ingredients_count">0 ingredients</span>
+                </div>
+                <div class="recipe-builder-header-actions">
+                    <button type="button" class="btn-sync-ingredients" id="btn_sync_ingredients_create" title="Refresh live stock & cost from ingredients catalog">
+                        <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        <span class="sync-text">Live Sync</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Column Headers -->
+            <div class="recipe-ingredients-col-headers">
+                <span class="col-head-ing">Ingredient</span>
+                <span class="col-head-qty">Quantity & Unit</span>
+                <span class="col-head-cost">Cost</span>
+                <span class="col-head-action"></span>
+            </div>
+
+            <div class="recipe-ingredients-table-wrap">
+                <div class="recipe-ingredients-list" id="create_ingredients_rows">
+                    <!-- Dynamic ingredient rows -->
+                </div>
+                <div class="recipe-ingredients-empty-state" id="create_ingredients_empty">
+                    <div class="empty-icon-wrap">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <span class="empty-title">No Ingredients Linked</span>
+                    <span class="empty-desc">Click "+ Add Ingredient" below to configure recipe formula items.</span>
+                </div>
+            </div>
+
+            <div class="recipe-builder-footer">
+                <button type="button" class="btn-add-ingredient-row" id="btn_add_ingredient_create">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Ingredient</span>
+                </button>
+
+                <div class="recipe-summary-cost-box">
+                    <div class="recipe-cost-calc">
+                        <span class="recipe-cost-label">Recipe Cost:</span>
+                        <span class="recipe-cost-val" id="create_recipe_total_cost">$0.00</span>
+                    </div>
+                    <button type="button" class="btn-apply-cost" id="btn_apply_cost_create" title="Apply recipe cost to product cost input">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Apply to Cost</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_product_modal">Cancel</x-button>
             <x-button variant="primary" type="submit">Save Product</x-button>
         </div>
@@ -157,7 +297,7 @@
 </x-modal>
 
 <!-- EDIT PRODUCT MODAL DIALOG -->
-<x-modal id="edit_product_modal" title="Edit Product" maxWidth="520px" class="product-modal-overlay">
+<x-modal id="edit_product_modal" title="Edit Product" maxWidth="620px" class="product-modal-overlay" :showClose="false">
     <form id="form_edit_product" action="" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -183,23 +323,120 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
             <x-input name="sku" id="edit_product_sku" label="SKU" placeholder="PRD-0001" />
             <div class="form-group">
-                <label class="form-label" for="edit_product_status">Status</label>
-                <select name="status" id="edit_product_status" class="form-control">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
+                <label class="form-label" id="label_edit_product_status">Status</label>
+                <input type="hidden" name="status" id="edit_product_status" value="active">
+                <div class="product-status-btn-group" role="radiogroup" aria-labelledby="label_edit_product_status">
+                    <button type="button" class="btn-status-toggle is-active-state" data-value="active" id="btn_status_active" aria-checked="true" role="radio" title="Set Product Active">
+                        <span class="status-dot dot-active"></span>
+                        <span class="status-text">Active</span>
+                    </button>
+                    <button type="button" class="btn-status-toggle" data-value="inactive" id="btn_status_inactive" aria-checked="false" role="radio" title="Set Product Inactive">
+                        <span class="status-dot dot-inactive"></span>
+                        <span class="status-text">Inactive</span>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="form-group">
             <label class="form-label" for="edit_product_image">Product Image</label>
-            <input type="file" name="image" id="edit_product_image" class="form-control" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
-            <small style="color: #71717a; font-size: 0.75rem;">Leave empty to keep existing image</small>
+            <div class="product-file-upload-card">
+                <input type="file" name="image" id="edit_product_image" class="file-upload-input-real" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp">
+                <label for="edit_product_image" class="file-upload-dropzone">
+                    <div class="dropzone-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <div class="dropzone-text">
+                        <span class="dropzone-main" id="edit_image_filename">Replace photo or drop new image</span>
+                        <span class="dropzone-hint">Leave empty to keep existing image</span>
+                    </div>
+                    <span class="btn-dropzone-browse">Browse</span>
+                </label>
+            </div>
         </div>
-        <div class="form-group">
-            <label class="form-label" for="edit_product_description">Description</label>
-            <textarea name="description" id="edit_product_description" rows="2" class="form-control-textarea" placeholder="Brief description..."></textarea>
+
+        <!-- RECIPE INGREDIENTS BUILDER SECTION (EDIT) -->
+        <div class="product-recipe-builder-section">
+            <div class="recipe-builder-header">
+                <div class="recipe-builder-title-wrap">
+                    <div class="recipe-icon-box">
+                        <svg class="recipe-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <div class="recipe-title-meta">
+                        <span class="recipe-section-title">Recipe Ingredients</span>
+                        <span class="recipe-section-sub">Link raw ingredients to calculate costs and automate inventory</span>
+                    </div>
+                    <span class="recipe-items-badge" id="edit_ingredients_count">0 ingredients</span>
+                </div>
+                <div class="recipe-builder-header-actions">
+                    <button type="button" class="btn-sync-ingredients" id="btn_sync_ingredients_edit" title="Refresh live stock & cost from ingredients catalog">
+                        <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        <span class="sync-text">Live Sync</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Column Headers -->
+            <div class="recipe-ingredients-col-headers">
+                <span class="col-head-ing">Ingredient</span>
+                <span class="col-head-qty">Quantity & Unit</span>
+                <span class="col-head-cost">Cost</span>
+                <span class="col-head-action"></span>
+            </div>
+
+            <div class="recipe-ingredients-table-wrap">
+                <div class="recipe-ingredients-list" id="edit_ingredients_rows">
+                    <!-- Dynamic ingredient rows -->
+                </div>
+                <div class="recipe-ingredients-empty-state" id="edit_ingredients_empty">
+                    <div class="empty-icon-wrap">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <span class="empty-title">No Ingredients Linked</span>
+                    <span class="empty-desc">Click "+ Add Ingredient" below to configure recipe formula items.</span>
+                </div>
+            </div>
+
+            <div class="recipe-builder-footer">
+                <button type="button" class="btn-add-ingredient-row" id="btn_add_ingredient_edit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Ingredient</span>
+                </button>
+
+                <div class="recipe-summary-cost-box">
+                    <div class="recipe-cost-calc">
+                        <span class="recipe-cost-label">Recipe Cost:</span>
+                        <span class="recipe-cost-val" id="edit_recipe_total_cost">$0.00</span>
+                    </div>
+                    <button type="button" class="btn-apply-cost" id="btn_apply_cost_edit" title="Apply recipe cost to product cost input">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Apply to Cost</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+
+        <div class="modal-sticky-footer">
             <x-button variant="secondary" type="button" id="btn_cancel_edit_product_modal">Cancel</x-button>
             <x-button variant="primary" type="submit" id="btn_submit_edit_product">Update Product</x-button>
         </div>
@@ -214,10 +451,275 @@
         const closeCreateBtn = document.getElementById('btn_close_product_modal');
         const cancelCreateBtn = document.getElementById('btn_cancel_product_modal');
 
+        // =========================================================================
+        // Real-Time Recipe Ingredients Builder
+        // =========================================================================
+        let cachedIngredients = @json($ingredients ?? []);
+        const INGREDIENTS_API_URL = "{{ route('admin.products.ingredients-list') }}";
+        let createRowIndex = 0;
+        let editRowIndex = 0;
+
+        function fetchLiveIngredients(buttonElement = null, onComplete = null) {
+            if (buttonElement) {
+                buttonElement.classList.add('is-syncing');
+            }
+            fetch(INGREDIENTS_API_URL, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && Array.isArray(data.ingredients)) {
+                    cachedIngredients = data.ingredients;
+                    updateAllDropdownOptions();
+                    recalculateRecipeTotal('create');
+                    recalculateRecipeTotal('edit');
+                    if (buttonElement) {
+                        const textEl = buttonElement.querySelector('.sync-text');
+                        if (textEl) {
+                            const original = textEl.textContent;
+                            textEl.textContent = 'Synced!';
+                            setTimeout(() => { textEl.textContent = original; }, 1800);
+                        }
+                    }
+                }
+                if (typeof onComplete === 'function') onComplete(cachedIngredients);
+            })
+            .catch(err => {
+                console.error('Error fetching live ingredients:', err);
+            })
+            .finally(() => {
+                if (buttonElement) {
+                    buttonElement.classList.remove('is-syncing');
+                }
+            });
+        }
+
+        function updateAllDropdownOptions() {
+            ['create', 'edit'].forEach(type => {
+                const container = document.getElementById(`${type}_ingredients_rows`);
+                if (!container) return;
+                const rows = container.querySelectorAll('.recipe-ingredient-row');
+                rows.forEach(row => {
+                    const sel = row.querySelector('.ingredient-select');
+                    if (!sel) return;
+                    const currentVal = sel.value;
+                    let html = '<option value="">-- Choose Ingredient --</option>';
+                    cachedIngredients.forEach(ing => {
+                        const stock = parseFloat(ing.quantity || 0).toLocaleString();
+                        const cost = parseFloat(ing.cost || 0).toFixed(2);
+                        const isSel = String(ing.id) === String(currentVal) ? 'selected' : '';
+                        html += `<option value="${ing.id}" data-unit="${ing.unit || 'unit'}" data-cost="${ing.cost || 0}" data-stock="${ing.quantity || 0}" ${isSel}>${ing.name} (Stock: ${stock} ${ing.unit} | $${cost}/${ing.unit})</option>`;
+                    });
+                    sel.innerHTML = html;
+                });
+            });
+        }
+
+        function clearIngredientsRows(type) {
+            const container = document.getElementById(`${type}_ingredients_rows`);
+            if (container) container.innerHTML = '';
+            recalculateRecipeTotal(type);
+        }
+
+        function addIngredientRow(type, initial = null) {
+            const container = document.getElementById(`${type}_ingredients_rows`);
+            if (!container) return;
+
+            const idx = type === 'create' ? createRowIndex++ : editRowIndex++;
+            const row = document.createElement('div');
+            row.className = 'recipe-ingredient-row';
+            row.dataset.index = idx;
+
+            const selectedId = initial ? initial.ingredient_id : '';
+            const qtyVal = initial && initial.quantity !== undefined ? initial.quantity : '';
+            let initialUnit = initial && initial.unit ? initial.unit : 'unit';
+
+            let optionsHtml = '<option value="">-- Choose Ingredient --</option>';
+            cachedIngredients.forEach(ing => {
+                const isSel = String(ing.id) === String(selectedId) ? 'selected' : '';
+                if (isSel && ing.unit) initialUnit = ing.unit;
+                const stock = parseFloat(ing.quantity || 0).toLocaleString();
+                const cost = parseFloat(ing.cost || 0).toFixed(2);
+                optionsHtml += `<option value="${ing.id}" data-unit="${ing.unit || 'unit'}" data-cost="${ing.cost || 0}" data-stock="${ing.quantity || 0}" ${isSel}>${ing.name} (Stock: ${stock} ${ing.unit} | $${cost}/${ing.unit})</option>`;
+            });
+
+            row.innerHTML = `
+                <div class="ingredient-select-col">
+                    <select name="ingredients[${idx}][ingredient_id]" class="ingredient-select">
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div class="ingredient-qty-col">
+                    <div class="ingredient-qty-wrap">
+                        <input type="number" step="any" min="0.0001" name="ingredients[${idx}][quantity]" class="ingredient-qty-input" placeholder="0.00" value="${qtyVal}">
+                        <span class="ingredient-unit-badge">${initialUnit}</span>
+                        <input type="hidden" name="ingredients[${idx}][unit]" class="ingredient-unit-hidden" value="${initialUnit}">
+                    </div>
+                </div>
+                <div class="ingredient-cost-col">
+                    <span class="ingredient-row-cost">$0.00</span>
+                </div>
+                <div class="ingredient-action-col">
+                    <button type="button" class="btn-remove-ingredient-row" title="Remove ingredient">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            const selectEl = row.querySelector('.ingredient-select');
+            const qtyInput = row.querySelector('.ingredient-qty-input');
+            const unitBadge = row.querySelector('.ingredient-unit-badge');
+            const unitHidden = row.querySelector('.ingredient-unit-hidden');
+            const removeBtn = row.querySelector('.btn-remove-ingredient-row');
+
+            selectEl.addEventListener('change', function() {
+                const opt = selectEl.selectedOptions[0];
+                const unit = opt && opt.dataset.unit ? opt.dataset.unit : 'unit';
+                unitBadge.textContent = unit;
+                unitHidden.value = unit;
+                recalculateRecipeTotal(type);
+            });
+
+            qtyInput.addEventListener('input', function() {
+                recalculateRecipeTotal(type);
+            });
+
+            removeBtn.addEventListener('click', function() {
+                row.remove();
+                recalculateRecipeTotal(type);
+            });
+
+            container.appendChild(row);
+            recalculateRecipeTotal(type);
+        }
+
+        function recalculateRecipeTotal(type) {
+            const container = document.getElementById(`${type}_ingredients_rows`);
+            const emptyEl = document.getElementById(`${type}_ingredients_empty`);
+            const countBadge = document.getElementById(`${type}_ingredients_count`);
+            const totalEl = document.getElementById(`${type}_recipe_total_cost`);
+
+            if (!container) return;
+
+            const rows = container.querySelectorAll('.recipe-ingredient-row');
+            let total = 0.0;
+            let count = 0;
+
+            rows.forEach(row => {
+                const sel = row.querySelector('.ingredient-select');
+                const qtyInput = row.querySelector('.ingredient-qty-input');
+                const costBadge = row.querySelector('.ingredient-row-cost');
+
+                const opt = sel ? sel.selectedOptions[0] : null;
+                const unitCost = opt && opt.dataset.cost ? parseFloat(opt.dataset.cost) : 0.0;
+                const qty = qtyInput && qtyInput.value ? parseFloat(qtyInput.value) : 0.0;
+
+                const subtotal = qty * unitCost;
+                if (costBadge) {
+                    costBadge.textContent = `$${subtotal.toFixed(2)}`;
+                }
+
+                if (sel && sel.value && qty > 0) {
+                    count++;
+                    total += subtotal;
+                }
+            });
+
+            if (emptyEl) {
+                emptyEl.style.display = rows.length === 0 ? 'flex' : 'none';
+            }
+            if (countBadge) {
+                countBadge.textContent = `${rows.length} ${rows.length === 1 ? 'ingredient' : 'ingredients'}`;
+            }
+            if (totalEl) {
+                totalEl.textContent = `$${total.toFixed(2)}`;
+            }
+            return total;
+        }
+
+        function applyRecipeCost(type) {
+            const total = recalculateRecipeTotal(type);
+            const targetInput = type === 'create'
+                ? document.getElementById('create_product_cost')
+                : document.getElementById('edit_product_cost');
+
+            if (targetInput) {
+                targetInput.value = total.toFixed(2);
+                targetInput.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+                targetInput.style.borderColor = '#10b981';
+                targetInput.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                setTimeout(() => {
+                    targetInput.style.borderColor = '';
+                    targetInput.style.boxShadow = '';
+                }, 1200);
+            }
+        }
+
+        // Attach builder footer & sync buttons
+        const btnAddCreate = document.getElementById('btn_add_ingredient_create');
+        if (btnAddCreate) btnAddCreate.addEventListener('click', () => addIngredientRow('create'));
+
+        const btnAddEdit = document.getElementById('btn_add_ingredient_edit');
+        if (btnAddEdit) btnAddEdit.addEventListener('click', () => addIngredientRow('edit'));
+
+        const btnSyncCreate = document.getElementById('btn_sync_ingredients_create');
+        if (btnSyncCreate) btnSyncCreate.addEventListener('click', function() { fetchLiveIngredients(this); });
+
+        const btnSyncEdit = document.getElementById('btn_sync_ingredients_edit');
+        if (btnSyncEdit) btnSyncEdit.addEventListener('click', function() { fetchLiveIngredients(this); });
+
+        const btnApplyCreate = document.getElementById('btn_apply_cost_create');
+        if (btnApplyCreate) btnApplyCreate.addEventListener('click', () => applyRecipeCost('create'));
+
+        const btnApplyEdit = document.getElementById('btn_apply_cost_edit');
+        if (btnApplyEdit) btnApplyEdit.addEventListener('click', () => applyRecipeCost('edit'));
+
+        // Custom File Upload Dynamic Name Update
+        const createImgInput = document.getElementById('create_product_image');
+        const createImgName = document.getElementById('create_image_filename');
+        if (createImgInput && createImgName) {
+            createImgInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    createImgName.textContent = this.files[0].name;
+                    createImgName.classList.add('has-file');
+                } else {
+                    createImgName.textContent = 'Choose product photo or drop here';
+                    createImgName.classList.remove('has-file');
+                }
+            });
+        }
+
+        const editImgInput = document.getElementById('edit_product_image');
+        const editImgName = document.getElementById('edit_image_filename');
+        if (editImgInput && editImgName) {
+            editImgInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    editImgName.textContent = this.files[0].name;
+                    editImgName.classList.add('has-file');
+                } else {
+                    editImgName.textContent = 'Replace photo or drop new image';
+                    editImgName.classList.remove('has-file');
+                }
+            });
+        }
+
         if (openCreateBtn && createModal) {
             openCreateBtn.addEventListener('click', () => {
                 createModal.classList.add('is-active');
                 createModal.style.display = 'flex';
+                if (createImgName) {
+                    createImgName.textContent = 'Choose product photo or drop here';
+                    createImgName.classList.remove('has-file');
+                }
+                clearIngredientsRows('create');
+                addIngredientRow('create');
+                fetchLiveIngredients();
             });
         }
         [closeCreateBtn, cancelCreateBtn].forEach(btn => {
@@ -242,9 +744,35 @@
         const editForm = document.getElementById('form_edit_product');
         const cancelEditBtn = document.getElementById('btn_cancel_edit_product_modal');
 
+        function setEditProductStatus(status) {
+            const hiddenStatus = document.getElementById('edit_product_status');
+            const btnActive = document.getElementById('btn_status_active');
+            const btnInactive = document.getElementById('btn_status_inactive');
+            const isAct = (status || 'active').toLowerCase() === 'active';
+
+            if (hiddenStatus) hiddenStatus.value = isAct ? 'active' : 'inactive';
+            if (btnActive) {
+                btnActive.classList.toggle('is-active-state', isAct);
+                btnActive.setAttribute('aria-checked', isAct ? 'true' : 'false');
+            }
+            if (btnInactive) {
+                btnInactive.classList.toggle('is-active-state', !isAct);
+                btnInactive.setAttribute('aria-checked', !isAct ? 'true' : 'false');
+            }
+        }
+
+        const btnStatusActive = document.getElementById('btn_status_active');
+        const btnStatusInactive = document.getElementById('btn_status_inactive');
+        if (btnStatusActive) {
+            btnStatusActive.addEventListener('click', () => setEditProductStatus('active'));
+        }
+        if (btnStatusInactive) {
+            btnStatusInactive.addEventListener('click', () => setEditProductStatus('inactive'));
+        }
+
         function closeEditModal() {
             if (editModal) {
-                editModal.classList.remove('is-active');
+                editModal.classList.remove('is-active', 'active');
                 editModal.style.display = 'none';
             }
         }
@@ -293,15 +821,42 @@
                 const expiryDateInput = document.getElementById('edit_product_expiry_date');
                 if (expiryDateInput) expiryDateInput.value = this.dataset.expiryDate || '';
 
-                const statusSelect = document.getElementById('edit_product_status');
-                if (statusSelect) statusSelect.value = this.dataset.status || 'active';
+                setEditProductStatus(this.dataset.status || 'active');
 
-                const descInput = document.getElementById('edit_product_description');
-                if (descInput) descInput.value = this.dataset.description || '';
+                if (editImgName) {
+                    editImgName.textContent = 'Replace photo or drop new image';
+                    editImgName.classList.remove('has-file');
+                }
+
+                // Populate existing recipe ingredients
+                clearIngredientsRows('edit');
+                try {
+                    const recipeData = this.dataset.recipe ? JSON.parse(this.dataset.recipe) : [];
+                    if (Array.isArray(recipeData) && recipeData.length > 0) {
+                        recipeData.forEach(item => addIngredientRow('edit', item));
+                    }
+                } catch (e) {
+                    console.error('Failed to parse product recipe:', e);
+                }
+                recalculateRecipeTotal('edit');
+                fetchLiveIngredients(null, () => recalculateRecipeTotal('edit'));
 
                 editModal.classList.add('is-active');
                 editModal.style.display = 'flex';
             });
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (editModal && (editModal.classList.contains('is-active') || editModal.style.display === 'flex')) {
+                    closeEditModal();
+                }
+                if (createModal && (createModal.classList.contains('is-active') || createModal.style.display === 'flex')) {
+                    createModal.classList.remove('is-active', 'active');
+                    createModal.style.display = 'none';
+                }
+            }
         });
 
         // Live Header Search Integration

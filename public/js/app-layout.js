@@ -1,10 +1,17 @@
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar synchronization helper
-            function smoothPillSync() {
-                // Lightweight trigger without continuous frame resize loops
-                requestAnimationFrame(() => {
-                    window.dispatchEvent(new Event('resize'));
-                });
+            // Clean up initial anti-flash class once DOM is parsed and script takes over
+            document.documentElement.classList.remove('sidebar-initially-collapsed');
+            document.documentElement.classList.remove('sidebar-initially-closed');
+
+            // Sidebar synchronization helper (waits for CSS transition to complete smoothly)
+            function smoothPillSync(delay = 320) {
+                setTimeout(() => {
+                    if (typeof window.sidebarPillRefresh === 'function') {
+                        window.sidebarPillRefresh(false);
+                    } else {
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                }, delay);
             }
             window.smoothPillSync = smoothPillSync;
 
@@ -39,10 +46,10 @@
                 if (headerToggleBtn) headerToggleBtn.classList.remove('is-closed-state');
             }
 
-            const sidebarHeaderToggleBtn = document.querySelector('.sidebar-header-toggle-btn') || document.getElementById('sidebar_close_btn');
+            const sidebarHeaderToggleBtn = document.getElementById('sidebar_brand_toggle') || document.querySelector('.bakery-logo-area') || document.querySelector('.sidebar-header-toggle-btn') || document.getElementById('sidebar_close_btn');
 
             function updateSidebarHeaderToggleBtn() {
-                const btn = document.querySelector('.sidebar-header-toggle-btn') || document.getElementById('sidebar_close_btn');
+                const btn = document.getElementById('sidebar_brand_toggle') || document.querySelector('.bakery-logo-area') || document.querySelector('.sidebar-header-toggle-btn') || document.getElementById('sidebar_close_btn');
                 if (!btn) return;
                 const isCollapsed = isDesktop() 
                     ? (sidebar && (sidebar.classList.contains('sidebar-collapsed') || document.body.classList.contains('sidebar-is-closed')))
@@ -60,6 +67,8 @@
             }
 
             function openSidebar() {
+                document.documentElement.classList.remove('sidebar-initially-collapsed');
+                document.documentElement.classList.remove('sidebar-initially-closed');
                 if (isDesktop()) {
                     if (sidebar) sidebar.classList.remove('sidebar-collapsed');
                     document.body.classList.remove('sidebar-is-closed');
@@ -72,10 +81,13 @@
                     openMobileDrawer();
                 }
                 updateSidebarHeaderToggleBtn();
-                smoothPillSync();
+                smoothPillSync(10);
+                smoothPillSync(320);
             }
 
             function closeSidebar() {
+                document.documentElement.classList.remove('sidebar-initially-collapsed');
+                document.documentElement.classList.remove('sidebar-initially-closed');
                 if (isDesktop()) {
                     if (sidebar) sidebar.classList.add('sidebar-collapsed');
                     document.body.classList.add('sidebar-is-closed');
@@ -88,7 +100,8 @@
                     closeMobileDrawer();
                 }
                 updateSidebarHeaderToggleBtn();
-                smoothPillSync();
+                smoothPillSync(10);
+                smoothPillSync(320);
             }
 
             function toggleSidebar() {
@@ -126,7 +139,16 @@
                 });
             }
 
-            if (sidebarHeaderToggleBtn) {
+            const brandToggle = document.getElementById('sidebar_brand_toggle') || document.querySelector('.bakery-logo-area');
+            if (brandToggle) {
+                brandToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+
+            if (sidebarHeaderToggleBtn && sidebarHeaderToggleBtn !== brandToggle) {
                 sidebarHeaderToggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -383,9 +405,8 @@
                 }
             }
 
-            // Click & touch listener on dropdown toggle buttons
+            // Chevron Button: Dedicated Submenu Accordion Toggle without page navigation
             document.querySelectorAll('.sidebar-dropdown-btn').forEach(btn => {
-                // Instant touch response for iPad & Mobile
                 btn.addEventListener('pointerdown', function(e) {
                     e.stopPropagation();
                 });
@@ -394,17 +415,34 @@
                     e.preventDefault();
                     e.stopPropagation();
                     const group = this.closest('.sidebar-group');
-                    if (group) {
-                        const isCurrentlyOpen = group.classList.contains('is-open');
-                        // Auto-close any other open group
-                        closeAllSidebarDropdowns(group);
-                        // Toggle current group
-                        if (isCurrentlyOpen) {
-                            group.classList.remove('is-open');
-                        } else {
-                            group.classList.add('is-open');
+                    if (!group) return;
+
+                    const sidebar = document.querySelector('.bakery-sidebar');
+                    const isCollapsed = sidebar && (sidebar.classList.contains('sidebar-collapsed') || document.body.classList.contains('sidebar-is-closed'));
+                    if (isCollapsed) {
+                        if (typeof window.openSidebar === 'function') {
+                            window.openSidebar();
                         }
+                        group.classList.add('is-open');
                         smoothPillSync();
+                        return;
+                    }
+
+                    const isCurrentlyOpen = group.classList.contains('is-open');
+                    closeAllSidebarDropdowns(group);
+
+                    if (isCurrentlyOpen) {
+                        group.classList.remove('is-open');
+                    } else {
+                        group.classList.add('is-open');
+                    }
+
+                    smoothPillSync();
+                    if (typeof window.sidebarPillRefresh === 'function') {
+                        setTimeout(() => window.sidebarPillRefresh(false), 50);
+                        setTimeout(() => window.sidebarPillRefresh(false), 150);
+                        setTimeout(() => window.sidebarPillRefresh(false), 260);
+                        setTimeout(() => window.sidebarPillRefresh(true), 380);
                     }
                 });
 
@@ -417,10 +455,57 @@
                 });
             });
 
-            // Auto-close dropdowns when clicking on any other function, nav item, button, or anywhere outside
+            // Parent Navigation Links (.sidebar-group > .sidebar-nav-item)
+            document.querySelectorAll('.sidebar-group > .sidebar-nav-item').forEach(navItem => {
+                navItem.addEventListener('click', function(e) {
+                    // If user clicked the chevron button, let the dedicated chevron handler handle it
+                    if (e.target.closest('.sidebar-dropdown-btn')) {
+                        return;
+                    }
+
+                    const group = this.closest('.sidebar-group');
+                    const href = this.getAttribute('href');
+                    const currentUrl = window.location.href.split('?')[0].replace(/\/+$/, '');
+                    const targetUrl = href ? new URL(href, window.location.origin).href.split('?')[0].replace(/\/+$/, '') : '';
+                    const isCurrentPage = Boolean(targetUrl && currentUrl === targetUrl);
+
+                    // If already on this page, toggle the accordion open/close instead of redundant reload
+                    if (isCurrentPage) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (group) {
+                            const isCurrentlyOpen = group.classList.contains('is-open');
+                            closeAllSidebarDropdowns(group);
+                            if (isCurrentlyOpen) {
+                                group.classList.remove('is-open');
+                            } else {
+                                group.classList.add('is-open');
+                            }
+                            smoothPillSync();
+                            if (typeof window.sidebarPillRefresh === 'function') {
+                                setTimeout(() => window.sidebarPillRefresh(false), 50);
+                                setTimeout(() => window.sidebarPillRefresh(false), 150);
+                                setTimeout(() => window.sidebarPillRefresh(true), 350);
+                            }
+                        }
+                    } else {
+                        // User is on another page (e.g. Dashboard): allow standard browser navigation to href!
+                        if (group) {
+                            group.classList.add('is-open');
+                        }
+                    }
+                });
+            });
+
+            // Auto-close inactive dropdowns when clicking outside
             document.addEventListener('click', function(e) {
                 const clickedGroup = e.target.closest('.sidebar-group');
-                closeAllSidebarDropdowns(clickedGroup);
+                document.querySelectorAll('.sidebar-group.is-open').forEach(grp => {
+                    if (grp !== clickedGroup && !grp.querySelector('.sidebar-submenu-item.active') && !grp.querySelector('.sidebar-nav-item.active')) {
+                        grp.classList.remove('is-open');
+                        smoothPillSync();
+                    }
+                });
             });
 
             // =========================================================

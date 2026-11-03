@@ -135,6 +135,10 @@ class ReportController extends Controller
             $endStr = $endDate ? $endDate->format('Ymd') : 'all';
             $filename = "bakery-{$type}-report-{$startStr}-{$endStr}.pdf";
 
+            if ($request->has('stream') || $request->has('preview')) {
+                return $pdf->stream($filename);
+            }
+
             return $pdf->download($filename);
         } catch (\Throwable $e) {
             return response()->view('admin.reports.pdf', compact(

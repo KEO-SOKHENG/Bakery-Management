@@ -8,6 +8,42 @@
         .po-modal-card {
             max-width: 620px;
             width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35);
+        }
+        .po-modal-badge {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ea580c;
+            background: rgba(234, 88, 12, 0.1);
+            border: 1px solid rgba(234, 88, 12, 0.25);
+            padding: 0.35rem 0.75rem;
+            border-radius: 10px;
+            line-height: 1;
+            letter-spacing: 0.03em;
+        }
+        [data-theme="dark"] .po-modal-badge,
+        body.dark-mode .po-modal-badge {
+            color: #ff8a4c !important;
+            background: rgba(234, 88, 12, 0.15) !important;
+            border-color: rgba(234, 88, 12, 0.35) !important;
+        }
+        [data-theme="dark"] .po-modal-card .po-table-wrap,
+        body.dark-mode .po-modal-card .po-table-wrap {
+            background: #18181c !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        [data-theme="dark"] .po-modal-card .order-detail-summary-box,
+        body.dark-mode .po-modal-card .order-detail-summary-box {
+            background: #131316 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        [data-theme="dark"] .po-modal-card .order-detail-info-grid,
+        body.dark-mode .po-modal-card .order-detail-info-grid {
+            background: #141417 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
         .po-modal-ing-table {
             width: 100%;
@@ -551,9 +587,9 @@
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
                                     @if($po->isDraft())
-                                        <a href="{{ route('admin.purchase-orders.edit', $po->id) }}" class="table-icon-btn" title="Edit Draft PO">
+                                        <button type="button" onclick="openEditPurchaseOrderModalById({{ $po->id }})" class="table-icon-btn" title="Edit Draft PO" style="background: none; border: none; cursor: pointer; color: inherit;">
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                                        </a>
+                                        </button>
                                     @elseif($po->isOrdered())
                                         <form action="{{ route('admin.purchase-orders.receive', $po->id) }}" method="POST" onsubmit="return confirm('Confirm receipt of PO #{{ $po->po_number }}? This will instantly increase raw ingredient inventory stock.');" style="display: inline;">
                                             @csrf
@@ -585,10 +621,10 @@
      ======================================================================== -->
 <div id="purchaseOrderDetailModal" class="order-detail-modal-backdrop" onclick="if(event.target === this) closePurchaseOrderDetailModal()">
     <div class="order-detail-modal-card po-modal-card">
-        <!-- Modal Header -->
+        <!-- Modal Header (Clean with no top X button - single close button is in footer) -->
         <div class="order-detail-modal-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem;">
             <div class="order-detail-modal-header-left" style="display: flex; align-items: center; gap: 0.85rem;">
-                <div class="order-detail-modal-badge" id="po_modal_badge" style="font-family: monospace; font-size: 1.05rem;">
+                <div class="po-modal-badge" id="po_modal_badge">
                     #PO-0001
                 </div>
                 <div>
@@ -600,10 +636,8 @@
                     </p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <div id="po_modal_status_badge">
-                    <!-- Dynamic status badge -->
-                </div>
+            <div id="po_modal_status_badge">
+                <!-- Dynamic status badge -->
             </div>
         </div>
 
@@ -640,45 +674,50 @@
             <!-- Vendor & Schedule 2-Column Info Grid -->
             <div class="order-detail-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; padding: 0.95rem 1.1rem; border-radius: 14px;">
                 <!-- Vendor Column -->
-                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <span class="info-label" style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #94a3b8);">
                         Vendor Information
                     </span>
-                    <div id="po_modal_vendor_name" style="font-size: 0.95rem; font-weight: 800; color: #ea580c;">
+                    <div id="po_modal_vendor_name" style="font-size: 0.95rem; font-weight: 800; color: #ea580c; line-height: 1.25;">
                         —
                     </div>
-                    <div id="po_modal_vendor_contact" style="font-size: 0.8rem; color: var(--text-title, #0f172a); font-weight: 600;">
-                        👤 Contact: —
+                    <div id="po_modal_vendor_contact_row" style="font-size: 0.8rem; color: var(--text-title, #0f172a); font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; flex-shrink: 0;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span id="po_modal_vendor_contact">—</span>
                     </div>
-                    <div id="po_modal_vendor_contact_details" style="font-size: 0.775rem; color: var(--text-muted, #64748b);">
-                        📞 — | ✉️ —
+                    <div id="po_modal_vendor_meta_row" style="font-size: 0.775rem; color: var(--text-muted, #64748b); display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <span id="po_modal_vendor_phone_wrap" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <span id="po_modal_vendor_phone">—</span>
+                        </span>
+                        <span id="po_modal_vendor_email_wrap" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span id="po_modal_vendor_email">—</span>
+                        </span>
                     </div>
-                    <div id="po_modal_vendor_address" style="font-size: 0.75rem; color: var(--text-muted, #64748b);">
-                        📍 —
+                    <div id="po_modal_vendor_address_row" style="font-size: 0.75rem; color: var(--text-muted, #64748b); display: flex; align-items: center; gap: 0.35rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.6; flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span id="po_modal_vendor_address">—</span>
                     </div>
                 </div>
 
-                <!-- Schedule Column -->
-                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <!-- Schedule Column (Clean rows without duplicate created-by) -->
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <span class="info-label" style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #94a3b8);">
                         Order Dates & Schedule
                     </span>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.15rem;">
-                        <div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted, #64748b);">Order Date</div>
-                            <div id="po_modal_order_date" style="font-weight: 700; font-size: 0.85rem; color: var(--text-title, #0f172a);">—</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 0.45rem; margin-top: 0.15rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border, #e2e8f0); padding-bottom: 0.3rem;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b);">Order Date</span>
+                            <span id="po_modal_order_date" style="font-weight: 700; font-size: 0.825rem; color: var(--text-title, #0f172a);">—</span>
                         </div>
-                        <div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted, #64748b);">Expected Delivery</div>
-                            <div id="po_modal_expected_date" style="font-weight: 700; font-size: 0.85rem; color: #f59e0b;">—</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border, #e2e8f0); padding-bottom: 0.3rem;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b);">Expected Delivery</span>
+                            <span id="po_modal_expected_date" style="font-weight: 700; font-size: 0.825rem; color: #f59e0b;">—</span>
                         </div>
-                        <div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted, #64748b);">Received Date</div>
-                            <div id="po_modal_received_date" style="font-weight: 700; font-size: 0.85rem; color: #10b981;">—</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.68rem; color: var(--text-muted, #64748b);">Created By</div>
-                            <div id="po_modal_creator" style="font-weight: 700; font-size: 0.85rem; color: var(--text-title, #0f172a);">—</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.1rem;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b);">Received Date</span>
+                            <span id="po_modal_received_date" style="font-weight: 700; font-size: 0.825rem; color: #10b981;">—</span>
                         </div>
                     </div>
                 </div>
@@ -699,17 +738,16 @@
                     <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #94a3b8);">
                         Ordered Ingredients (<span id="po_modal_items_count">0</span>)
                     </span>
-                    <span style="font-size: 0.725rem; color: var(--text-muted, #94a3b8);">Server-calculated totals</span>
                 </div>
 
-                <div style="border-radius: 12px; border: 1px solid var(--border, #e2e8f0); overflow: hidden; background: var(--bg-surface, #ffffff);">
+                <div class="po-table-wrap" style="border-radius: 12px; border: 1px solid var(--border, #e2e8f0); overflow: hidden; background: var(--bg-surface, #ffffff);">
                     <table class="po-modal-ing-table">
                         <thead>
                             <tr>
-                                <th style="width: 42%;">Ingredient</th>
+                                <th style="width: 44%;">Ingredient</th>
                                 <th style="width: 20%;">Quantity</th>
                                 <th style="width: 18%;">Unit Price</th>
-                                <th style="width: 20%; text-align: right;">Subtotal</th>
+                                <th style="width: 18%; text-align: right;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody id="po_modal_items_tbody">
@@ -728,8 +766,8 @@
             </div>
         </div>
 
-        <!-- Modal Footer Actions (Context-sensitive based on status) -->
-        <div class="order-detail-modal-actions" id="po_modal_footer_actions" style="padding: 0.9rem 1.4rem; border-top: 1px solid var(--border, #e2e8f0); display: flex; align-items: center; gap: 0.6rem; background: var(--bg-surface, #faf6f0);">
+        <!-- Modal Footer Actions (Single Close button, or clean action group) -->
+        <div class="order-detail-modal-actions" id="po_modal_footer_actions" style="padding: 0.9rem 1.4rem; border-top: 1px solid var(--border, #e2e8f0); display: flex; align-items: center; justify-content: flex-end; background: var(--bg-surface, #faf6f0);">
             <!-- Dynamic Form buttons for Draft / Ordered / Cancelled / Received -->
         </div>
     </div>
@@ -743,11 +781,11 @@
         <!-- Modal Header -->
         <div class="order-detail-modal-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1.15rem 1.4rem;">
             <div class="order-detail-modal-header-left" style="display: flex; align-items: center; gap: 0.85rem;">
-                <div class="order-detail-modal-badge" style="font-size: 1.05rem; background: rgba(234, 88, 12, 0.15); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3);">
+                <div class="order-detail-modal-badge" id="create_po_modal_badge" style="font-size: 1.05rem; background: rgba(234, 88, 12, 0.15); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.3);">
                     + PO
                 </div>
                 <div>
-                    <h3 class="order-detail-modal-title" style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title, #0f172a);">
+                    <h3 class="order-detail-modal-title" id="create_po_modal_title" style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-title, #0f172a);">
                         Create Purchase Order
                     </h3>
                 </div>
@@ -757,6 +795,7 @@
         <!-- Modal Body Form -->
         <form action="{{ route('admin.purchase-orders.store') }}" method="POST" id="create_po_modal_form" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; margin: 0;">
             @csrf
+            <input type="hidden" name="_method" id="create_po_method_field" value="POST">
             <input type="hidden" name="redirect_to" value="index">
 
             <div class="order-detail-modal-body" style="padding: 1.25rem 1.4rem; overflow-y: auto; flex: 1; max-height: calc(88vh - 75px);">
@@ -972,21 +1011,9 @@
         }
     };
 
-    window.openPurchaseOrderDetailModal = function(btn) {
+    window.renderPurchaseOrderDetailModal = function(po) {
         const modal = document.getElementById('purchaseOrderDetailModal');
-        if (!modal) return;
-
-        let po = null;
-        const rawData = btn.getAttribute('data-po');
-        if (rawData) {
-            try {
-                po = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
-            } catch (e) {
-                console.error('Failed to parse PO data:', e);
-            }
-        }
-
-        if (!po) return;
+        if (!modal || !po) return;
 
         // 1. PO Number & Dates
         document.getElementById('po_modal_badge').textContent = `#${po.po_number}`;
@@ -994,13 +1021,13 @@
 
         // 2. Status Badge & Banners
         const statusMap = {
-            'draft': { label: 'Draft', class: 'status-pending', color: '#475569', bg: 'rgba(148, 163, 184, 0.15)' },
-            'ordered': { label: 'Ordered (In Transit)', class: 'status-pending', color: '#b45309', bg: 'rgba(245, 158, 11, 0.15)' },
-            'received': { label: 'Received & Stocked In', class: 'status-completed', color: '#047857', bg: 'rgba(16, 185, 129, 0.15)' },
-            'cancelled': { label: 'Cancelled', class: 'status-cancelled', color: '#b91c1c', bg: 'rgba(239, 68, 68, 0.15)' }
+            'draft': { label: 'Draft', class: 'status-pending', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.25)' },
+            'ordered': { label: 'Ordered (In Transit)', class: 'status-pending', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.25)' },
+            'received': { label: 'Received & Stocked In', class: 'status-completed', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.25)' },
+            'cancelled': { label: 'Cancelled', class: 'status-cancelled', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.25)' }
         };
-        const st = statusMap[po.status] || { label: po.status, class: 'status-pending', color: '#ea580c', bg: 'rgba(234, 88, 12, 0.15)' };
-        document.getElementById('po_modal_status_badge').innerHTML = `<span class="status-pill ${st.class}" style="background: ${st.bg}; color: ${st.color}; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">${st.label}</span>`;
+        const st = statusMap[po.status] || { label: po.status, class: 'status-pending', color: '#ea580c', bg: 'rgba(234, 88, 12, 0.12)', border: 'rgba(234, 88, 12, 0.25)' };
+        document.getElementById('po_modal_status_badge').innerHTML = `<span class="status-pill ${st.class}" style="background: ${st.bg}; color: ${st.color}; border: 1px solid ${st.border}; font-weight: 700; padding: 0.3rem 0.85rem; border-radius: 9999px; font-size: 0.775rem; letter-spacing: 0.02em;">${st.label}</span>`;
 
         // Status Notification Banners
         const recvBanner = document.getElementById('po_modal_received_banner');
@@ -1020,24 +1047,56 @@
             ordBanner.style.display = 'flex';
         }
 
-        // 3. Vendor Information
+        // 3. Vendor Information (Structured micro-SVG presentation)
         if (po.supplier) {
             document.getElementById('po_modal_vendor_name').textContent = po.supplier.name || 'Unassigned Supplier';
-            document.getElementById('po_modal_vendor_contact').textContent = `👤 Contact: ${po.supplier.contact_person || 'Account Rep'}`;
-            document.getElementById('po_modal_vendor_contact_details').textContent = `📞 ${po.supplier.phone || '—'} | ✉️ ${po.supplier.email || '—'}`;
-            document.getElementById('po_modal_vendor_address').textContent = `📍 ${po.supplier.address || 'No address registered'}`;
+            
+            const contactPerson = po.supplier.contact_person || '';
+            const contactRow = document.getElementById('po_modal_vendor_contact_row');
+            if (contactPerson) {
+                document.getElementById('po_modal_vendor_contact').textContent = contactPerson;
+                contactRow.style.display = 'flex';
+            } else {
+                contactRow.style.display = 'none';
+            }
+
+            const phone = po.supplier.phone || '';
+            const email = po.supplier.email || '';
+            const phoneWrap = document.getElementById('po_modal_vendor_phone_wrap');
+            const emailWrap = document.getElementById('po_modal_vendor_email_wrap');
+            if (phone) {
+                document.getElementById('po_modal_vendor_phone').textContent = phone;
+                phoneWrap.style.display = 'inline-flex';
+            } else {
+                phoneWrap.style.display = 'none';
+            }
+            if (email) {
+                document.getElementById('po_modal_vendor_email').textContent = email;
+                emailWrap.style.display = 'inline-flex';
+            } else {
+                emailWrap.style.display = 'none';
+            }
+            document.getElementById('po_modal_vendor_meta_row').style.display = (!phone && !email) ? 'none' : 'flex';
+
+            const address = po.supplier.address || '';
+            const addressRow = document.getElementById('po_modal_vendor_address_row');
+            if (address) {
+                document.getElementById('po_modal_vendor_address').textContent = address;
+                addressRow.style.display = 'flex';
+            } else {
+                addressRow.style.display = 'none';
+            }
         } else {
             document.getElementById('po_modal_vendor_name').textContent = 'No vendor linked';
-            document.getElementById('po_modal_vendor_contact').textContent = '';
-            document.getElementById('po_modal_vendor_contact_details').textContent = '';
-            document.getElementById('po_modal_vendor_address').textContent = '';
+            document.getElementById('po_modal_vendor_contact_row').style.display = 'none';
+            document.getElementById('po_modal_vendor_meta_row').style.display = 'none';
+            document.getElementById('po_modal_vendor_address_row').style.display = 'none';
         }
 
         // 4. Order Dates & Schedule
         document.getElementById('po_modal_order_date').textContent = po.order_date || '—';
-        document.getElementById('po_modal_expected_date').textContent = po.expected_delivery_date || 'Flexible / Unspecified';
-        document.getElementById('po_modal_received_date').textContent = po.received_date || (po.status === 'received' ? 'Received' : 'Pending');
-        document.getElementById('po_modal_creator').textContent = po.creator_name || 'System Admin';
+        document.getElementById('po_modal_expected_date').textContent = po.expected_delivery_date || '—';
+        document.getElementById('po_modal_received_date').textContent = po.received_date || (po.status === 'received' ? 'Received' : '—');
 
         // 5. Notes
         const notesBox = document.getElementById('po_modal_notes_box');
@@ -1048,7 +1107,7 @@
             notesBox.style.display = 'none';
         }
 
-        // 6. Ordered Ingredients List
+        // 6. Ordered Ingredients List (Clean line items without redundant stock text)
         const items = po.items || [];
         document.getElementById('po_modal_items_count').textContent = items.length;
         const tbody = document.getElementById('po_modal_items_tbody');
@@ -1061,9 +1120,6 @@
                     <td>
                         <div style="font-weight: 700; color: var(--text-title, #0f172a); font-size: 0.85rem;">
                             ${escapeHtml(item.name)}
-                        </div>
-                        <div style="font-size: 0.725rem; color: var(--text-muted, #71717a); margin-top: 1px;">
-                            Current Stock: ${Number(item.current_stock).toFixed(2)} ${escapeHtml(item.unit ? item.unit.toUpperCase() : '')}
                         </div>
                     </td>
                     <td style="font-weight: 700;">
@@ -1082,51 +1138,66 @@
         // 7. Grand Total
         document.getElementById('po_modal_total_cost').textContent = '$' + Number(po.total_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // 8. Footer Action Buttons
+        // 8. Footer Action Buttons (Only single professional Close button, or draft/ordered actions + Close)
         const footerActions = document.getElementById('po_modal_footer_actions');
         let actionsHtml = '';
 
         if (po.status === 'draft') {
             actionsHtml = `
-                <a href="${po.routes.edit}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 1rem; font-size: 0.825rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; color: #2563eb; text-decoration: none;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                    <span>Edit Draft</span>
-                </a>
-                <form method="POST" action="${po.routes.order}" onsubmit="return confirm('Place order with vendor? Status will become Ordered.');" style="display: inline; margin: 0;">
-                    <input type="hidden" name="_token" value="${CSRF_TOKEN}">
-                    <button type="submit" class="btn" style="background: #b45309; border: 1px solid #b45309; color: #ffffff; border-radius: 50px; padding: 0.45rem 1.15rem; font-weight: 700; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                        <span>Place Order</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.6rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" onclick="closePurchaseOrderDetailModal(); openEditPurchaseOrderModalById(${po.id});" class="btn btn-secondary" style="border-radius: 50px; padding: 0.5rem 1.1rem; font-size: 0.825rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; color: #2563eb; cursor: pointer; border: 1px solid #d4d4d8; background: #fff;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                            <span>Edit Draft</span>
+                        </button>
+                        <form method="POST" action="${po.routes.order}" onsubmit="return confirm('Place order with vendor? Status will become Ordered.');" style="display: inline; margin: 0;">
+                            <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                            <button type="submit" class="btn" style="background: #ea580c; border: 1px solid #ea580c; color: #ffffff; border-radius: 50px; padding: 0.5rem 1.25rem; font-weight: 700; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                                <span>Place Order</span>
+                            </button>
+                        </form>
+                        <form method="POST" action="${po.routes.cancel}" onsubmit="return confirm('Cancel this purchase order?');" style="display: inline; margin: 0;">
+                            <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                            <button type="submit" class="btn btn-secondary" style="border-radius: 50px; padding: 0.5rem 1rem; font-size: 0.825rem; font-weight: 600; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;">
+                                Cancel Order
+                            </button>
+                        </form>
+                    </div>
+                    <button type="button" onclick="closePurchaseOrderDetailModal();" class="btn-order-detail-close">
+                        Close
                     </button>
-                </form>
-                <form method="POST" action="${po.routes.cancel}" onsubmit="return confirm('Cancel this purchase order?');" style="display: inline; margin: 0;">
-                    <input type="hidden" name="_token" value="${CSRF_TOKEN}">
-                    <button type="submit" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-size: 0.825rem; font-weight: 600; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;">
-                        Cancel Order
-                    </button>
-                </form>
+                </div>
             `;
         } else if (po.status === 'ordered') {
             actionsHtml = `
-                <form method="POST" action="${po.routes.receive}" onsubmit="return confirm('Receive Purchase Order #${po.po_number}?\\n\\nThis will:\\n- Add items to inventory stock\\n- Update ingredient costs\\n- Mark this order as Received.');" style="display: inline; margin: 0;">
-                    <input type="hidden" name="_token" value="${CSRF_TOKEN}">
-                    <button type="submit" class="btn" style="background: #059669; border: 1px solid #059669; color: #ffffff; border-radius: 50px; padding: 0.45rem 1.25rem; font-weight: 700; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span>Receive Order & Replenish Stock</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.6rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <form method="POST" action="${po.routes.receive}" onsubmit="return confirm('Receive Purchase Order #${po.po_number}?\\n\\nThis will:\\n- Add items to inventory stock\\n- Update ingredient costs\\n- Mark this order as Received.');" style="display: inline; margin: 0;">
+                            <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                            <button type="submit" class="btn" style="background: #059669; border: 1px solid #059669; color: #ffffff; border-radius: 50px; padding: 0.5rem 1.35rem; font-weight: 700; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Receive & Replenish Stock</span>
+                            </button>
+                        </form>
+                        <form method="POST" action="${po.routes.cancel}" onsubmit="return confirm('Cancel this purchase order?');" style="display: inline; margin: 0;">
+                            <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                            <button type="submit" class="btn btn-secondary" style="border-radius: 50px; padding: 0.5rem 1rem; font-size: 0.825rem; font-weight: 600; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;">
+                                Cancel Order
+                            </button>
+                        </form>
+                    </div>
+                    <button type="button" onclick="closePurchaseOrderDetailModal();" class="btn-order-detail-close">
+                        Close
                     </button>
-                </form>
-                <form method="POST" action="${po.routes.cancel}" onsubmit="return confirm('Cancel this purchase order?');" style="display: inline; margin: 0;">
-                    <input type="hidden" name="_token" value="${CSRF_TOKEN}">
-                    <button type="submit" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-size: 0.825rem; font-weight: 600; border: 1px solid #ef4444; color: #ef4444; background: transparent; cursor: pointer;">
-                        Cancel Order
-                    </button>
-                </form>
+                </div>
             `;
         } else {
             actionsHtml = `
-                <div style="font-size: 0.8rem; color: var(--text-muted, #71717a); font-weight: 600; display: flex; align-items: center; gap: 0.45rem;">
-                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${po.status === 'received' ? '#10b981' : '#ef4444'};"></span>
-                    <span>${po.status === 'received' ? 'Order finalized & inventory stocked' : 'Purchase order cancelled (Archived)'}</span>
+                <div style="display: flex; justify-content: flex-end; width: 100%;">
+                    <button type="button" onclick="closePurchaseOrderDetailModal();" class="btn-order-detail-close">
+                        Close
+                    </button>
                 </div>
             `;
         }
@@ -1136,6 +1207,91 @@
         // Show modal & lock background scrolling
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+    };
+
+    window.openPurchaseOrderDetailModal = function(btn) {
+        let po = null;
+        const rawData = btn.getAttribute('data-po');
+        if (rawData) {
+            try {
+                po = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            } catch (e) {
+                console.error('Failed to parse PO data:', e);
+            }
+        }
+        if (po) {
+            renderPurchaseOrderDetailModal(po);
+        }
+    };
+
+    window.openPurchaseOrderDetailModalById = function(poId) {
+        const buttons = document.querySelectorAll('.btn-view-po');
+        for (const btn of buttons) {
+            try {
+                const po = JSON.parse(btn.getAttribute('data-po'));
+                if (String(po.id) === String(poId)) {
+                    renderPurchaseOrderDetailModal(po);
+                    return;
+                }
+            } catch (e) {}
+        }
+        fetch(`/admin/purchase-orders/${poId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.purchase_order) {
+                renderPurchaseOrderDetailModal(data.purchase_order);
+            }
+        })
+        .catch(err => console.error('Failed to load PO:', err));
+    };
+
+    window.openEditPurchaseOrderModalById = function(poId) {
+        fetch(`/admin/purchase-orders/${poId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const po = data.purchase_order;
+            if (!po) return;
+
+            const modal = document.getElementById('createPurchaseOrderModal');
+            const form = document.getElementById('create_po_modal_form');
+            if (!modal || !form) return;
+
+            form.action = `/admin/purchase-orders/${po.id}`;
+            document.getElementById('create_po_method_field').value = 'PUT';
+            document.getElementById('create_po_modal_title').textContent = `Edit Purchase Order #${po.po_number}`;
+            document.getElementById('create_po_modal_badge').textContent = `#${po.po_number}`;
+
+            document.getElementById('modal_supplier_select').value = po.supplier_id || '';
+            document.getElementById('modal_order_date').value = po.order_date || '';
+            document.getElementById('modal_expected_delivery_date').value = po.expected_delivery_date || '';
+            document.getElementById('modal_notes').value = po.notes || '';
+
+            const tbody = document.getElementById('modal_items_tbody');
+            tbody.innerHTML = '';
+            modalRowIndex = 0;
+
+            if (po.items && po.items.length > 0) {
+                po.items.forEach(item => {
+                    createModalItemRow(item.ingredient_id, item.quantity, item.purchase_price);
+                });
+            } else {
+                createModalItemRow('');
+            }
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(err => console.error('Failed to load PO for edit:', err));
     };
 
     window.closePurchaseOrderDetailModal = function() {
@@ -1313,7 +1469,11 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('action') === 'create' || urlParams.get('create') === '1' || urlParams.has('ingredient_id')) {
+        if (urlParams.has('open_po')) {
+            openPurchaseOrderDetailModalById(urlParams.get('open_po'));
+        } else if (urlParams.has('edit_po')) {
+            openEditPurchaseOrderModalById(urlParams.get('edit_po'));
+        } else if (urlParams.get('action') === 'create' || urlParams.get('create') === '1' || urlParams.has('ingredient_id')) {
             openCreatePurchaseOrderModal({
                 supplier_id: urlParams.get('supplier_id') || '',
                 ingredient_id: urlParams.get('ingredient_id') || ''
