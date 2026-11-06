@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -149,35 +151,204 @@ class SettingController extends Controller
             'date_format'              => 'nullable|string|in:DD/MM/YYYY,MM/DD/YYYY,YYYY-MM-DD',
             'language'                 => 'nullable|string|in:EN,KM,en,km',
             'theme_mode'               => 'nullable|string|in:light,dark',
-            'shop_logo'                => 'nullable|image|max:2048',
-            'avatar'                   => 'nullable|image|max:2048',
+            'shop_logo'                => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'mimetypes:image/jpeg,image/png,image/webp',
+                'max:2048',
+            ],
+            'avatar'                   => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'mimetypes:image/jpeg,image/png,image/webp',
+                'max:2048',
+            ],
+        ], [
+            'shop_logo.image'     => 'The bakery logo must be a valid image file.',
+            'shop_logo.mimes'     => 'The bakery logo must be a file of type: jpeg, png, jpg, webp.',
+            'shop_logo.mimetypes' => 'The bakery logo must have a valid image MIME type (image/jpeg, image/png, image/webp).',
+            'shop_logo.max'       => 'The bakery logo file size must not exceed 2MB.',
+            'avatar.image'        => 'The avatar must be a valid image file.',
+            'avatar.mimes'        => 'The avatar must be a file of type: jpeg, png, jpg, webp.',
+            'avatar.mimetypes'    => 'The avatar must have a valid image MIME type (image/jpeg, image/png, image/webp).',
+            'avatar.max'          => 'The avatar file size must not exceed 2MB.',
         ]);
 
-        $uploadedImageUrl = null;
-        // Handle shop logo or profile avatar upload if provided
+        $uploadedLogoUrl = null;
+        $uploadedAvatarUrl = null;
+        $diskName = config('filesystems.settings_disk', config('filesystems.default') === 's3' ? 's3' : 'public');
+
+        // Handle shop logo upload if provided
         if ($request->hasFile('shop_logo')) {
             $logoFile = $request->file('shop_logo');
-            $logoFilename = 'bakery_logo_' . time() . '.' . $logoFile->getClientOriginalExtension();
-            $destinationPath = public_path('images');
-            File::ensureDirectoryExists($destinationPath);
-            $logoFile->move($destinationPath, $logoFilename);
-            $logoPath = '/images/' . $logoFilename;
-            SettingsService::set('shop_logo', $logoPath);
-            SettingsService::set('user_avatar_' . $user->id, $logoPath);
-            SettingsService::set('admin_avatar', $logoPath);
-            $uploadedImageUrl = $logoPath;
+
+            if (!$logoFile->isValid()) {
+                $errorMsg = 'Upload failed: ' . $logoFile->getErrorMessage();
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $errorMsg, 'errors' => ['shop_logo' => [$errorMsg]]], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['shop_logo' => $errorMsg]);
+            }
+
+            // Verify binary image content
+            $imageInfo = @getimagesize($logoFile->getRealPath());
+            if ($imageInfo === false) {
+                $errorMsg = 'The uploaded file does not contain valid image content.';
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $errorMsg, 'errors' => ['shop_logo' => [$errorMsg]]], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['shop_logo' => $errorMsg]);
+            }
+
+            $rawExt = $logoFile->guessExtension() ?: $logoFile->getClientOriginalExtension();
+            $extension = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawExt)) ?: 'png';
+            $logoFilename = 'bakery_logo_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+
+            // Preserve old logo reference until new upload successfully completes
+            $previousLogo = SettingsService::getString('shop_logo', '');
+
+            try {
+                $disk = Storage::disk($diskName);
+                $storedPath = $disk->putFileAs('logos', $logoFile, $logoFilename);
+
+                if (!$storedPath || !$disk->exists('logos/' . $logoFilename)) {
+                    throw new \RuntimeException('Persistent storage disk was unable to write the logo file.');
+                }
+
+                $logoPath = ($diskName === 'public')
+                    ? '/storage/logos/' . $logoFilename
+                    : $disk->url($storedPath);
+
+                // Ensure Supabase S3 URLs use the public object URL format instead of raw S3 API endpoint
+                if (str_contains($logoPath, '.storage.supabase.co/storage/v1/s3/')) {
+                    $logoPath = str_replace('.storage.supabase.co/storage/v1/s3/', '.supabase.co/storage/v1/object/public/', $logoPath);
+                }
+
+                SettingsService::set('shop_logo', $logoPath);
+                SettingsService::set('user_avatar_' . $user->id, $logoPath);
+                SettingsService::set('admin_avatar', $logoPath);
+                $uploadedLogoUrl = $logoPath;
+
+                // Safely delete previous logo only AFTER the new logo has succeeded
+                if (!empty($previousLogo) && $previousLogo !== $logoPath) {
+                    try {
+                        $parsedPath = parse_url($previousLogo, PHP_URL_PATH) ?? $previousLogo;
+                        $pos = strpos($parsedPath, 'logos/');
+                        if ($pos !== false) {
+                            $oldKey = substr($parsedPath, $pos);
+                            if ($disk->exists($oldKey)) {
+                                $disk->delete($oldKey);
+                            }
+                            if ($diskName !== 'public' && Storage::disk('public')->exists($oldKey)) {
+                                Storage::disk('public')->delete($oldKey);
+                            }
+                        }
+                    } catch (\Throwable $delEx) {
+                        Log::warning("Failed to remove previous logo [{$previousLogo}]: " . $delEx->getMessage());
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error("Bakery logo upload failed: " . $e->getMessage(), [
+                    'exception' => $e,
+                    'user_id'   => $user->id,
+                ]);
+
+                $userMessage = 'Failed to store bakery logo. Please verify storage permissions or disk availability.';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $userMessage,
+                        'errors'  => ['shop_logo' => [$userMessage]],
+                    ], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['shop_logo' => $userMessage]);
+            }
         }
 
+        // Handle profile avatar upload if provided
         if ($request->hasFile('avatar')) {
             $avatarFile = $request->file('avatar');
-            $avatarFilename = 'avatar_' . $user->id . '_' . time() . '.' . $avatarFile->getClientOriginalExtension();
-            $destinationPath = public_path('images/avatars');
-            File::ensureDirectoryExists($destinationPath);
-            $avatarFile->move($destinationPath, $avatarFilename);
-            $avatarPath = '/images/avatars/' . $avatarFilename;
-            SettingsService::set('user_avatar_' . $user->id, $avatarPath);
-            SettingsService::set('admin_avatar', $avatarPath);
-            $uploadedImageUrl = $avatarPath;
+
+            if (!$avatarFile->isValid()) {
+                $errorMsg = 'Avatar upload failed: ' . $avatarFile->getErrorMessage();
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $errorMsg, 'errors' => ['avatar' => [$errorMsg]]], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['avatar' => $errorMsg]);
+            }
+
+            // Verify binary image content
+            $imageInfo = @getimagesize($avatarFile->getRealPath());
+            if ($imageInfo === false) {
+                $errorMsg = 'The uploaded avatar does not contain valid image content.';
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $errorMsg, 'errors' => ['avatar' => [$errorMsg]]], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['avatar' => $errorMsg]);
+            }
+
+            $rawExt = $avatarFile->guessExtension() ?: $avatarFile->getClientOriginalExtension();
+            $extension = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawExt)) ?: 'png';
+            $avatarFilename = 'avatar_' . $user->id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+
+            $previousAvatar = SettingsService::getString('user_avatar_' . $user->id, '');
+
+            try {
+                $disk = Storage::disk($diskName);
+                $storedPath = $disk->putFileAs('avatars', $avatarFile, $avatarFilename);
+
+                if (!$storedPath || !$disk->exists('avatars/' . $avatarFilename)) {
+                    throw new \RuntimeException('Persistent storage disk was unable to write the avatar file.');
+                }
+
+                $avatarPath = ($diskName === 'public')
+                    ? '/storage/avatars/' . $avatarFilename
+                    : $disk->url($storedPath);
+
+                // Ensure Supabase S3 URLs use the public object URL format instead of raw S3 API endpoint
+                if (str_contains($avatarPath, '.storage.supabase.co/storage/v1/s3/')) {
+                    $avatarPath = str_replace('.storage.supabase.co/storage/v1/s3/', '.supabase.co/storage/v1/object/public/', $avatarPath);
+                }
+
+                SettingsService::set('user_avatar_' . $user->id, $avatarPath);
+                SettingsService::set('admin_avatar', $avatarPath);
+                $uploadedAvatarUrl = $avatarPath;
+
+                if (!empty($previousAvatar) && $previousAvatar !== $avatarPath) {
+                    try {
+                        $parsedPath = parse_url($previousAvatar, PHP_URL_PATH) ?? $previousAvatar;
+                        $pos = strpos($parsedPath, 'avatars/');
+                        if ($pos !== false) {
+                            $oldKey = substr($parsedPath, $pos);
+                            if ($disk->exists($oldKey)) {
+                                $disk->delete($oldKey);
+                            }
+                            if ($diskName !== 'public' && Storage::disk('public')->exists($oldKey)) {
+                                Storage::disk('public')->delete($oldKey);
+                            }
+                        }
+                    } catch (\Throwable $delEx) {
+                        Log::warning("Failed to remove previous avatar [{$previousAvatar}]: " . $delEx->getMessage());
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error("Avatar upload failed: " . $e->getMessage(), [
+                    'exception' => $e,
+                    'user_id'   => $user->id,
+                ]);
+
+                $userMessage = 'Failed to store avatar image. Please verify storage permissions or disk availability.';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $userMessage,
+                        'errors'  => ['avatar' => [$userMessage]],
+                    ], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['avatar' => $userMessage]);
+            }
         }
 
         $fieldsToUpdate = [
@@ -246,8 +417,8 @@ class SettingController extends Controller
                 'user_name' => $user->name,
                 'user_email' => $user->email,
                 'user_phone' => $user->phone,
-                'avatar_url' => $uploadedImageUrl,
-                'logo_url' => $uploadedImageUrl,
+                'avatar_url' => $uploadedAvatarUrl ?? $uploadedLogoUrl,
+                'logo_url' => $uploadedLogoUrl ?? $uploadedAvatarUrl,
             ]);
         }
 

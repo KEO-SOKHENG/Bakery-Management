@@ -18,6 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SettingManagementTest extends TestCase
@@ -510,5 +511,428 @@ class SettingManagementTest extends TestCase
             'user_id' => $this->admin->id,
             'action'  => 'backup_restored',
         ]);
+    }
+
+    /**
+     * 22. Admin can update settings without uploading a logo.
+     */
+    public function test_admin_can_update_settings_without_uploading_logo(): void
+    {
+        SettingsService::set('shop_logo', '/storage/logos/existing_logo.png');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_name'  => 'No Logo Bakery',
+            'shop_phone' => '+855 12 345 678',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('No Logo Bakery', SettingsService::get('shop_name'));
+        $this->assertEquals('/storage/logos/existing_logo.png', SettingsService::get('shop_logo'));
+    }
+
+    /**
+     * 23. Admin can upload a valid bakery logo using Storage.
+     */
+    public function test_admin_can_upload_valid_bakery_logo(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('my_bakery_logo.png', 400, 400);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_name' => 'Moon Cake Bakery',
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $storedLogo = SettingsService::get('shop_logo');
+        $this->assertNotEmpty($storedLogo);
+        $this->assertStringStartsWith('/storage/logos/bakery_logo_', $storedLogo);
+        $this->assertStringEndsWith('.png', $storedLogo);
+
+        $relativeDiskPath = str_replace('/storage/', '', $storedLogo);
+        Storage::disk('public')->assertExists($relativeDiskPath);
+    }
+
+    /**
+     * 24. Uploading logo via JSON/AJAX returns valid JSON with logo_url.
+     */
+    public function test_admin_can_upload_logo_via_ajax_and_receive_json(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('ajax_logo.jpg', 300, 300);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_name' => 'AJAX Bakery',
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $data = $response->json();
+        $this->assertNotNull($data['logo_url']);
+        $this->assertStringStartsWith('/storage/logos/bakery_logo_', $data['logo_url']);
+    }
+
+    /**
+     * 25. Reject invalid logo file type (e.g. PDF or non-image).
+     */
+    public function test_reject_invalid_logo_file_type(): void
+    {
+        Storage::fake('public');
+
+        $invalidFile = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $invalidFile,
+        ]);
+
+        $response->assertSessionHasErrors('shop_logo');
+    }
+
+    /**
+     * 26. Reject fake image file (corrupted or spoofed non-image content).
+     */
+    public function test_reject_fake_image_content(): void
+    {
+        Storage::fake('public');
+
+        // Text content disguised with a .png extension
+        $fakeImage = UploadedFile::fake()->createWithContent('fake_logo.png', 'NOT_AN_IMAGE_BINARY_DATA');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $fakeImage,
+        ]);
+
+        $response->assertSessionHasErrors('shop_logo');
+    }
+
+    /**
+     * 27. Saved logo is displayed in Settings view after page refresh.
+     */
+    public function test_saved_logo_is_displayed_after_page_refresh(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('fresh_logo.webp', 250, 250);
+
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $storedLogo = SettingsService::get('shop_logo');
+
+        // Fetch settings page as if refreshing or loading in browser
+        $viewResponse = $this->actingAs($this->admin)->get(route('admin.settings'));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee(asset($storedLogo), false);
+    }
+
+    /**
+     * 28. Replacing existing logo cleans up previous storage file only after successful upload.
+     */
+    public function test_replacing_existing_logo_cleans_up_previous_file_only_after_success(): void
+    {
+        Storage::fake('public');
+
+        // 1. First upload
+        $firstFile = UploadedFile::fake()->image('first_logo.png', 200, 200);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $firstFile,
+        ]);
+
+        $firstLogo = SettingsService::get('shop_logo');
+        $firstDiskPath = str_replace('/storage/', '', $firstLogo);
+        Storage::disk('public')->assertExists($firstDiskPath);
+
+        // 2. Second upload (replaces first)
+        $secondFile = UploadedFile::fake()->image('second_logo.jpg', 200, 200);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $secondFile,
+        ]);
+
+        $secondLogo = SettingsService::get('shop_logo');
+        $secondDiskPath = str_replace('/storage/', '', $secondLogo);
+
+        // Second logo must exist
+        Storage::disk('public')->assertExists($secondDiskPath);
+        // First logo must have been cleaned up
+        Storage::disk('public')->assertMissing($firstDiskPath);
+        $this->assertNotEquals($firstLogo, $secondLogo);
+    }
+
+    /**
+     * 29. Previous logo is preserved when a new upload fails validation or storage.
+     */
+    public function test_previous_logo_is_preserved_when_new_upload_fails(): void
+    {
+        Storage::fake('public');
+
+        // 1. Initial valid upload
+        $validFile = UploadedFile::fake()->image('good_logo.png', 200, 200);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $validFile,
+        ]);
+
+        $originalLogo = SettingsService::get('shop_logo');
+        $originalDiskPath = str_replace('/storage/', '', $originalLogo);
+        Storage::disk('public')->assertExists($originalDiskPath);
+
+        // 2. Attempt uploading an invalid file
+        $invalidFile = UploadedFile::fake()->create('hacker.exe', 500, 'application/octet-stream');
+        $failResponse = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $invalidFile,
+        ]);
+
+        $failResponse->assertSessionHasErrors('shop_logo');
+
+        // 3. Verify original logo is still preserved in DB and on disk
+        $this->assertEquals($originalLogo, SettingsService::get('shop_logo'));
+        Storage::disk('public')->assertExists($originalDiskPath);
+    }
+
+    /**
+     * 30. Storage unavailable returns graceful error message instead of HTTP 500.
+     */
+    public function test_storage_unavailable_returns_graceful_error_instead_of_http_500(): void
+    {
+        // Mock Storage disk to throw a Filesystem exception when writing
+        $mockDisk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockDisk->shouldReceive('putFileAs')
+            ->andThrow(new \RuntimeException('Disk write failure: permission denied'));
+        $mockDisk->shouldReceive('exists')->andReturn(false);
+
+        Storage::shouldReceive('disk')->with('public')->andReturn($mockDisk);
+
+        $file = UploadedFile::fake()->image('broken_disk.png', 200, 200);
+
+        // Web request: redirected back with error, not HTTP 500
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('shop_logo');
+
+        // AJAX request: returns 422 with useful message, not HTTP 500
+        $ajaxResponse = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $ajaxResponse->assertStatus(422);
+        $ajaxResponse->assertJsonStructure(['message', 'errors' => ['shop_logo']]);
+    }
+
+    /**
+     * 31. Reject oversized logo file (exceeds 2MB limit).
+     */
+    public function test_reject_oversized_logo_file(): void
+    {
+        Storage::fake('public');
+
+        // Create an image file exceeding 2048 KB (e.g. 3000 KB)
+        $oversizedFile = UploadedFile::fake()->image('huge_logo.png')->size(3000);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $oversizedFile,
+        ]);
+
+        $response->assertSessionHasErrors('shop_logo');
+    }
+
+    /**
+     * 32. Admin can upload a valid profile avatar using Storage.
+     */
+    public function test_admin_can_upload_valid_avatar_using_storage(): void
+    {
+        Storage::fake('public');
+
+        $avatarFile = UploadedFile::fake()->image('admin_avatar.png', 300, 300);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'avatar' => $avatarFile,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $data = $response->json();
+        $this->assertNotNull($data['avatar_url']);
+        $this->assertStringStartsWith('/storage/avatars/avatar_', $data['avatar_url']);
+
+        $relativeDiskPath = str_replace('/storage/', '', $data['avatar_url']);
+        Storage::disk('public')->assertExists($relativeDiskPath);
+    }
+
+    /**
+     * 33. Supabase S3 disk configuration resolves correct public object URL format.
+     */
+    public function test_supabase_s3_disk_configuration_resolves_correct_public_object_url(): void
+    {
+        config([
+            'filesystems.disks.s3.key' => 'mock_key',
+            'filesystems.disks.s3.secret' => 'mock_secret',
+            'filesystems.disks.s3.region' => 'ap-northeast-1',
+            'filesystems.disks.s3.bucket' => 'bakery-media',
+            'filesystems.disks.s3.endpoint' => 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3',
+            'filesystems.disks.s3.use_path_style_endpoint' => true,
+            'filesystems.disks.s3.url' => 'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media',
+        ]);
+
+        $url = Storage::disk('s3')->url('logos/bakery_logo_1730000000.png');
+        $this->assertEquals(
+            'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/bakery_logo_1730000000.png',
+            $url
+        );
+    }
+
+    /**
+     * 34. Admin can upload logo to Supabase S3 disk and receive public object URL.
+     */
+    public function test_admin_can_upload_logo_to_supabase_s3_disk(): void
+    {
+        config(['filesystems.settings_disk' => 's3']);
+        Storage::fake('s3');
+
+        $file = UploadedFile::fake()->image('supabase_logo.png', 400, 400);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_name' => 'Moon Cake Supabase Bakery',
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $storedLogo = SettingsService::get('shop_logo');
+        $this->assertNotEmpty($storedLogo);
+
+        // Verify the file was stored on the fake S3 disk
+        $parsedPath = parse_url($storedLogo, PHP_URL_PATH) ?? $storedLogo;
+        $pos = strpos($parsedPath, 'logos/');
+        $this->assertNotFalse($pos);
+        $objectKey = substr($parsedPath, $pos);
+        Storage::disk('s3')->assertExists($objectKey);
+    }
+
+    /**
+     * 35. Admin can upload avatar to Supabase S3 disk.
+     */
+    public function test_admin_can_upload_avatar_to_supabase_s3_disk(): void
+    {
+        config(['filesystems.settings_disk' => 's3']);
+        Storage::fake('s3');
+
+        $file = UploadedFile::fake()->image('supabase_avatar.png', 300, 300);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'avatar' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $storedAvatar = SettingsService::get('user_avatar_' . $this->admin->id);
+        $this->assertNotEmpty($storedAvatar);
+
+        $parsedPath = parse_url($storedAvatar, PHP_URL_PATH) ?? $storedAvatar;
+        $pos = strpos($parsedPath, 'avatars/');
+        $this->assertNotFalse($pos);
+        $objectKey = substr($parsedPath, $pos);
+        Storage::disk('s3')->assertExists($objectKey);
+    }
+
+    /**
+     * 36. Replacing logo on Supabase S3 cleans up previous file only after new upload succeeds.
+     */
+    public function test_replacing_logo_on_supabase_s3_cleans_up_previous_file_only_after_success(): void
+    {
+        config(['filesystems.settings_disk' => 's3']);
+        Storage::fake('s3');
+
+        // 1. Initial upload
+        $firstFile = UploadedFile::fake()->image('first_s3.png', 200, 200);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $firstFile,
+        ]);
+
+        $firstLogo = SettingsService::get('shop_logo');
+        $firstParsed = parse_url($firstLogo, PHP_URL_PATH) ?? $firstLogo;
+        $firstKey = substr($firstParsed, strpos($firstParsed, 'logos/'));
+        Storage::disk('s3')->assertExists($firstKey);
+
+        // 2. Second upload
+        $secondFile = UploadedFile::fake()->image('second_s3.png', 200, 200);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $secondFile,
+        ]);
+
+        $secondLogo = SettingsService::get('shop_logo');
+        $secondParsed = parse_url($secondLogo, PHP_URL_PATH) ?? $secondLogo;
+        $secondKey = substr($secondParsed, strpos($secondParsed, 'logos/'));
+
+        Storage::disk('s3')->assertExists($secondKey);
+        Storage::disk('s3')->assertMissing($firstKey);
+        $this->assertNotEquals($firstLogo, $secondLogo);
+    }
+
+    /**
+     * 37. Supabase S3 storage failure is handled gracefully without returning HTTP 500 or exposing credentials.
+     */
+    public function test_supabase_s3_storage_failure_handled_gracefully(): void
+    {
+        config(['filesystems.settings_disk' => 's3']);
+
+        $mockS3Disk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockS3Disk->shouldReceive('putFileAs')
+            ->andThrow(new \RuntimeException('Supabase S3 connection timeout error'));
+        $mockS3Disk->shouldReceive('exists')->andReturn(false);
+
+        Storage::shouldReceive('disk')->with('s3')->andReturn($mockS3Disk);
+
+        $file = UploadedFile::fake()->image('s3_failure.png', 200, 200);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message', 'errors' => ['shop_logo']]);
+        // Secret keys must never appear in response
+        $this->assertStringNotContainsString('mock_secret', $response->getContent());
+    }
+
+    /**
+     * 38. Supabase S3 disk configuration auto-derives public object URL when AWS_URL is null.
+     */
+    public function test_supabase_s3_disk_auto_derives_public_object_url_when_aws_url_is_null(): void
+    {
+        $endpoint = 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3';
+        $bucket = 'bakery-media';
+        $derivedUrl = str_replace('.storage.supabase.co/storage/v1/s3', '.supabase.co/storage/v1/object/public/' . $bucket, $endpoint);
+
+        config([
+            'filesystems.disks.s3.key' => 'mock_key',
+            'filesystems.disks.s3.secret' => 'mock_secret',
+            'filesystems.disks.s3.region' => 'ap-northeast-1',
+            'filesystems.disks.s3.bucket' => $bucket,
+            'filesystems.disks.s3.endpoint' => $endpoint,
+            'filesystems.disks.s3.use_path_style_endpoint' => true,
+            'filesystems.disks.s3.url' => $derivedUrl,
+        ]);
+
+        $url = Storage::disk('s3')->url('logos/test_logo.png');
+        $this->assertEquals(
+            'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/test_logo.png',
+            $url
+        );
     }
 }

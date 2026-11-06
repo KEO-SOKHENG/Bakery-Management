@@ -8,16 +8,25 @@ PORT="${PORT:-80}"
 echo "Listen ${PORT}" > /etc/apache2/ports.conf
 sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost \*:${PORT}>/g" /etc/apache2/sites-available/000-default.conf
 
-# Ensure required storage and cache directories exist
+# Ensure required storage, upload directories, and cache directories exist
 mkdir -p storage/framework/cache/data \
          storage/framework/sessions \
          storage/framework/views \
          storage/logs \
          storage/app/public \
-         bootstrap/cache
+         storage/app/public/logos \
+         storage/app/public/avatars \
+         bootstrap/cache \
+         public/images/avatars
 
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache public/images
+chmod -R 775 storage bootstrap/cache public/images
+
+# Ensure public storage symlink exists for persistent asset serving
+if [ ! -e public/storage ]; then
+    rm -f public/storage 2>/dev/null || true
+    php artisan storage:link || true
+fi
 
 # Safe read-only diagnostic check of database connectivity (non-destructive, credentials never logged)
 if php artisan db:diagnostic; then
