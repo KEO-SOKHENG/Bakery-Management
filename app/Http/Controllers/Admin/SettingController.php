@@ -180,7 +180,7 @@ class SettingController extends Controller
 
         $uploadedLogoUrl = null;
         $uploadedAvatarUrl = null;
-        $diskName = config('filesystems.settings_disk', config('filesystems.default') === 's3' ? 's3' : 'public');
+        $diskName = config('filesystems.settings_disk', in_array(config('filesystems.default'), ['s3', 'supabase-s3'], true) ? config('filesystems.default') : 'public');
 
         // Handle shop logo upload if provided
         if ($request->hasFile('shop_logo')) {

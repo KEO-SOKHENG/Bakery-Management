@@ -15,7 +15,7 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
-    'settings_disk' => env('SETTINGS_DISK', env('FILESYSTEM_DISK') === 's3' ? 's3' : 'public'),
+    'settings_disk' => env('SETTINGS_DISK', in_array(env('FILESYSTEM_DISK'), ['s3', 'supabase-s3'], true) ? env('FILESYSTEM_DISK') : 'public'),
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ return [
     | may even configure multiple disks for the same driver. Examples for
     | most supported storage drivers are configured here for reference.
     |
-    | Supported drivers: "local", "ftp", "sftp", "s3"
+    | Supported drivers: "local", "ftp", "sftp", "s3", "supabase-s3"
     |
     */
 
@@ -50,13 +50,13 @@ return [
         ],
 
         's3' => [
-            'driver' => 's3',
+            'driver' => env('AWS_DRIVER') ?: 'supabase-s3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION', 'ap-northeast-1'),
-            'bucket' => env('AWS_BUCKET', 'bakery-media'),
+            'region' => env('AWS_DEFAULT_REGION') ?: 'ap-northeast-1',
+            'bucket' => env('AWS_BUCKET') ?: 'bakery-media',
             'url' => (function () {
-                $bucket = env('AWS_BUCKET', 'bakery-media');
+                $bucket = env('AWS_BUCKET') ?: 'bakery-media';
                 $url = env('AWS_URL');
                 if ($url) {
                     if (str_contains($url, '.supabase.co/storage/v1/object/public') && !str_ends_with(rtrim($url, '/'), '/' . $bucket)) {
@@ -72,8 +72,35 @@ return [
             })(),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', env('AWS_ENDPOINT') ? true : false),
-            'throw' => false,
-            'report' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+
+        'supabase-s3' => [
+            'driver' => 'supabase-s3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION') ?: 'ap-northeast-1',
+            'bucket' => env('AWS_BUCKET') ?: 'bakery-media',
+            'url' => (function () {
+                $bucket = env('AWS_BUCKET') ?: 'bakery-media';
+                $url = env('AWS_URL');
+                if ($url) {
+                    if (str_contains($url, '.supabase.co/storage/v1/object/public') && !str_ends_with(rtrim($url, '/'), '/' . $bucket)) {
+                        return rtrim($url, '/') . '/' . $bucket;
+                    }
+                    return $url;
+                }
+                $endpoint = env('AWS_ENDPOINT');
+                if ($endpoint && str_contains($endpoint, '.storage.supabase.co')) {
+                    return str_replace('.storage.supabase.co/storage/v1/s3', '.supabase.co/storage/v1/object/public/' . $bucket, $endpoint);
+                }
+                return null;
+            })(),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', env('AWS_ENDPOINT') ? true : false),
+            'throw' => true,
+            'report' => true,
         ],
 
     ],

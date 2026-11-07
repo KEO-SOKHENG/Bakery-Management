@@ -19,6 +19,11 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Aws\MockHandler;
+use Aws\Result;
+use Aws\CommandInterface;
+use Psr\Http\Message\RequestInterface;
+use Aws\S3\S3Client;
 use Tests\TestCase;
 
 class SettingManagementTest extends TestCase
@@ -934,5 +939,274 @@ class SettingManagementTest extends TestCase
             'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/test_logo.png',
             $url
         );
+    }
+
+    /**
+     * 39. Supabase S3 PutObject requests remove ACL parameters and omit x-amz-acl header.
+     */
+    public function test_supabase_s3_put_object_removes_acl_and_omits_x_amz_acl_header(): void
+    {
+        $interceptedRequest = null;
+        $mock = new MockHandler();
+        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
+            $interceptedRequest = $req;
+            return new Result();
+        });
+
+        config([
+            'filesystems.disks.test_supabase_acl' => [
+                'driver' => 'supabase-s3',
+                'key' => 'AKIAIOSFODNN7EXAMPLE',
+                'secret' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                'region' => 'ap-northeast-1',
+                'bucket' => 'bakery-media',
+                'endpoint' => 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3',
+                'use_path_style_endpoint' => true,
+                'handler' => $mock,
+                'throw' => true,
+                'report' => true,
+            ],
+        ]);
+
+        $disk = Storage::disk('test_supabase_acl');
+        $disk->put('logos/unit_test.txt', 'test contents');
+
+        $this->assertNotNull($interceptedRequest);
+        // Outgoing HTTP request must NOT have x-amz-acl header
+        $this->assertFalse($interceptedRequest->hasHeader('x-amz-acl'));
+    }
+
+    /**
+     * 40. AWS Signature V4 does not sign x-amz-acl for Supabase S3 requests.
+     */
+    public function test_supabase_s3_sigv4_does_not_sign_x_amz_acl(): void
+    {
+        $interceptedRequest = null;
+        $mock = new MockHandler();
+        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
+            $interceptedRequest = $req;
+            return new Result();
+        });
+
+        config([
+            'filesystems.disks.test_supabase_sigv4' => [
+                'driver' => 'supabase-s3',
+                'key' => 'AKIAIOSFODNN7EXAMPLE',
+                'secret' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                'region' => 'ap-northeast-1',
+                'bucket' => 'bakery-media',
+                'endpoint' => 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3',
+                'use_path_style_endpoint' => true,
+                'handler' => $mock,
+                'throw' => true,
+                'report' => true,
+            ],
+        ]);
+
+        $disk = Storage::disk('test_supabase_sigv4');
+        $disk->put('logos/sigv4_test.txt', 'sigv4 test payload');
+
+        $this->assertNotNull($interceptedRequest);
+        $authHeader = $interceptedRequest->getHeaderLine('Authorization');
+        $this->assertNotEmpty($authHeader);
+        // Signature V4 SignedHeaders must NOT contain x-amz-acl
+        $this->assertStringNotContainsString('x-amz-acl', $authHeader);
+        $this->assertStringContainsString('AWS4-HMAC-SHA256', $authHeader);
+    }
+
+    /**
+     * 41. Supabase S3 custom driver supports upload and delete operations.
+     */
+    public function test_supabase_s3_driver_upload_and_delete_operations_work(): void
+    {
+        $mock = new MockHandler();
+        // 1. PutObject response
+        $mock->append(new Result());
+        // 2. HeadObject response for exists() check
+        $mock->append(new Result(['ContentLength' => 12]));
+        // 3. DeleteObject response
+        $mock->append(new Result());
+
+        config([
+            'filesystems.disks.test_supabase_ops' => [
+                'driver' => 'supabase-s3',
+                'key' => 'AKIAIOSFODNN7EXAMPLE',
+                'secret' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                'region' => 'ap-northeast-1',
+                'bucket' => 'bakery-media',
+                'endpoint' => 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3',
+                'use_path_style_endpoint' => true,
+                'handler' => $mock,
+                'throw' => true,
+                'report' => true,
+            ],
+        ]);
+
+        $disk = Storage::disk('test_supabase_ops');
+
+        // Write file
+        $putResult = $disk->put('logos/ops_test.png', 'fake image bytes');
+        $this->assertTrue($putResult);
+
+        // Check existence
+        $existsResult = $disk->exists('logos/ops_test.png');
+        $this->assertTrue($existsResult);
+
+        // Delete file
+        $deleteResult = $disk->delete('logos/ops_test.png');
+        $this->assertTrue($deleteResult);
+    }
+
+    /**
+     * 42. Supabase-s3 dedicated disk generates correct public object URL.
+     */
+    public function test_supabase_s3_disk_generates_correct_public_object_url(): void
+    {
+        $endpoint = 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3';
+        $bucket = 'bakery-media';
+        $derivedUrl = str_replace('.storage.supabase.co/storage/v1/s3', '.supabase.co/storage/v1/object/public/' . $bucket, $endpoint);
+
+        config([
+            'filesystems.disks.supabase-s3.key' => 'mock_key',
+            'filesystems.disks.supabase-s3.secret' => 'mock_secret',
+            'filesystems.disks.supabase-s3.region' => 'ap-northeast-1',
+            'filesystems.disks.supabase-s3.bucket' => $bucket,
+            'filesystems.disks.supabase-s3.endpoint' => $endpoint,
+            'filesystems.disks.supabase-s3.use_path_style_endpoint' => true,
+            'filesystems.disks.supabase-s3.url' => $derivedUrl,
+        ]);
+
+        $url = Storage::disk('supabase-s3')->url('logos/supabase_logo.png');
+        $this->assertEquals(
+            'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/supabase_logo.png',
+            $url
+        );
+    }
+
+    /**
+     * 43. Failed upload to Supabase S3 preserves database values and previous logo.
+     */
+    public function test_failed_upload_to_supabase_s3_preserves_database_and_previous_logo(): void
+    {
+        SettingsService::set('shop_logo', 'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/initial_logo.png');
+        config(['filesystems.settings_disk' => 'supabase-s3']);
+
+        $mockDisk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockDisk->shouldReceive('putFileAs')
+            ->andThrow(new \League\Flysystem\UnableToWriteFile('Connection refused to Supabase S3 endpoint'));
+        $mockDisk->shouldReceive('exists')->andReturn(false);
+
+        Storage::shouldReceive('disk')->with('supabase-s3')->andReturn($mockDisk);
+
+        $file = UploadedFile::fake()->image('failed_logo.png', 200, 200);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message', 'errors' => ['shop_logo']]);
+        // Sensitive connection info should not be leaked
+        $this->assertStringNotContainsString('Connection refused', $response->getContent());
+
+        // Previous logo in database must remain unchanged
+        $this->assertEquals(
+            'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/initial_logo.png',
+            SettingsService::get('shop_logo')
+        );
+    }
+
+    /**
+     * 44. Settings update without logo upload continues to work with Supabase disk.
+     */
+    public function test_settings_update_without_logo_upload_continues_to_work_with_supabase_disk(): void
+    {
+        config(['filesystems.settings_disk' => 'supabase-s3']);
+
+        $response = $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'shop_name'    => 'Moon Cake Fresh Bakery',
+            'shop_phone'   => '+855 12 345 678',
+            'shop_email'   => 'bakery@example.com',
+            'tax_rate'     => 10,
+            'currency'     => 'KHR',
+            'opening_time' => '07:00',
+            'closing_time' => '21:00',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $this->assertEquals('Moon Cake Fresh Bakery', SettingsService::get('shop_name'));
+        $this->assertEquals('+855 12 345 678', SettingsService::get('shop_phone'));
+        $this->assertEquals('bakery@example.com', SettingsService::get('shop_email'));
+    }
+
+    /**
+     * 45. Production Supabase S3 endpoint and path-style compatibility audit.
+     */
+    public function test_production_supabase_s3_endpoint_and_path_style_compatibility(): void
+    {
+        $interceptedRequest = null;
+        $mock = new MockHandler();
+        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
+            $interceptedRequest = $req;
+            return new Result();
+        });
+
+        $endpoint = 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3';
+        $bucket = 'bakery-media';
+        $publicBaseUrl = 'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/' . $bucket;
+
+        config([
+            'filesystems.disks.prod_audit_supabase' => [
+                'driver' => 'supabase-s3',
+                'key' => 'AKIAIOSFODNN7EXAMPLE',
+                'secret' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                'region' => 'ap-northeast-1',
+                'bucket' => $bucket,
+                'endpoint' => $endpoint,
+                'url' => $publicBaseUrl,
+                'use_path_style_endpoint' => true,
+                'handler' => $mock,
+                'throw' => true,
+                'report' => true,
+            ],
+        ]);
+
+        $disk = Storage::disk('prod_audit_supabase');
+        $fileName = 'bakery_logo_1730000000_abcd1234.png';
+        $disk->put('logos/' . $fileName, 'audit image binary content');
+
+        $this->assertNotNull($interceptedRequest);
+
+        // 1. Confirm HTTP Host is exact Supabase storage host
+        $this->assertEquals('rtrnlnezucgjkgqluofv.storage.supabase.co', $interceptedRequest->getHeaderLine('Host'));
+        $this->assertEquals('rtrnlnezucgjkgqluofv.storage.supabase.co', $interceptedRequest->getUri()->getHost());
+
+        // 2. Confirm request path includes /storage/v1/s3/bakery-media/logos/
+        $requestPath = $interceptedRequest->getUri()->getPath();
+        $this->assertEquals('/storage/v1/s3/bakery-media/logos/' . $fileName, $requestPath);
+        $this->assertStringStartsWith('/storage/v1/s3/bakery-media/logos/', $requestPath);
+
+        // 3. Confirm bucket is NOT inserted as a subdomain
+        $this->assertStringNotContainsString('bakery-media.storage.supabase.co', $interceptedRequest->getHeaderLine('Host'));
+        $this->assertStringNotContainsString('bakery-media.storage.supabase.co', (string) $interceptedRequest->getUri());
+
+        // 4. Confirm x-amz-acl is completely absent from request headers
+        $this->assertFalse($interceptedRequest->hasHeader('x-amz-acl'));
+
+        // 5. Confirm AWS Signature V4 signs the correct request without x-amz-acl
+        $authHeader = $interceptedRequest->getHeaderLine('Authorization');
+        $this->assertStringContainsString('AWS4-HMAC-SHA256', $authHeader);
+        $this->assertStringContainsString('Credential=AKIAIOSFODNN7EXAMPLE/20261107/ap-northeast-1/s3/aws4_request', $authHeader);
+        $this->assertStringNotContainsString('x-amz-acl', $authHeader);
+
+        // 6. Verify public URL uses https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/
+        $generatedUrl = $disk->url('logos/' . $fileName);
+        $this->assertEquals(
+            'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/' . $fileName,
+            $generatedUrl
+        );
+        $this->assertStringStartsWith('https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/', $generatedUrl);
     }
 }
