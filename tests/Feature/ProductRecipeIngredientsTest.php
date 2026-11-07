@@ -166,4 +166,3 @@ class ProductRecipeIngredientsTest extends TestCase
         $response->assertSee('Live Sync');
     }
 }
-

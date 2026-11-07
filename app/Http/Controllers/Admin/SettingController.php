@@ -212,6 +212,7 @@ class SettingController extends Controller
             $previousLogo = SettingsService::getString('shop_logo', '');
 
             try {
+                /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
                 $disk = Storage::disk($diskName);
                 $storedPath = $disk->putFileAs('logos', $logoFile, $logoFilename);
 
@@ -297,6 +298,7 @@ class SettingController extends Controller
             $previousAvatar = SettingsService::getString('user_avatar_' . $user->id, '');
 
             try {
+                /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
                 $disk = Storage::disk($diskName);
                 $storedPath = $disk->putFileAs('avatars', $avatarFile, $avatarFilename);
 

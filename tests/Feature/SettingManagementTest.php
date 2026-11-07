@@ -2,28 +2,24 @@
 
 namespace Tests\Feature;
 
-use App\Models\AuditLog;
 use App\Models\Category;
-use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\Setting;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\SettingsService;
-use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Aws\MockHandler;
 use Aws\Result;
-use Aws\CommandInterface;
+use Carbon\Carbon;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Mockery\MockInterface;
 use Psr\Http\Message\RequestInterface;
-use Aws\S3\S3Client;
 use Tests\TestCase;
 
 class SettingManagementTest extends TestCase
@@ -71,7 +67,23 @@ class SettingManagementTest extends TestCase
             'status'   => 'active',
         ]);
 
+        config([
+            'filesystems.default'       => 'local',
+            'filesystems.settings_disk' => 'public',
+        ]);
+
         SettingsService::clearCache();
+    }
+
+    /**
+     * Get a filesystem disk instance typed as FilesystemAdapter for IDE and static analysis.
+     */
+    protected function storageDisk(string $name = 'public'): FilesystemAdapter
+    {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk($name);
+
+        return $disk;
     }
 
     /**
@@ -560,7 +572,7 @@ class SettingManagementTest extends TestCase
         $this->assertStringEndsWith('.png', $storedLogo);
 
         $relativeDiskPath = str_replace('/storage/', '', $storedLogo);
-        Storage::disk('public')->assertExists($relativeDiskPath);
+        $this->storageDisk('public')->assertExists($relativeDiskPath);
     }
 
     /**
@@ -656,7 +668,7 @@ class SettingManagementTest extends TestCase
 
         $firstLogo = SettingsService::get('shop_logo');
         $firstDiskPath = str_replace('/storage/', '', $firstLogo);
-        Storage::disk('public')->assertExists($firstDiskPath);
+        $this->storageDisk('public')->assertExists($firstDiskPath);
 
         // 2. Second upload (replaces first)
         $secondFile = UploadedFile::fake()->image('second_logo.jpg', 200, 200);
@@ -668,9 +680,9 @@ class SettingManagementTest extends TestCase
         $secondDiskPath = str_replace('/storage/', '', $secondLogo);
 
         // Second logo must exist
-        Storage::disk('public')->assertExists($secondDiskPath);
+        $this->storageDisk('public')->assertExists($secondDiskPath);
         // First logo must have been cleaned up
-        Storage::disk('public')->assertMissing($firstDiskPath);
+        $this->storageDisk('public')->assertMissing($firstDiskPath);
         $this->assertNotEquals($firstLogo, $secondLogo);
     }
 
@@ -679,19 +691,23 @@ class SettingManagementTest extends TestCase
      */
     public function test_previous_logo_is_preserved_when_new_upload_fails(): void
     {
+        config(['filesystems.settings_disk' => 'public']);
         Storage::fake('public');
 
         // 1. Initial valid upload
         $validFile = UploadedFile::fake()->image('good_logo.png', 200, 200);
-        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+        $initResponse = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
             'shop_logo' => $validFile,
         ]);
+        $initResponse->assertRedirect();
+        $initResponse->assertSessionHas('success');
 
         $originalLogo = SettingsService::get('shop_logo');
+        $this->assertNotEmpty($originalLogo);
         $originalDiskPath = str_replace('/storage/', '', $originalLogo);
-        Storage::disk('public')->assertExists($originalDiskPath);
+        $this->storageDisk('public')->assertExists($originalDiskPath);
 
-        // 2. Attempt uploading an invalid file
+        // 2. Attempt uploading an invalid file (validation failure)
         $invalidFile = UploadedFile::fake()->create('hacker.exe', 500, 'application/octet-stream');
         $failResponse = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
             'shop_logo' => $invalidFile,
@@ -701,7 +717,26 @@ class SettingManagementTest extends TestCase
 
         // 3. Verify original logo is still preserved in DB and on disk
         $this->assertEquals($originalLogo, SettingsService::get('shop_logo'));
-        Storage::disk('public')->assertExists($originalDiskPath);
+        $this->storageDisk('public')->assertExists($originalDiskPath);
+
+        // 4. Attempt uploading a valid file when storage disk fails (storage failure)
+        /** @var \Illuminate\Contracts\Filesystem\Filesystem&MockInterface $mockDisk */
+        $mockDisk = Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        $mockDisk->shouldReceive('putFileAs')
+            ->andThrow(new \RuntimeException('Storage disk unavailable'));
+        $mockDisk->shouldReceive('exists')->andReturn(false);
+
+        Storage::set('public', $mockDisk);
+
+        $secondValidFile = UploadedFile::fake()->image('second_good_logo.png', 200, 200);
+        $storageFailResponse = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $secondValidFile,
+        ]);
+
+        $storageFailResponse->assertSessionHasErrors('shop_logo');
+
+        // 5. Verify original logo in database is STILL preserved after storage failure
+        $this->assertEquals($originalLogo, SettingsService::get('shop_logo'));
     }
 
     /**
@@ -710,12 +745,13 @@ class SettingManagementTest extends TestCase
     public function test_storage_unavailable_returns_graceful_error_instead_of_http_500(): void
     {
         // Mock Storage disk to throw a Filesystem exception when writing
-        $mockDisk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        /** @var \Illuminate\Contracts\Filesystem\Filesystem&MockInterface $mockDisk */
+        $mockDisk = Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
         $mockDisk->shouldReceive('putFileAs')
             ->andThrow(new \RuntimeException('Disk write failure: permission denied'));
         $mockDisk->shouldReceive('exists')->andReturn(false);
 
-        Storage::shouldReceive('disk')->with('public')->andReturn($mockDisk);
+        Storage::set('public', $mockDisk);
 
         $file = UploadedFile::fake()->image('broken_disk.png', 200, 200);
 
@@ -774,7 +810,7 @@ class SettingManagementTest extends TestCase
         $this->assertStringStartsWith('/storage/avatars/avatar_', $data['avatar_url']);
 
         $relativeDiskPath = str_replace('/storage/', '', $data['avatar_url']);
-        Storage::disk('public')->assertExists($relativeDiskPath);
+        $this->storageDisk('public')->assertExists($relativeDiskPath);
     }
 
     /**
@@ -792,7 +828,7 @@ class SettingManagementTest extends TestCase
             'filesystems.disks.s3.url' => 'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media',
         ]);
 
-        $url = Storage::disk('s3')->url('logos/bakery_logo_1730000000.png');
+        $url = $this->storageDisk('s3')->url('logos/bakery_logo_1730000000.png');
         $this->assertEquals(
             'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/bakery_logo_1730000000.png',
             $url
@@ -825,7 +861,7 @@ class SettingManagementTest extends TestCase
         $pos = strpos($parsedPath, 'logos/');
         $this->assertNotFalse($pos);
         $objectKey = substr($parsedPath, $pos);
-        Storage::disk('s3')->assertExists($objectKey);
+        $this->storageDisk('s3')->assertExists($objectKey);
     }
 
     /**
@@ -852,7 +888,7 @@ class SettingManagementTest extends TestCase
         $pos = strpos($parsedPath, 'avatars/');
         $this->assertNotFalse($pos);
         $objectKey = substr($parsedPath, $pos);
-        Storage::disk('s3')->assertExists($objectKey);
+        $this->storageDisk('s3')->assertExists($objectKey);
     }
 
     /**
@@ -872,7 +908,7 @@ class SettingManagementTest extends TestCase
         $firstLogo = SettingsService::get('shop_logo');
         $firstParsed = parse_url($firstLogo, PHP_URL_PATH) ?? $firstLogo;
         $firstKey = substr($firstParsed, strpos($firstParsed, 'logos/'));
-        Storage::disk('s3')->assertExists($firstKey);
+        $this->storageDisk('s3')->assertExists($firstKey);
 
         // 2. Second upload
         $secondFile = UploadedFile::fake()->image('second_s3.png', 200, 200);
@@ -884,8 +920,8 @@ class SettingManagementTest extends TestCase
         $secondParsed = parse_url($secondLogo, PHP_URL_PATH) ?? $secondLogo;
         $secondKey = substr($secondParsed, strpos($secondParsed, 'logos/'));
 
-        Storage::disk('s3')->assertExists($secondKey);
-        Storage::disk('s3')->assertMissing($firstKey);
+        $this->storageDisk('s3')->assertExists($secondKey);
+        $this->storageDisk('s3')->assertMissing($firstKey);
         $this->assertNotEquals($firstLogo, $secondLogo);
     }
 
@@ -896,12 +932,13 @@ class SettingManagementTest extends TestCase
     {
         config(['filesystems.settings_disk' => 's3']);
 
-        $mockS3Disk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        /** @var \Illuminate\Contracts\Filesystem\Filesystem&MockInterface $mockS3Disk */
+        $mockS3Disk = Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
         $mockS3Disk->shouldReceive('putFileAs')
             ->andThrow(new \RuntimeException('Supabase S3 connection timeout error'));
         $mockS3Disk->shouldReceive('exists')->andReturn(false);
 
-        Storage::shouldReceive('disk')->with('s3')->andReturn($mockS3Disk);
+        Storage::set('s3', $mockS3Disk);
 
         $file = UploadedFile::fake()->image('s3_failure.png', 200, 200);
 
@@ -934,7 +971,7 @@ class SettingManagementTest extends TestCase
             'filesystems.disks.s3.url' => $derivedUrl,
         ]);
 
-        $url = Storage::disk('s3')->url('logos/test_logo.png');
+        $url = $this->storageDisk('s3')->url('logos/test_logo.png');
         $this->assertEquals(
             'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/test_logo.png',
             $url
@@ -946,12 +983,8 @@ class SettingManagementTest extends TestCase
      */
     public function test_supabase_s3_put_object_removes_acl_and_omits_x_amz_acl_header(): void
     {
-        $interceptedRequest = null;
         $mock = new MockHandler();
-        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
-            $interceptedRequest = $req;
-            return new Result();
-        });
+        $mock->append(new Result());
 
         config([
             'filesystems.disks.test_supabase_acl' => [
@@ -968,9 +1001,11 @@ class SettingManagementTest extends TestCase
             ],
         ]);
 
-        $disk = Storage::disk('test_supabase_acl');
+        $disk = $this->storageDisk('test_supabase_acl');
         $disk->put('logos/unit_test.txt', 'test contents');
 
+        /** @var RequestInterface $interceptedRequest */
+        $interceptedRequest = $mock->getLastRequest();
         $this->assertNotNull($interceptedRequest);
         // Outgoing HTTP request must NOT have x-amz-acl header
         $this->assertFalse($interceptedRequest->hasHeader('x-amz-acl'));
@@ -981,12 +1016,8 @@ class SettingManagementTest extends TestCase
      */
     public function test_supabase_s3_sigv4_does_not_sign_x_amz_acl(): void
     {
-        $interceptedRequest = null;
         $mock = new MockHandler();
-        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
-            $interceptedRequest = $req;
-            return new Result();
-        });
+        $mock->append(new Result());
 
         config([
             'filesystems.disks.test_supabase_sigv4' => [
@@ -1003,9 +1034,11 @@ class SettingManagementTest extends TestCase
             ],
         ]);
 
-        $disk = Storage::disk('test_supabase_sigv4');
+        $disk = $this->storageDisk('test_supabase_sigv4');
         $disk->put('logos/sigv4_test.txt', 'sigv4 test payload');
 
+        /** @var RequestInterface $interceptedRequest */
+        $interceptedRequest = $mock->getLastRequest();
         $this->assertNotNull($interceptedRequest);
         $authHeader = $interceptedRequest->getHeaderLine('Authorization');
         $this->assertNotEmpty($authHeader);
@@ -1042,7 +1075,7 @@ class SettingManagementTest extends TestCase
             ],
         ]);
 
-        $disk = Storage::disk('test_supabase_ops');
+        $disk = $this->storageDisk('test_supabase_ops');
 
         // Write file
         $putResult = $disk->put('logos/ops_test.png', 'fake image bytes');
@@ -1076,7 +1109,7 @@ class SettingManagementTest extends TestCase
             'filesystems.disks.supabase-s3.url' => $derivedUrl,
         ]);
 
-        $url = Storage::disk('supabase-s3')->url('logos/supabase_logo.png');
+        $url = $this->storageDisk('supabase-s3')->url('logos/supabase_logo.png');
         $this->assertEquals(
             'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/supabase_logo.png',
             $url
@@ -1091,12 +1124,13 @@ class SettingManagementTest extends TestCase
         SettingsService::set('shop_logo', 'https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/logos/initial_logo.png');
         config(['filesystems.settings_disk' => 'supabase-s3']);
 
-        $mockDisk = \Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+        /** @var \Illuminate\Contracts\Filesystem\Filesystem&MockInterface $mockDisk */
+        $mockDisk = Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
         $mockDisk->shouldReceive('putFileAs')
             ->andThrow(new \League\Flysystem\UnableToWriteFile('Connection refused to Supabase S3 endpoint'));
         $mockDisk->shouldReceive('exists')->andReturn(false);
 
-        Storage::shouldReceive('disk')->with('supabase-s3')->andReturn($mockDisk);
+        Storage::set('supabase-s3', $mockDisk);
 
         $file = UploadedFile::fake()->image('failed_logo.png', 200, 200);
 
@@ -1146,12 +1180,8 @@ class SettingManagementTest extends TestCase
      */
     public function test_production_supabase_s3_endpoint_and_path_style_compatibility(): void
     {
-        $interceptedRequest = null;
         $mock = new MockHandler();
-        $mock->append(function (CommandInterface $cmd, RequestInterface $req) use (&$interceptedRequest) {
-            $interceptedRequest = $req;
-            return new Result();
-        });
+        $mock->append(new Result());
 
         $endpoint = 'https://rtrnlnezucgjkgqluofv.storage.supabase.co/storage/v1/s3';
         $bucket = 'bakery-media';
@@ -1173,10 +1203,12 @@ class SettingManagementTest extends TestCase
             ],
         ]);
 
-        $disk = Storage::disk('prod_audit_supabase');
+        $disk = $this->storageDisk('prod_audit_supabase');
         $fileName = 'bakery_logo_1730000000_abcd1234.png';
         $disk->put('logos/' . $fileName, 'audit image binary content');
 
+        /** @var RequestInterface $interceptedRequest */
+        $interceptedRequest = $mock->getLastRequest();
         $this->assertNotNull($interceptedRequest);
 
         // 1. Confirm HTTP Host is exact Supabase storage host
