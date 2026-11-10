@@ -3035,3 +3035,62 @@ body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlig
 [data-theme="glass"] .bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg {
     color: #a1a1aa !important;
 }
+
+/* ── Smooth collapse / expand (desktop) ── */
+@media (min-width: 992px) {
+    html body .bakery-sidebar {
+        transition: width 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    min-width 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    max-width 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    padding 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    background-color 0.3s ease,
+                    border-color 0.3s ease !important;
+    }
+
+    html body .bakery-sidebar .sidebar-nav-item,
+    html body .bakery-sidebar .logout-btn {
+        transition: width 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    min-width 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    padding 0.32s cubic-bezier(0.2, 0, 0, 1),
+                    background-color 0.18s ease,
+                    color 0.18s ease !important;
+    }
+
+    /* Labels: fade + shrink instead of display:none snapping */
+    html body .bakery-sidebar .bakery-logo-text,
+    html body .bakery-sidebar .sidebar-nav-item span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    html body .bakery-sidebar .logout-btn span,
+    html body .bakery-sidebar .sidebar-badge,
+    html body .bakery-sidebar .sidebar-dropdown-btn {
+        white-space: nowrap;
+        overflow: hidden;
+        transition: opacity 0.2s ease 0.08s,
+                    max-width 0.32s cubic-bezier(0.2, 0, 0, 1) !important;
+    }
+
+    html body .bakery-sidebar.sidebar-collapsed .sidebar-nav-item,
+    html body .bakery-sidebar.sidebar-collapsed .sidebar-nav-item.active,
+    html body .bakery-sidebar.sidebar-collapsed .logout-btn {
+        justify-content: flex-start !important;
+        padding: 0 0 0 12px !important;
+        gap: 0 !important;
+    }
+
+    html body .bakery-sidebar.sidebar-collapsed .bakery-logo-text,
+    html body .bakery-sidebar.sidebar-collapsed .sidebar-badge,
+    html body .bakery-sidebar.sidebar-collapsed .sidebar-dropdown-btn,
+    html body .bakery-sidebar.sidebar-collapsed .sidebar-nav-item:not(:hover) span:not(.sidebar-badge):not(.sidebar-dropdown-btn),
+    html body .bakery-sidebar.sidebar-collapsed .logout-btn:not(:hover) span {
+        display: inline-flex !important;
+        opacity: 0 !important;
+        max-width: 0 !important;
+        transition: opacity 0.1s ease,
+                    max-width 0.32s cubic-bezier(0.2, 0, 0, 1) !important;
+    }
+
+    /* Don't animate on first paint when the page loads collapsed */
+    html.sidebar-initially-collapsed body .bakery-sidebar,
+    html.sidebar-initially-collapsed body .bakery-sidebar * {
+        transition: none !important;
+    }
+}
