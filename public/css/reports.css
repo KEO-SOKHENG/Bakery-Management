@@ -2260,3 +2260,34 @@ body.dark-mode .report-dropdown-menu.has-drop-pill .report-dropdown-item:not(.pi
     html[data-theme="dark"] body.is-reports-page .report-stat-val.val-blue,
     html[data-theme="glass"] body.is-reports-page .report-stat-val.val-blue { color: #60a5fa !important; }
 }
+
+/* ── Export buttons: glass so the night sky shows through ── */
+[data-theme="dark"] .reports-export-actions .btn,
+[data-theme="glass"] .reports-export-actions .btn {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .reports-export-actions .btn:hover,
+[data-theme="glass"] .reports-export-actions .btn:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+/* ── Dark/glass: let the night sky (moon) show behind header & toolbar ── */
+html body.dark-mode .top-header-bar,
+html[data-theme="dark"] body .top-header-bar,
+html[data-theme="glass"] body .top-header-bar,
+html body.dark-mode .reports-fixed-header-section,
+html[data-theme="dark"] body .reports-fixed-header-section,
+html[data-theme="glass"] body .reports-fixed-header-section,
+html body.dark-mode .reports-sticky-toolbar-wrapper,
+html[data-theme="dark"] body .reports-sticky-toolbar-wrapper,
+html[data-theme="glass"] body .reports-sticky-toolbar-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}

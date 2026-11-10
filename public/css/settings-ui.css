@@ -1624,3 +1624,29 @@ html body .apple-detail-body .ios-segmented-control:has(.segmented-pointer-pill[
 html body .apple-detail-body .ios-segmented-control:has(.segmented-pointer-pill[style*="opacity: 1"]) .segmented-option.pill-highlighted {
     color: #ffffff !important;
 }
+
+/* ── Dark mode: glass settings shell ── */
+html[data-theme="dark"] body .apple-settings-shell,
+html body.dark-mode .apple-settings-shell,
+html body.theme-dark .apple-settings-shell {
+    --sui-bg: transparent;
+    --sui-surface: rgba(255, 255, 255, 0.04);
+    --sui-surface-2: rgba(255, 255, 255, 0.06);
+    --sui-border: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.035) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+html[data-theme="dark"] body .apple-settings-shell .apple-detail-pane,
+html[data-theme="dark"] body .apple-settings-shell .apple-detail-body,
+html body.dark-mode .apple-settings-shell .apple-detail-pane,
+html body.dark-mode .apple-settings-shell .apple-detail-body {
+    background: transparent !important;
+}
+
+html[data-theme="dark"] body .apple-settings-shell .apple-nav-pane,
+html body.dark-mode .apple-settings-shell .apple-nav-pane {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
