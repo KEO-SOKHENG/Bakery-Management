@@ -1,6 +1,7 @@
 @props([
     'name',
     'label' => null,
+    'labelKey' => null,
     'options' => [],
     'selected' => null,
     'placeholder' => null,
@@ -12,7 +13,7 @@
 <div class="form-group">
     @if($label)
         <label for="{{ $attributes->get('id', $name) }}" class="form-label">
-            {{ $label }}
+            @if($labelKey)<span data-lang-key="{{ $labelKey }}">{{ $label }}</span>@else{{ $label }}@endif
             @if($required)
                 <span class="required-star">*</span>
             @endif

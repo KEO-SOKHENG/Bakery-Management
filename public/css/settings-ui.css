@@ -1479,9 +1479,9 @@ body.theme-dark .bkx-header-icon { color: #e4e4e7; }
     width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
 }
-.bkx-stat-icon.is-blue { background: rgba(99, 102, 241, 0.16); color: #818cf8; }
-.bkx-stat-icon.is-amber { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
-.bkx-stat-icon.is-violet { background: rgba(139, 92, 246, 0.18); color: #a78bfa; }
+.bkx-stat-icon.is-blue { color: #818cf8; }
+.bkx-stat-icon.is-amber { color: #f59e0b; }
+.bkx-stat-icon.is-violet { color: #a78bfa; }
 
 /* Action cards */
 .bkx-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -1493,8 +1493,8 @@ body.theme-dark .bkx-header-icon { color: #e4e4e7; }
     width: 62px; height: 62px; border-radius: 16px;
     display: inline-flex; align-items: center; justify-content: center;
 }
-.bkx-action-icon.is-orange { background: rgba(243, 106, 19, 0.16); color: #f36a13; }
-.bkx-action-icon.is-rust { background: rgba(194, 90, 60, 0.2); color: #e0775a; }
+.bkx-action-icon.is-orange { color: #f36a13; }
+.bkx-action-icon.is-rust { color: #e0775a; }
 .bkx-action-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .bkx-action-body strong { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
 .bkx-action-body span { font-size: 0.8rem; color: var(--bkx-muted); }

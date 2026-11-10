@@ -50,7 +50,7 @@
         <aside class="apple-nav-pane" id="apple_nav_pane" aria-label="Settings Categories">
             
             <!-- GROUP 1: GENERAL -->
-            <div class="apple-nav-section-title">General</div>
+            <div class="apple-nav-section-title" data-lang-key="settings_group_general">General</div>
 
             <!-- 1. Profile & Business -->
             <button type="button" class="apple-nav-item active" role="tab" id="nav_profile_business" data-target="panel_profile_business" aria-selected="true">
@@ -58,11 +58,11 @@
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                <span class="apple-nav-title">Profile &amp; Business</span>
+                <span class="apple-nav-title" data-lang-key="profile_business">Profile &amp; Business</span>
             </button>
 
             <!-- GROUP 2: PREFERENCES -->
-            <div class="apple-nav-section-title">Preferences</div>
+            <div class="apple-nav-section-title" data-lang-key="settings_group_preferences">Preferences</div>
 
             <!-- 3. Business Settings -->
             <button type="button" class="apple-nav-item" role="tab" id="nav_business" data-target="panel_business" aria-selected="false">
@@ -72,7 +72,7 @@
                     <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
                     <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
                 </svg>
-                <span class="apple-nav-title">Business Settings</span>
+                <span class="apple-nav-title" data-lang-key="business_settings">Business Settings</span>
             </button>
 
             <!-- 4. Notifications -->
@@ -80,7 +80,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                 </svg>
-                <span class="apple-nav-title">Notifications</span>
+                <span class="apple-nav-title" data-lang-key="notifications">Notifications</span>
             </button>
 
             <!-- 5. Appearance -->
@@ -88,11 +88,11 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
-                <span class="apple-nav-title">Appearance</span>
+                <span class="apple-nav-title" data-lang-key="appearance">Appearance &amp; Language</span>
             </button>
 
             <!-- GROUP 3: MANAGEMENT -->
-            <div class="apple-nav-section-title">Management</div>
+            <div class="apple-nav-section-title" data-lang-key="settings_group_management">Management</div>
 
             
 
@@ -101,7 +101,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line>
                 </svg>
-                <span class="apple-nav-title">Storage & Files</span>
+                <span class="apple-nav-title" data-lang-key="storage_files">Storage & Files</span>
             </button>
 
             <!-- 8. Backup & Restore (Admin Only) -->
@@ -110,7 +110,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    <span class="apple-nav-title">Backup & Restore</span>
+                    <span class="apple-nav-title" data-lang-key="nav_backup_restore">Backup & Restore</span>
                 </button>
             @endif
         </aside>
@@ -398,12 +398,11 @@
                         </div>
 
                         <!-- Group 3: Printed Receipt Branding -->
-                        <div class="sp-card bz-card">
-                            <div class="bz-head">
-                                <span class="bz-head-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>
-                                <h3>Receipt Branding</h3>
-                                <span class="bz-head-note">Printed on customer slips</span>
-                            </div>
+                        <div class="storage-section-head" id="section_receipt_branding">
+                            <h3>Receipt Branding</h3>
+                            <span>Printed on customer slips</span>
+                        </div>
+                        <div class="sp-card">
                             <div class="apple-row-stacked" style="padding: 0; border-bottom: none;">
                                 <div class="receipt-preview-wrapper">
                                     <div style="flex: 1; min-width: 280px;">
@@ -568,8 +567,8 @@
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                             </div>
                             <div class="storage-page-heading">
-                                <h2 class="storage-page-title">Appearance & Display</h2>
-                                <span class="storage-page-subtitle">Choose your theme and see the fonts in use.</span>
+                                <h2 class="storage-page-title" data-lang-key="appearance_display">Appearance & Display</h2>
+                                <span class="storage-page-subtitle" data-lang-key="appearance_display_sub">Choose your theme and see the fonts in use.</span>
                             </div>
                         </div>
 
@@ -581,13 +580,13 @@
                         <!-- Group 1: Theme Mode Switcher -->
                         <div class="storage-section-head">
                             <h3 data-lang-key="theme_mode">Theme Mode</h3>
-                            <span>How the system looks</span>
+                            <span data-lang-key="how_system_looks">How the system looks</span>
                         </div>
                         <div class="sp-card">
                             <div class="apple-row">
                                 <div class="apple-row-label-wrap">
-                                    <span class="apple-row-title">Interface Style</span>
-                                    <span class="apple-row-desc">Light or dark colors</span>
+                                    <span class="apple-row-title" data-lang-key="interface_style">Interface Style</span>
+                                    <span class="apple-row-desc" data-lang-key="interface_style_sub">Light or dark colors</span>
                                 </div>
                                 <div class="ios-segmented-control">
                                     <button type="button" class="segmented-option {{ ($settings['theme_mode'] ?? 'light') === 'light' ? 'active' : '' }}" data-theme-value="light">
@@ -604,12 +603,12 @@
 
                         <!-- Group 2: System Language (moved here from Business Settings) -->
                         <div class="storage-section-head">
-                            <h3>System Language</h3>
-                            <span>Language of the interface</span>
+                            <h3 data-lang-key="system_language">System Language</h3>
+                            <span data-lang-key="system_language_sub">Language of the interface</span>
                         </div>
                         <div class="sp-card">
                             <div style="max-width: 50%;">
-                                <x-select name="language" id="language_select" data-styled-select label="System Language" :disabled="!$canManage">
+                                <x-select name="language" id="language_select" data-styled-select label="System Language" label-key="system_language" :disabled="!$canManage">
                                     <option value="EN" {{ strtoupper($settings['language'] ?? 'EN') === 'EN' ? 'selected' : '' }}>English</option>
                                     <option value="KM" {{ strtoupper($settings['language'] ?? '') === 'KM' ? 'selected' : '' }}>Khmer (ភាសាខ្មែរ)</option>
                                 </x-select>

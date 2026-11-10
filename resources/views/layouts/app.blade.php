@@ -341,6 +341,7 @@
                                 class="header-search-input"
                                 id="{{ request()->is('pos*') || request()->is('cashier*') ? 'pos_search_input' : (request()->is('admin/orders*') ? 'order_search_input' : (request()->is('admin/categories*') ? 'category_search_input' : 'global_header_search')) }}"
                                 placeholder="Search page items..."
+                                data-lang-key="search_page_items"
                                 autocomplete="off"
                                 value="{{ request('search') }}"
                             >

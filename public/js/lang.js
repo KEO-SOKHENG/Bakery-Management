@@ -342,7 +342,24 @@
             "restore_file": "Backup file (.json)",
             "restore_warning": "I understand my current settings will be replaced.",
             "restore_now": "Restore Settings",
-            "save_changes": "Save Changes"
+            "save_changes": "Save Changes",
+            "system_settings": "System Settings",
+            "search_page_items": "Search page items...",
+            "settings_group_general": "General",
+            "settings_group_preferences": "Preferences",
+            "settings_group_management": "Management",
+            "profile_business": "Profile & Business",
+            "business_settings": "Business Settings",
+            "appearance": "Appearance & Language",
+            "storage_files": "Storage & Files",
+            "nav_backup_restore": "Backup & Restore",
+            "appearance_display": "Appearance & Display",
+            "appearance_display_sub": "Choose your theme and see the fonts in use.",
+            "how_system_looks": "How the system looks",
+            "interface_style": "Interface Style",
+            "interface_style_sub": "Light or dark colors",
+            "system_language": "System Language",
+            "system_language_sub": "Language of the interface"
         },
         KM: {
             // Navigation
@@ -684,7 +701,24 @@
             "restore_file": "ជ្រើសរើសឯកសារបម្រុងទុក (.JSON)",
             "restore_warning": "ខ្ញុំបញ្ជាក់ថាខ្ញុំចង់ស្តារការកំណត់ប្រព័ន្ធឡើងវិញ។ ការកំណត់បច្ចុប្បន្ននឹងត្រូវសរសេរជាន់លើ។",
             "restore_now": "ស្តារការកំណត់ឡើងវិញ",
-            "save_changes": "រក្សាទុកការផ្លាស់ប្តូរ"
+            "save_changes": "រក្សាទុកការផ្លាស់ប្តូរ",
+            "system_settings": "ការកំណត់ប្រព័ន្ធ",
+            "search_page_items": "ស្វែងរកនៅលើទំព័រ...",
+            "settings_group_general": "ទូទៅ",
+            "settings_group_preferences": "ចំណូលចិត្ត",
+            "settings_group_management": "ការគ្រប់គ្រង",
+            "profile_business": "ប្រវត្តិរូប និងអាជីវកម្ម",
+            "business_settings": "ការកំណត់អាជីវកម្ម",
+            "appearance": "រូបរាង និងភាសា",
+            "storage_files": "ទំហំផ្ទុក និងឯកសារ",
+            "nav_backup_restore": "បម្រុងទុក និងស្តារ",
+            "appearance_display": "រូបរាង និងការបង្ហាញ",
+            "appearance_display_sub": "ជ្រើសរើសរចនាប័ទ្ម និងមើលពុម្ពអក្សរដែលកំពុងប្រើ។",
+            "how_system_looks": "របៀបដែលប្រព័ន្ធបង្ហាញ",
+            "interface_style": "រចនាប័ទ្មផ្ទៃប្រើប្រាស់",
+            "interface_style_sub": "ពណ៌ភ្លឺ ឬពណ៌ងងឹត",
+            "system_language": "ភាសាប្រព័ន្ធ",
+            "system_language_sub": "ភាសានៃផ្ទៃប្រើប្រាស់"
         }
     };
 
