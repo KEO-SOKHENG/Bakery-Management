@@ -6197,3 +6197,50 @@ html body.dark-mode .bakery-sidebar:hover {
     backdrop-filter: blur(16px) saturate(140%) !important;
     -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
 }
+
+/* ── Dark mode: glass menubars, search and bell ── */
+html[data-theme="dark"] body .dash-filter-bar,
+html[data-theme="dark"] body .header-filter-form,
+html[data-theme="dark"] body .reports-main-nav,
+html[data-theme="dark"] body .report-nav-tabs,
+html[data-theme="dark"] body .hr-nav-tabs,
+html[data-theme="dark"] body .orders-filter-bar,
+html[data-theme="dark"] body .pos-category-tabs,
+html[data-theme="dark"] body .ios-segmented-control,
+html[data-theme="dark"] body .header-search-box,
+html[data-theme="dark"] body .icon-bell-btn,
+html body.dark-mode .dash-filter-bar,
+html body.dark-mode .header-filter-form,
+html body.dark-mode .reports-main-nav,
+html body.dark-mode .report-nav-tabs,
+html body.dark-mode .hr-nav-tabs,
+html body.dark-mode .orders-filter-bar,
+html body.dark-mode .pos-category-tabs,
+html body.dark-mode .ios-segmented-control,
+html body.dark-mode .header-search-box,
+html body.dark-mode .icon-bell-btn,
+html body.theme-dark .dash-filter-bar,
+html body.theme-dark .header-filter-form,
+html body.theme-dark .reports-main-nav,
+html body.theme-dark .report-nav-tabs,
+html body.theme-dark .hr-nav-tabs,
+html body.theme-dark .orders-filter-bar,
+html body.theme-dark .pos-category-tabs,
+html body.theme-dark .ios-segmented-control,
+html body.theme-dark .header-search-box,
+html body.theme-dark .icon-bell-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+    border-radius: 9999px !important;
+}
+
+html[data-theme="dark"] body .header-search-input,
+html body.dark-mode .header-search-input,
+html body.theme-dark .header-search-input {
+    background: transparent !important;
+    background-color: transparent !important;
+}
