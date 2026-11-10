@@ -5,6 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $category_id
+ * @property string $name
+ * @property string|null $slug
+ * @property string|null $sku
+ * @property string|null $description
+ * @property float $price
+ * @property float $cost
+ * @property int $stock
+ * @property int $minimum_stock
+ * @property int|null $shelf_life
+ * @property \Carbon\Carbon|null $expiry_date
+ * @property string $status
+ * @property string|null $image_emoji
+ * @property string|null $image_path
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ */
 class Product extends Model
 {
     use HasFactory;
@@ -61,15 +80,18 @@ class Product extends Model
 
     public function getImageUrl(): ?string
     {
-        if (!empty($this->image_path) && file_exists(public_path($this->image_path))) {
-            return asset($this->image_path);
+        $images = app(\App\Services\ProductImageStorage::class);
+
+        foreach ([$this->image_path, $this->image] as $path) {
+            if (empty($path)) {
+                continue;
+            }
+            $url = $images->url($path);
+            if ($url !== null) {
+                return $url;
+            }
         }
-        if (!empty($this->image) && file_exists(public_path($this->image))) {
-            return asset($this->image);
-        }
-        if (!empty($this->image) && file_exists(public_path('storage/' . $this->image))) {
-            return asset('storage/' . $this->image);
-        }
+
         return null;
     }
 

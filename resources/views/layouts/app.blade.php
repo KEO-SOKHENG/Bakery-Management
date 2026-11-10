@@ -9,7 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Instant Theme Loader -->
     <script>
@@ -70,11 +70,15 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ asset('css/common.css') }}?v={{ @filemtime(public_path('css/common.css')) ?: '1.0' }}">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}?v={{ @filemtime(public_path('css/sidebar.css')) ?: '1.0' }}">
+    <link rel="stylesheet" href="{{ asset('css/theme-scenery.css') }}?v={{ @filemtime(public_path('css/theme-scenery.css')) ?: '1.0' }}">
     <link rel="stylesheet" href="{{ asset('css/animations.css') }}?v={{ @filemtime(public_path('css/animations.css')) ?: '1.0' }}">
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}?v={{ @filemtime(public_path('css/responsive.css')) ?: '1.0' }}">
 </head>
 <body class="{{ (request()->is('pos*') || request()->is('cashier*')) ? 'is-pos-page' : ((request()->is('admin/products*') || request()->is('admin/categories*') || request()->is('admin/reports*') || request()->is('admin/settings*') || request()->is('admin/notifications*') || request()->is('*dashboard*')) ? 'is-catalog-page is-dashboard-page is-settings-page' : '') }} @yield('body_class')">
+    <!-- Theme scenery: sun (light) / moon + falling stars (dark) -->
+    <div class="theme-scenery" aria-hidden="true"><div class="sky-sun"></div><div class="sky-moon"></div><div class="sky-stars"></div><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span></div>
+
     <div class="bakery-app-layout">
         <!-- Sidebar Navigation -->
         <aside class="bakery-sidebar" id="sidebar_nav">
@@ -91,8 +95,8 @@
             </script>
             <!-- Brand / Logo Area (Interactive toggle button) -->
             <button type="button" class="bakery-logo-area" id="sidebar_brand_toggle" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar">
-                <div class="bakery-logo-icon">
-                    <svg viewBox="0 0 40 40" fill="none">
+                <div class="bakery-logo-icon" id="sidebar_brand_icon" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 40 40" fill="none" id="sidebar_brand_logo_svg">
                         <path d="M10 26C6.7 26 4 23.3 4 20C4 17.2 6.1 14.8 8.8 14.2C8.5 13.5 8.3 12.8 8.3 12C8.3 7.6 11.9 4 16.3 4C19.7 4 22.6 6.1 23.8 9.2C24.8 8.5 26 8 27.3 8C31 8 34 11 34 14.7C34 15.2 33.9 15.7 33.7 16.2C35.6 17.3 36.8 19.4 36.8 21.8C36.8 25.2 34 28 30.5 28H10" stroke="#f97316" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M12 25L25 12" stroke="#f97316" stroke-width="2.4" stroke-linecap="round"/>
                         <path d="M16 19C15 17.5 16 16 17.5 16.5C18.5 17.5 18 19 16 19Z" fill="#f97316"/>
@@ -101,10 +105,6 @@
                         <path d="M17.5 22.5C16.5 21 17.5 19.5 19 20C20 21 19.5 22.5 17.5 22.5Z" fill="#f97316"/>
                         <path d="M21 19C20 17.5 21 16 22.5 16.5C23.5 17.5 23 19 21 19Z" fill="#f97316"/>
                     </svg>
-                </div>
-                <div class="bakery-logo-text">
-                    <span class="bakery-logo-title">Bakery</span>
-                    <span class="bakery-logo-subtitle">Management System</span>
                 </div>
             </button>
 
@@ -300,14 +300,7 @@
                     } catch(e) {}
                 })();
             </script>
-
-            <!-- Bottom Logout Button -->
-            <div class="sidebar-logout">
-                <a href="{{ route('logout') }}" class="logout-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    <span data-lang-key="logout">Logout</span>
-                </a>
-            </div></aside>
+        </aside>
 
         <!-- Mobile & Tablet Drawer Backdrop -->
         <div id="sidebar_mobile_backdrop" class="sidebar-mobile-backdrop"></div>
@@ -447,7 +440,6 @@
                                 <div class="user-dropdown-info">
                                     <div class="user-dropdown-name-row">
                                         <span class="user-dropdown-name">{{ auth()->check() ? auth()->user()->name : 'User Account' }}</span>
-                                        <span class="user-dropdown-role-badge">{{ auth()->check() ? ucfirst(auth()->user()->role) : 'Staff' }}</span>
                                     </div>
                                     <div class="user-dropdown-email" title="{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}">{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}</div>
                                 </div>
@@ -596,6 +588,7 @@
 
     @stack('scripts')
     <script src="{{ asset('js/sidebar.js') }}?v={{ @filemtime(public_path('js/sidebar.js')) ?: '1.0' }}"></script>
+    <script src="{{ asset('js/custom-select.js') }}?v={{ @filemtime(public_path('js/custom-select.js')) ?: '1.0' }}"></script>
     <script src="{{ asset('js/lang.js') }}?v={{ @filemtime(public_path('js/lang.js')) ?: '1.0' }}"></script>
     <script>
         window.APP_CONFIG = {

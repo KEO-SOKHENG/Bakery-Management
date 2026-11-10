@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProductShelfLifeAndExpiryTest extends TestCase
@@ -213,6 +214,7 @@ class ProductShelfLifeAndExpiryTest extends TestCase
 
     public function test_product_can_be_created_and_updated_with_uploaded_image()
     {
+        Storage::fake('public'); // media disk in tests; images are stored under products/
         $fakeImage = UploadedFile::fake()->image('bakery_tart.jpg', 300, 300);
 
         $response = $this->actingAs($this->admin)->post(route('admin.products.store'), [
@@ -228,12 +230,8 @@ class ProductShelfLifeAndExpiryTest extends TestCase
         $product = Product::where('sku', 'TART-IMG-01')->first();
         $this->assertNotNull($product);
         $this->assertNotNull($product->image_path);
-        $this->assertFileExists(public_path($product->image_path));
-
-        // Clean up stored file
-        if (File::exists(public_path($product->image_path))) {
-            File::delete(public_path($product->image_path));
-        }
+        $this->assertStringStartsWith('products/', $product->image_path);
+        Storage::disk('public')->assertExists($product->image_path);
     }
 
     public function test_product_view_renders_edit_and_image_upload_ui()
@@ -257,6 +255,7 @@ class ProductShelfLifeAndExpiryTest extends TestCase
 
     public function test_updating_product_without_new_image_preserves_existing_image()
     {
+        Storage::fake('public');
         $fakeImage = UploadedFile::fake()->image('original_bun.jpg', 200, 200);
 
         $this->actingAs($this->admin)->post(route('admin.products.store'), [
@@ -271,7 +270,7 @@ class ProductShelfLifeAndExpiryTest extends TestCase
         $product = Product::where('sku', 'BUN-PRESERVE-01')->firstOrFail();
         $originalImagePath = $product->image_path;
         $this->assertNotNull($originalImagePath);
-        $this->assertFileExists(public_path($originalImagePath));
+        Storage::disk('public')->assertExists($originalImagePath);
 
         // Update product WITHOUT providing an image
         $response = $this->actingAs($this->admin)->put(route('admin.products.update', $product), [
@@ -289,11 +288,6 @@ class ProductShelfLifeAndExpiryTest extends TestCase
         $this->assertEquals('Renamed Bun with Same Image', $product->name);
         $this->assertEquals(3.00, (float)$product->price);
         $this->assertEquals($originalImagePath, $product->image_path, 'Existing image path should be preserved when no new image is uploaded');
-        $this->assertFileExists(public_path($originalImagePath));
-
-        // Clean up stored file
-        if (File::exists(public_path($originalImagePath))) {
-            File::delete(public_path($originalImagePath));
-        }
+        Storage::disk('public')->assertExists($originalImagePath);
     }
 }

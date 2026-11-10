@@ -113,6 +113,23 @@ class LoginAuthenticationTest extends TestCase
     }
 
     /**
+     * Test login is case-insensitive for username (e.g. Test_Admin or ADMIN).
+     */
+    public function test_login_is_case_insensitive_for_username_and_email(): void
+    {
+        $response = $this->post(route('login.post'), [
+            'username' => 'Test_Admin',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticated();
+        $user = Auth::user();
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('test_admin', $user->username);
+    }
+
+    /**
      * Test Manager login redirects to Manager Dashboard without any role parameter.
      */
     public function test_manager_account_redirects_to_manager_dashboard(): void
@@ -268,5 +285,35 @@ class LoginAuthenticationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('login');
+    }
+
+    /**
+     * Test that login page renders the custom bakery logo image when shop_logo is set.
+     */
+    public function test_login_page_renders_custom_shop_logo_when_configured(): void
+    {
+        \App\Services\SettingsService::set('shop_logo', '/storage/logos/custom_test_logo.png');
+        \App\Services\SettingsService::set('shop_name', 'Artisan Bakery Hub');
+
+        $response = $this->get(route('login'));
+
+        $response->assertStatus(200);
+        $response->assertSee('custom_test_logo.png');
+        $response->assertSee('Artisan Bakery Hub');
+        $response->assertSee('login-logo-custom-img');
+    }
+
+    /**
+     * Test that login page renders default chef hat SVG when no shop_logo is set.
+     */
+    public function test_login_page_renders_default_chef_hat_icon_when_no_logo_configured(): void
+    {
+        \App\Services\SettingsService::set('shop_logo', '');
+
+        $response = $this->get(route('login'));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('login-logo-custom-img');
+        $response->assertSee('d="M6 13.8', false);
     }
 }

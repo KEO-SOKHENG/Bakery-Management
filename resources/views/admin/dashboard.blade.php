@@ -520,7 +520,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h2 data-lang-key="order_status_distribution">{{ __('messages.order_status_distribution') }}</h2>
                 <span style="font-size: 0.8rem; color: var(--text-muted);">{{ number_format($totalAllOrders) }} total recorded orders</span>
             </div>
-            <a href="{{ route('admin.orders') }}" class="link-action">View all &rarr;</a>
         </div>
 
         <!-- Proportional Multi-Segment Status Bar -->
@@ -575,7 +574,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h2 data-lang-key="best_selling_products">{{ __('messages.best_selling_products') }}</h2>
                 <span style="font-size: 0.8rem; color: var(--text-muted);">Top items ranked by units sold from completed sales</span>
             </div>
-            <a href="{{ route('admin.products') }}" class="link-action">Catalog &rarr;</a>
         </div>
 
         <div class="bestseller-list">
@@ -626,7 +624,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span style="font-size: 0.8rem; color: #dc2626; font-weight: 700;">{{ $expiredIngredientsCount }} expired!</span>
                 @endif
             </div>
-            <a href="{{ route('admin.ingredients') }}" class="link-action">Manage &rarr;</a>
         </div>
 
         <div class="stock-alerts-list">
@@ -688,7 +685,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <div>
                 <h2 data-lang-key="procurement_production_overview">{{ __('messages.procurement_production_overview') }}</h2>
             </div>
-            <a href="{{ route('admin.purchase-orders.index') }}" class="link-action">Procurement &rarr;</a>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.25rem;">
@@ -722,10 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Recent Orders Table -->
 <div class="bakery-card">
-    <div class="card-header-flex">
-        <h2>Recent Orders</h2>
-        <a href="{{ route('admin.orders') }}" class="link-action">View all orders &rarr;</a>
-    </div>
+
 
     <div class="table-responsive-wrapper">
         <table class="recent-orders-table">

@@ -128,6 +128,7 @@
                         data-expiry-date="{{ $product->expiry_date ? $product->expiry_date->format('Y-m-d') : '' }}"
                         data-status="{{ $product->status }}"
                         data-description="{{ $product->description }}"
+                        data-image="{{ $product->image_url ?? '' }}"
                         data-recipe="{{ json_encode($product->recipe ? $product->recipe->recipeIngredients->map(function($ri) {
                             return [
                                 'ingredient_id' => $ri->ingredient_id,
@@ -680,14 +681,25 @@
         const btnApplyEdit = document.getElementById('btn_apply_cost_edit');
         if (btnApplyEdit) btnApplyEdit.addEventListener('click', () => applyRecipeCost('edit'));
 
-        // Custom File Upload Dynamic Name Update
+        // Custom File Upload Dynamic Name & Live Thumbnail Preview Update
         const createImgInput = document.getElementById('create_product_image');
         const createImgName = document.getElementById('create_image_filename');
         if (createImgInput && createImgName) {
             createImgInput.addEventListener('change', function() {
+                const dropzone = this.closest('.product-file-upload-card')?.querySelector('.file-upload-dropzone');
+                const dropzoneIcon = dropzone?.querySelector('.dropzone-icon');
                 if (this.files && this.files[0]) {
-                    createImgName.textContent = this.files[0].name;
+                    const file = this.files[0];
+                    createImgName.textContent = file.name;
                     createImgName.classList.add('has-file');
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (dropzoneIcon) {
+                            dropzoneIcon.innerHTML = `<img src="${e.target.result}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;" alt="Preview">`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
                 } else {
                     createImgName.textContent = 'Choose product photo or drop here';
                     createImgName.classList.remove('has-file');
@@ -699,9 +711,20 @@
         const editImgName = document.getElementById('edit_image_filename');
         if (editImgInput && editImgName) {
             editImgInput.addEventListener('change', function() {
+                const dropzone = this.closest('.product-file-upload-card')?.querySelector('.file-upload-dropzone');
+                const dropzoneIcon = dropzone?.querySelector('.dropzone-icon');
                 if (this.files && this.files[0]) {
-                    editImgName.textContent = this.files[0].name;
+                    const file = this.files[0];
+                    editImgName.textContent = file.name;
                     editImgName.classList.add('has-file');
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (dropzoneIcon) {
+                            dropzoneIcon.innerHTML = `<img src="${e.target.result}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;" alt="Preview">`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
                 } else {
                     editImgName.textContent = 'Replace photo or drop new image';
                     editImgName.classList.remove('has-file');
@@ -717,6 +740,11 @@
                     createImgName.textContent = 'Choose product photo or drop here';
                     createImgName.classList.remove('has-file');
                 }
+                const createDropzoneIcon = createModal.querySelector('.dropzone-icon');
+                if (createDropzoneIcon) {
+                    createDropzoneIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+                }
+                if (createImgInput) createImgInput.value = '';
                 clearIngredientsRows('create');
                 addIngredientRow('create');
                 fetchLiveIngredients();
@@ -823,10 +851,25 @@
 
                 setEditProductStatus(this.dataset.status || 'active');
 
-                if (editImgName) {
-                    editImgName.textContent = 'Replace photo or drop new image';
-                    editImgName.classList.remove('has-file');
+                const editDropzoneIcon = editModal.querySelector('.dropzone-icon');
+                if (this.dataset.image) {
+                    if (editDropzoneIcon) {
+                        editDropzoneIcon.innerHTML = `<img src="${this.dataset.image}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px;" alt="Current Image">`;
+                    }
+                    if (editImgName) {
+                        editImgName.textContent = 'Current image loaded (choose file to replace)';
+                        editImgName.classList.add('has-file');
+                    }
+                } else {
+                    if (editDropzoneIcon) {
+                        editDropzoneIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+                    }
+                    if (editImgName) {
+                        editImgName.textContent = 'Replace photo or drop new image';
+                        editImgName.classList.remove('has-file');
+                    }
                 }
+                if (editImgInput) editImgInput.value = '';
 
                 // Populate existing recipe ingredients
                 clearIngredientsRows('edit');

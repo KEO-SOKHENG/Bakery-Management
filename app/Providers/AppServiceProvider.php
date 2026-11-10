@@ -48,8 +48,9 @@ class AppServiceProvider extends ServiceProvider
             Paginator::defaultSimpleView('vendor.pagination.simple-custom');
         }
 
-        // Register custom Supabase S3 filesystem driver omitting unsupported S3 ACLs
-        Storage::extend('supabase-s3', function ($app, array $config) {
+        // Custom S3 filesystem driver that omits S3 ACLs (unsupported by Supabase and by AWS buckets with ACLs disabled).
+        // Registered as 'supabase-s3' (media) and 's3-noacl' (private backup destination; also applies Object Lock when configured).
+        $s3NoAclBuilder = function ($app, array $config) {
             $s3Config = $config + ['version' => 'latest'];
 
             if (!empty($s3Config['key']) && !empty($s3Config['secret'])) {
@@ -86,6 +87,29 @@ class AppServiceProvider extends ServiceProvider
                         return $handler($command, $request);
                     };
                 }, 'supabase-strip-acl-header');
+
+                // Optional Object Lock for backup packages: retain-until depends on the retention class tag
+                // ("retention=daily|weekly|monthly") that BackupHistoryService::uploadOptions() sets.
+                $objectLock = (array) ($config['object_lock'] ?? []);
+                if (!empty($objectLock['mode'])) {
+                    $client->getHandlerList()->appendInit(function (callable $handler) use ($objectLock) {
+                        return function (CommandInterface $command, ?RequestInterface $request = null) use ($handler, $objectLock) {
+                            if (in_array($command->getName(), ['PutObject', 'CreateMultipartUpload'], true)
+                                && str_starts_with((string) ($command['Key'] ?? ''), 'packages/')) {
+                                $class = 'daily';
+                                if (preg_match('/retention=(daily|weekly|monthly)/', (string) ($command['Tagging'] ?? ''), $m)) {
+                                    $class = $m[1];
+                                }
+                                $days = (int) (($objectLock['days'] ?? [])[$class] ?? 0);
+                                if ($days > 0) {
+                                    $command['ObjectLockMode'] = $objectLock['mode'];
+                                    $command['ObjectLockRetainUntilDate'] = new \DateTimeImmutable('+' . $days . ' days');
+                                }
+                            }
+                            return $handler($command, $request);
+                        };
+                    }, 'backup-object-lock');
+                }
             }
 
             $adapter = new FlysystemS3Adapter(
@@ -107,7 +131,10 @@ class AppServiceProvider extends ServiceProvider
             ]));
 
             return new LaravelS3Adapter($flysystem, $adapter, $s3Config, $client);
-        });
+        };
+
+        Storage::extend('supabase-s3', $s3NoAclBuilder);
+        Storage::extend('s3-noacl', $s3NoAclBuilder);
 
         // Centralized RBAC Gate authorization
         Gate::before(function (\App\Models\User $user, string $ability) {

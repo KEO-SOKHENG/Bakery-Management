@@ -69,7 +69,6 @@
     <div class="manager-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h2 class="manager-card-title" style="margin-bottom: 0;">Today's Baking Quotas & Batches</h2>
-            <a href="{{ route('admin.production') }}" class="link-action" style="font-size: 0.825rem; font-weight: 700; color: #563020; text-decoration: none;">View All &rarr;</a>
         </div>
         
         @forelse($todayProductions as $batch)
@@ -113,7 +112,6 @@
     <div class="manager-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h2 class="manager-card-title" style="margin-bottom: 0;">Floor Inventory & Replenishment</h2>
-            <a href="{{ route('admin.ingredients') }}" class="link-action" style="font-size: 0.825rem; font-weight: 700; color: #563020; text-decoration: none;">Ingredients &rarr;</a>
         </div>
 
         <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">

@@ -76,10 +76,7 @@ class ProductController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/products'), $filename);
-            $imagePath = 'uploads/products/' . $filename;
+            $imagePath = app(\App\Services\ProductImageStorage::class)->store($request->file('image'));
         }
 
         if (empty($validated['sku'])) {
@@ -176,13 +173,12 @@ class ProductController extends Controller
         $validated['status'] = $validated['status'] ?? $product->status ?? 'active';
 
         if ($request->hasFile('image')) {
-            if ($product->image_path && file_exists(public_path($product->image_path))) {
-                @unlink(public_path($product->image_path));
+            $images = app(\App\Services\ProductImageStorage::class);
+            $oldPath = $product->image_path;
+            $validated['image_path'] = $images->store($request->file('image'));
+            if ($oldPath && $oldPath !== $validated['image_path']) {
+                $images->delete($oldPath);
             }
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/products'), $filename);
-            $validated['image_path'] = 'uploads/products/' . $filename;
         }
 
         $product->update($validated);
@@ -258,8 +254,8 @@ class ProductController extends Controller
                 ->with('error', "Cannot delete product '{$product->name}': A recipe is linked to this item. Please delete or reassign the recipe first.");
         }
 
-        if ($product->image_path && file_exists(public_path($product->image_path))) {
-            @unlink(public_path($product->image_path));
+        if ($product->image_path) {
+            app(\App\Services\ProductImageStorage::class)->delete($product->image_path);
         }
 
         $product->delete();

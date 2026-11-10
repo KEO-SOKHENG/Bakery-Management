@@ -38,3 +38,7 @@ node_modules/
 /scratch/
 /public/uploads/
 bakery_schema.sql
+
+# Full Backup working directories
+/storage/app/backup-tmp/
+/storage/app/sandbox-restore/

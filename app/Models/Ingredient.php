@@ -5,6 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int|null $supplier_id
+ * @property string $name
+ * @property string $unit
+ * @property float $quantity
+ * @property float $cost
+ * @property float $minimum_quantity
+ * @property \Carbon\Carbon|null $expiry_date
+ * @property string $status
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ */
 class Ingredient extends Model
 {
     use HasFactory;

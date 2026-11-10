@@ -1487,3 +1487,11 @@ body.theme-dark .bakery-sidebar,
 body.theme-dark .bakery-sidebar:hover {
     box-shadow: none !important;
 }
+
+/* Tablet (768-1199px): the sidebar is a fixed 72px rail on catalog/settings pages, so reserve space for it
+   instead of letting it overlap the page content. */
+@media (min-width: 768px) and (max-width: 1199px) {
+    body.is-catalog-page .bakery-main-content {
+        padding-left: calc(72px + 12px + 1.25rem) !important;
+    }
+}

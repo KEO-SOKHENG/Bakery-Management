@@ -6,6 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $type
+ * @property string $title
+ * @property string $message
+ * @property string $severity
+ * @property string|null $action_url
+ * @property \Carbon\Carbon|null $read_at
+ * @property string|null $dedup_key
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ */
 class Notification extends Model
 {
     use HasFactory;

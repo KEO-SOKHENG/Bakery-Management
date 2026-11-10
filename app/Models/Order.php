@@ -5,6 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int|null $user_id
+ * @property int|null $customer_id
+ * @property string $order_number
+ * @property string|null $customer_name
+ * @property float $subtotal
+ * @property float $discount
+ * @property float $tax
+ * @property float $total
+ * @property string $payment_method
+ * @property string $payment_status
+ * @property string $order_status
+ * @property int $loyalty_points_awarded
+ * @property bool $is_custom
+ * @property string|null $special_instructions
+ * @property \Carbon\Carbon|null $pickup_date
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ */
 class Order extends Model
 {
     use HasFactory;

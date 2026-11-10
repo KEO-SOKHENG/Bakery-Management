@@ -95,7 +95,7 @@ class SettingManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('admin.settings');
         $response->assertSee('System Settings');
-        $response->assertSee('Shop Information');
+        $response->assertSee('Contact Information');
         $response->assertSee('Tax & Discount', false);
         $response->assertSee('Business Hours & Operations', false);
         $response->assertSee('System Backup & Restore', false);
@@ -573,6 +573,34 @@ class SettingManagementTest extends TestCase
 
         $relativeDiskPath = str_replace('/storage/', '', $storedLogo);
         $this->storageDisk('public')->assertExists($relativeDiskPath);
+    }
+
+    /**
+     * 23b. Admin can reset shop logo to default (removes file and clears setting).
+     */
+    public function test_admin_can_reset_shop_logo_to_default(): void
+    {
+        Storage::fake('public');
+
+        // First upload a valid logo
+        $file = UploadedFile::fake()->image('bakery_to_remove.png', 400, 400);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $file,
+        ]);
+
+        $storedLogo = SettingsService::get('shop_logo');
+        $this->assertNotEmpty($storedLogo);
+        $relativeDiskPath = str_replace('/storage/', '', $storedLogo);
+        $this->storageDisk('public')->assertExists($relativeDiskPath);
+
+        // Reset logo to default
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'remove_shop_logo' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals('', SettingsService::get('shop_logo'));
+        $this->storageDisk('public')->assertMissing($relativeDiskPath);
     }
 
     /**
@@ -1230,7 +1258,7 @@ class SettingManagementTest extends TestCase
         // 5. Confirm AWS Signature V4 signs the correct request without x-amz-acl
         $authHeader = $interceptedRequest->getHeaderLine('Authorization');
         $this->assertStringContainsString('AWS4-HMAC-SHA256', $authHeader);
-        $this->assertStringContainsString('Credential=AKIAIOSFODNN7EXAMPLE/20261107/ap-northeast-1/s3/aws4_request', $authHeader);
+        $this->assertStringContainsString('Credential=AKIAIOSFODNN7EXAMPLE/' . gmdate('Ymd') . '/ap-northeast-1/s3/aws4_request', $authHeader);
         $this->assertStringNotContainsString('x-amz-acl', $authHeader);
 
         // 6. Verify public URL uses https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/
@@ -1240,5 +1268,203 @@ class SettingManagementTest extends TestCase
             $generatedUrl
         );
         $this->assertStringStartsWith('https://rtrnlnezucgjkgqluofv.supabase.co/storage/v1/object/public/bakery-media/', $generatedUrl);
+    }
+
+    /**
+     * 46. Settings navigation has unified Profile & Business and removes separate items.
+     */
+    public function test_navigation_has_profile_and_business_and_removes_separate_bakery_and_account_items(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.settings'));
+        $response->assertStatus(200);
+
+        // 1. Unified nav item is present
+        $response->assertSee('Profile & Business', false);
+        $response->assertSee('id="nav_profile_business"', false);
+        $response->assertSee('id="panel_profile_business"', false);
+
+        // 2. Separate legacy nav items are removed
+        $response->assertDontSee('id="nav_bakery"', false);
+        $response->assertDontSee('id="nav_account"', false);
+
+        // 3. Other settings navigation items remain intact
+        $response->assertSee('Business Settings');
+        $response->assertSee('Notifications');
+        $response->assertSee('Appearance');
+        $response->assertDontSee('id="nav_staff"', false);
+        $response->assertSee('Storage & Files', false);
+        $response->assertSee('Backup & Restore', false);
+    }
+
+    /**
+     * 47. Unified settings page contains the four required sections with clean IDs.
+     */
+    public function test_unified_page_contains_four_required_sections(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.settings'));
+        $response->assertStatus(200);
+
+        // Section 1: Bakery Profile
+        $response->assertSee('id="section_bakery_profile"', false);
+        $response->assertSee('id="bakery_logo_preview_box"', false);
+        $response->assertSee('id="input_shop_name"', false);
+        $response->assertSee('id="btn_change_bakery_logo"', false);
+
+        // Section 2: Contact Information
+        $response->assertSee('id="section_contact_info"', false);
+        $response->assertSee('id="input_shop_phone"', false);
+        $response->assertSee('id="input_shop_email"', false);
+        $response->assertSee('id="input_shop_address"', false);
+
+        // Section 3: Personal fields (merged into the single Profile card; one shared photo picker
+        // feeds both the bakery logo and the admin avatar inputs)
+        $response->assertSee('id="admin_avatar_file_input"', false);
+        $response->assertSee('id="input_remove_admin_avatar"', false);
+        $response->assertSee('id="input_user_name"', false);
+        $response->assertSee('id="input_username"', false);
+
+        // Section 4: Login Security
+        $response->assertSee('id="security_info"', false);
+        $response->assertSee('id="input_current_password"', false);
+        $response->assertSee('id="input_new_password"', false);
+        $response->assertSee('id="input_new_password_confirmation"', false);
+
+        // One combined Save Changes button (the separate Update Password button was merged into it)
+        $response->assertSee('id="btn_save_profile_business"', false);
+        $response->assertDontSee('id="btn_save_security"', false);
+        $response->assertDontSee('id="form_security"', false);
+    }
+
+    /**
+     * 48. Bakery Logo and Admin Avatar remain completely independent during uploads and resets.
+     */
+    public function test_bakery_logo_and_admin_avatar_are_strictly_independent(): void
+    {
+        Storage::fake('public');
+
+        // 1. Upload initial Bakery Logo
+        $logoFile1 = UploadedFile::fake()->image('bakery_brand_1.png', 400, 400);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $logoFile1,
+        ]);
+        $storedLogo1 = SettingsService::get('shop_logo');
+        $this->assertNotEmpty($storedLogo1);
+        $this->assertStringStartsWith('/storage/logos/', $storedLogo1);
+
+        // Verify avatar is NOT affected by logo upload
+        $storedAvatarBefore = SettingsService::get('user_avatar_' . $this->admin->id);
+        $this->assertEmpty($storedAvatarBefore);
+
+        // 2. Upload Admin Avatar
+        $avatarFile1 = UploadedFile::fake()->image('admin_personal_1.png', 300, 300);
+        $this->actingAs($this->admin)->json('POST', route('admin.settings.update'), [
+            'avatar' => $avatarFile1,
+        ]);
+        $storedAvatar1 = SettingsService::get('user_avatar_' . $this->admin->id);
+        $this->assertNotEmpty($storedAvatar1);
+        $this->assertStringStartsWith('/storage/avatars/', $storedAvatar1);
+
+        // Verify bakery logo is UNCHANGED by avatar upload
+        $this->assertEquals($storedLogo1, SettingsService::get('shop_logo'));
+
+        // 3. Update Bakery Logo with a new image
+        $logoFile2 = UploadedFile::fake()->image('bakery_brand_2.png', 400, 400);
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => $logoFile2,
+        ]);
+        $storedLogo2 = SettingsService::get('shop_logo');
+        $this->assertNotEquals($storedLogo1, $storedLogo2);
+
+        // Verify admin avatar is STILL completely untouched
+        $this->assertEquals($storedAvatar1, SettingsService::get('user_avatar_' . $this->admin->id));
+        $this->storageDisk('public')->assertExists(str_replace('/storage/', '', $storedAvatar1));
+
+        // 4. Remove Bakery Logo (reset to default)
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'remove_shop_logo' => 1,
+        ]);
+        $this->assertEmpty(SettingsService::get('shop_logo'));
+
+        // Admin avatar must STILL exist in settings and on disk
+        $this->assertEquals($storedAvatar1, SettingsService::get('user_avatar_' . $this->admin->id));
+        $this->storageDisk('public')->assertExists(str_replace('/storage/', '', $storedAvatar1));
+
+        // 5. Remove Admin Avatar
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'remove_avatar' => 1,
+        ]);
+        $this->assertEmpty(SettingsService::get('user_avatar_' . $this->admin->id));
+        $this->storageDisk('public')->assertMissing(str_replace('/storage/', '', $storedAvatar1));
+    }
+
+    /**
+     * 49. Admin can update bakery name, contact details, and user name in one consolidated save.
+     */
+    public function test_admin_can_update_bakery_name_contact_and_personal_profile_together(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_name'    => 'Unified Artisan Bakers',
+            'shop_phone'   => '+855 23 999 888',
+            'shop_email'   => 'contact@unifiedartisan.com',
+            'shop_address' => '45 Norodom Blvd, Phnom Penh',
+            'name'         => 'Chief Executive Baker',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('Unified Artisan Bakers', SettingsService::get('shop_name'));
+        $this->assertEquals('+855 23 999 888', SettingsService::get('shop_phone'));
+        $this->assertEquals('contact@unifiedartisan.com', SettingsService::get('shop_email'));
+        $this->assertEquals('45 Norodom Blvd, Phnom Penh', SettingsService::get('shop_address'));
+
+        $this->admin->refresh();
+        $this->assertEquals('Chief Executive Baker', $this->admin->name);
+    }
+
+    /**
+     * 50. A text-only save reports both images as unchanged (null) so the UI keeps their previews.
+     */
+    public function test_text_only_save_reports_logo_and_avatar_as_unchanged(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->admin)->post(route('admin.settings.update'), [
+            'shop_logo' => UploadedFile::fake()->image('logo.png', 200, 200),
+            'avatar'    => UploadedFile::fake()->image('me.png', 200, 200),
+        ]);
+        $logo   = SettingsService::get('shop_logo');
+        $avatar = SettingsService::get('user_avatar_' . $this->admin->id);
+
+        $response = $this->actingAs($this->admin)->postJson(route('admin.settings.update'), [
+            'shop_name' => 'Renamed Bakery',
+            'name'      => 'Renamed Admin',
+        ]);
+
+        $response->assertOk();
+        $this->assertNull($response->json('logo_url'));
+        $this->assertNull($response->json('avatar_url'));
+        $this->assertEquals($logo, SettingsService::get('shop_logo'));
+        $this->assertEquals($avatar, SettingsService::get('user_avatar_' . $this->admin->id));
+    }
+
+    /**
+     * 51. Navigation exposes a single Profile & Business item instead of separate Bakery / Account items.
+     */
+    public function test_navigation_has_single_profile_and_business_item(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.settings'));
+        $response->assertOk();
+
+        $response->assertSee('id="nav_profile_business"', false);
+        $response->assertSee('data-target="panel_profile_business"', false);
+        $response->assertDontSee('id="nav_bakery"', false);
+        $response->assertDontSee('id="nav_account"', false);
+        $response->assertDontSee('id="panel_bakery"', false);
+        $response->assertDontSee('id="panel_account"', false);
+
+        foreach (['nav_business', 'nav_notifications', 'nav_appearance', 'nav_storage', 'nav_backup'] as $id) {
+            $response->assertSee('id="' . $id . '"', false);
+        }
     }
 }

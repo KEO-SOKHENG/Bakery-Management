@@ -1,0 +1,104 @@
+/* ──────────────────────────────────────────────
+   Glass style: translucent, blurred surfaces so the
+   sun / moon scenery shows through the whole system
+   ────────────────────────────────────────────── */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.30);
+    --glass-bg-soft: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-shadow: 0 8px 32px rgba(120, 80, 30, 0.12);
+    --glass-blur: blur(18px) saturate(170%);
+}
+
+[data-theme="dark"],
+[data-theme="glass"] {
+    --glass-bg: rgba(18, 22, 48, 0.26);
+    --glass-bg-soft: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Main glass surfaces */
+html[data-theme] body .bakery-sidebar,
+html[data-theme] body .sidebar,
+html[data-theme] body .top-header-bar,
+html[data-theme] body .apple-settings-shell,
+html[data-theme] body .profile-unified-card.profile-card,
+html[data-theme] body .storage-kpi-card,
+html[data-theme] body .bakery-card,
+html[data-theme] body .chart-card,
+html[data-theme] body .dash-chart-card,
+html[data-theme] body .overview-kpi-card,
+html[data-theme] body .orders-card,
+html[data-theme] body .orders-search-filter-card,
+html[data-theme] body .prod-toolbar-card,
+html[data-theme] body .product-card,
+html[data-theme] body .detail-card,
+html[data-theme] body .form-card,
+html[data-theme] body .order-metric-card,
+html[data-theme] body .notif-stat-card,
+html[data-theme] body .permission-module-card,
+html[data-theme] body .dash-stat-row.sticky-stat-row,
+html[data-theme] body .dash-filter-bar,
+html[data-theme] body .notification-dropdown {
+    background: var(--glass-bg) !important;
+    background-color: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+}
+
+/* Header bar: a floating glass strip */
+html[data-theme] body .top-header-bar {
+    border-radius: 18px;
+    padding: 0.6rem 1rem;
+}
+
+/* Panes inside the settings shell stay see-through (shell is the glass) */
+html[data-theme] body .apple-nav-pane,
+html[data-theme] body .apple-detail-pane,
+html[data-theme] body .apple-detail-body,
+html[data-theme] body .apple-mobile-header {
+    background: transparent !important;
+    background-color: transparent !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+html[data-theme] body .apple-nav-pane {
+    border-right: 1px solid var(--glass-border) !important;
+}
+
+/* Boxes inside the unified settings card */
+html[data-theme] body .profile-unified-card .apple-row-stacked,
+html[data-theme] body .profile-unified-card .apple-input-grid + *,
+html[data-theme] body .profile-unified-card .storage-kpi-card {
+    background: var(--glass-bg-soft) !important;
+    border-color: var(--glass-border) !important;
+}
+
+html[data-theme] body .profile-unified-card .apple-section-header {
+    border-top-color: var(--glass-border) !important;
+}
+
+/* Inputs: lightly frosted */
+html[data-theme] body .profile-unified-card .apple-input,
+html[data-theme] body .profile-unified-card .apple-textarea,
+html[data-theme] body .profile-unified-card select {
+    background: var(--glass-bg-soft) !important;
+    border-color: var(--glass-border) !important;
+}
+
+/* Keep text legible on glass in light mode */
+[data-theme="light"] html[data-theme] body .top-header-bar,
+[data-theme="light"] .top-header-bar {
+    color: #29150d;
+}
+
+/* Fallback when backdrop-filter is unsupported: slightly more opaque */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root { --glass-bg: rgba(255, 255, 255, 0.85); }
+    [data-theme="dark"], [data-theme="glass"] { --glass-bg: rgba(18, 18, 26, 0.88); }
+}

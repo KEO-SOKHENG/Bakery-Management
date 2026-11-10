@@ -8,28 +8,27 @@
 @endpush
 
 
+@section('header_toolbar')
+    <div class="pos-category-scroll">
+        <div class="orders-filter-bar pos-category-tabs" id="pos_category_tabs">
+            <button type="button" class="filter-btn pos-cat-pill active" data-category-id="all">
+                <span data-lang-key="all_categories">All Items</span>
+            </button>
+            @foreach($categories as $category)
+                <button type="button" class="filter-btn pos-cat-pill" data-category-id="{{ $category->id }}">
+                    <span>{{ $category->name }}</span>
+                </button>
+            @endforeach
+        </div>
+    </div>
+@endsection
+
 @section('content')
 <div class="pos-screen-layout">
     <!-- ======================================================================
          LEFT: CATALOG PANEL (Product Cards Grid)
          ====================================================================== -->
     <div class="pos-catalog-panel">
-
-        <!-- Category Filter Tabs (Always Sticky, matching Order page style & size) -->
-        <div class="pos-category-sticky-bar" id="pos_category_sticky_bar">
-            <div class="pos-category-scroll">
-                <div class="orders-filter-bar pos-category-tabs" id="pos_category_tabs">
-                    <button type="button" class="filter-btn pos-cat-pill active" data-category-id="all">
-                        <span data-lang-key="all_categories">All Items</span>
-                    </button>
-                    @foreach($categories as $category)
-                        <button type="button" class="filter-btn pos-cat-pill" data-category-id="{{ $category->id }}">
-                            <span>{{ $category->name }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            </div>
-        </div>
 
         <!-- Product Grid -->
         <div class="pos-grid-container" id="pos_product_grid">

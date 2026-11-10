@@ -45,10 +45,31 @@ class LoginController extends Controller
         $remember = $request->boolean('remember');
 
         // Check if input is email or username
-        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $isEmail = (bool) filter_var($loginInput, FILTER_VALIDATE_EMAIL);
+        $fieldType = $isEmail ? 'email' : 'username';
+
+        // Support case-insensitive lookup (e.g. 'Admin' vs 'admin') on databases like PostgreSQL
+        $canonicalValue = $loginInput;
+        try {
+            $userLookup = \App\Models\User::query();
+            if ($isEmail) {
+                $matchedUser = $userLookup->whereRaw('LOWER(email) = ?', [strtolower($loginInput)])->first();
+                if ($matchedUser) {
+                    $canonicalValue = $matchedUser->email;
+                }
+            } else {
+                $matchedUser = $userLookup->whereRaw('LOWER(username) = ?', [strtolower($loginInput)])->first();
+                if ($matchedUser) {
+                    $canonicalValue = $matchedUser->username;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fallback to raw input if lookup encounters an issue
+            $canonicalValue = $loginInput;
+        }
 
         try {
-            $authenticated = Auth::attempt([$fieldType => $loginInput, 'password' => $credentials['password']], $remember);
+            $authenticated = Auth::attempt([$fieldType => $canonicalValue, 'password' => $credentials['password']], $remember);
         } catch (\Throwable $e) {
             report($e);
             return back()->withErrors([

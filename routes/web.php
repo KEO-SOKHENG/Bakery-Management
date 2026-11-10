@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
 use App\Http\Controllers\Cashier\DashboardController as CashierDashboardController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\IngredientController;
 use App\Http\Controllers\Admin\OrderController;
@@ -42,6 +44,14 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Password Reset Routes (Guest)
+Route::middleware(['guest'])->group(function () {
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
+});
+
 // Language Switcher
 Route::get('/lang/{lang}', [LanguageController::class, 'switchLanguage'])->name('lang.switch');
 
@@ -74,9 +84,20 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.updatePermissions');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-        // System Settings - Admin Exclusive Backup & Restore
+        // System Settings - Admin Exclusive Backup & Restore & Storage Diagnostics
+        Route::get('/settings/storage-status', [SettingController::class, 'storageStatus'])->name('settings.storageStatus');
         Route::post('/settings/backup', [SettingController::class, 'createBackup'])->name('settings.backup');
         Route::post('/settings/restore', [SettingController::class, 'restoreBackup'])->name('settings.restore');
+
+        // Full Backup & Restore (database + media + settings). Production restore is disabled.
+        Route::get('/backups', [BackupController::class, 'index'])->middleware('throttle:30,1')->name('backups.index');
+        Route::post('/backups', [BackupController::class, 'store'])->middleware('throttle:3,1')->name('backups.store');
+        Route::get('/backups/production-gate', [BackupController::class, 'productionGate'])->middleware('throttle:30,1')->name('backups.productionGate');
+        Route::post('/backups/verify', [BackupController::class, 'verify'])->middleware('throttle:6,1')->name('backups.verify');
+        Route::post('/backups/production-restore', [BackupController::class, 'productionRestore'])->middleware('throttle:6,1')->name('backups.productionRestore');
+        Route::get('/backups/{id}/status', [BackupController::class, 'status'])->whereUuid('id')->middleware('throttle:120,1')->name('backups.status');
+        Route::get('/backups/{id}/download', [BackupController::class, 'download'])->whereUuid('id')->middleware('signed')->name('backups.download');
+        Route::post('/backups/{id}/sandbox-restore', [BackupController::class, 'sandboxRestore'])->whereUuid('id')->middleware('throttle:3,1')->name('backups.sandboxRestore');
 
         // Orders Purge & Data Maintenance (Admin Exclusive)
         Route::get('/orders/purge-preview', [OrderController::class, 'purgePreview'])->name('orders.purgePreview');

@@ -336,11 +336,11 @@
             "expiry_warning_days_hint": "Days before ingredient expiration to trigger proactive notifications.",
             "backup_restore": "System Backup & Restore",
             "backup_restore_sub": "Export configuration snapshots or restore settings",
-            "download_backup": "System Configuration Backup",
+            "download_backup": "Download Backup",
             "backup_description": "Downloads verified JSON containing store settings, categories, and catalog metadata.",
             "backup_download": "Download Backup",
-            "restore_file": "Select Backup File (.JSON)",
-            "restore_warning": "I confirm that I want to restore system configurations. Current store parameters will be overwritten.",
+            "restore_file": "Backup file (.json)",
+            "restore_warning": "I understand my current settings will be replaced.",
             "restore_now": "Restore Settings",
             "save_changes": "Save Changes"
         },
@@ -724,6 +724,7 @@
         const langSelect = document.getElementById('language_select');
         if (langSelect && langSelect.value !== lang) {
             langSelect.value = lang;
+            langSelect.dispatchEvent(new Event('bk:sync'));
         }
 
         return lang;
@@ -736,6 +737,7 @@
         const langSelect = document.getElementById('language_select');
         if (langSelect) {
             langSelect.value = currentLang;
+            langSelect.dispatchEvent(new Event('bk:sync'));
             langSelect.addEventListener('change', function () {
                 const newLang = this.value;
                 window.applyLanguage(newLang);

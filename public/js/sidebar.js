@@ -334,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     activeBtn = this;
                     moveSegmentPill(this);
 
-                    const themeAttr = this.getAttribute('data-theme');
+                    const themeAttr = this.getAttribute('data-theme-value');
                     if (themeAttr) {
                         applyTheme(themeAttr);
                     }
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('.ios-segmented-control').forEach(control => {
             const buttons = control.querySelectorAll('.segmented-option');
             buttons.forEach(btn => {
-                const isMatch = btn.getAttribute('data-theme') === theme;
+                const isMatch = btn.getAttribute('data-theme-value') === theme;
                 btn.classList.toggle('active', isMatch);
             });
         });

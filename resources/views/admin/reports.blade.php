@@ -66,21 +66,23 @@
                 <span>Overview</span>
             </a>
 
-            <!-- 2. Sales -->
-            <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => in_array($type, ['sales', 'revenue', 'orders']) ? $type : 'sales'])) }}" 
-               class="reports-nav-btn report-tab-btn {{ $activeGroup === 'sales' ? 'active' : '' }}" 
-               id="nav_sales">
+            <!-- 2. Sales (dropdown) -->
+            <button type="button"
+               class="reports-nav-btn report-tab-btn has-dropdown {{ $activeGroup === 'sales' ? 'active' : '' }}"
+               id="nav_sales" aria-haspopup="true" aria-expanded="false" aria-controls="sales_report_menu">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v12"/></svg>
                 <span>Sales</span>
-            </a>
+                <svg class="report-nav-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
 
-            <!-- 3. Inventory -->
-            <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => in_array($type, ['products', 'inventory', 'low-stock', 'purchases']) ? $type : 'products'])) }}" 
-               class="reports-nav-btn report-tab-btn {{ $activeGroup === 'inventory' ? 'active' : '' }}" 
-               id="nav_inventory">
+            <!-- 3. Inventory (dropdown) -->
+            <button type="button"
+               class="reports-nav-btn report-tab-btn has-dropdown {{ $activeGroup === 'inventory' ? 'active' : '' }}"
+               id="nav_inventory" aria-haspopup="true" aria-expanded="false" aria-controls="inventory_report_menu">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 <span>Inventory</span>
-            </a>
+                <svg class="report-nav-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
 
             <!-- 4. Production -->
             <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'production'])) }}" 
@@ -98,6 +100,54 @@
                 <span>Customers</span>
             </a>
         </nav>
+            <div class="report-dropdown-menu" id="sales_report_menu" role="menu" hidden>
+                <div class="report-dropdown-label">Sales Reports</div>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'sales'])) }}" 
+                       class="report-dropdown-item {{ $type === 'sales' ? 'active' : '' }}" 
+                       id="tab_sales">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v12"/></svg>
+                        <span>Sales Report</span>
+                    </a>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'revenue'])) }}" 
+                       class="report-dropdown-item {{ $type === 'revenue' ? 'active' : '' }}" 
+                       id="tab_revenue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        <span>Revenue Report</span>
+                    </a>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'orders'])) }}" 
+                       class="report-dropdown-item {{ $type === 'orders' ? 'active' : '' }}" 
+                       id="tab_orders">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <span>Order Report</span>
+                    </a>
+            </div>
+            <div class="report-dropdown-menu" id="inventory_report_menu" role="menu" hidden>
+                <div class="report-dropdown-label">Inventory Reports</div>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'products'])) }}" 
+                       class="report-dropdown-item {{ $type === 'products' ? 'active' : '' }}" 
+                       id="tab_products">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                        <span>Product Report</span>
+                    </a>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'inventory'])) }}" 
+                       class="report-dropdown-item {{ $type === 'inventory' ? 'active' : '' }}" 
+                       id="tab_inventory">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span>Inventory Report</span>
+                    </a>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'low-stock'])) }}" 
+                       class="report-dropdown-item {{ $type === 'low-stock' ? 'active' : '' }}" 
+                       id="tab_low_stock">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 1 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>Low Stock Report</span>
+                    </a>
+                <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'purchases'])) }}" 
+                       class="report-dropdown-item {{ $type === 'purchases' ? 'active' : '' }}" 
+                       id="tab_purchases">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <span>Supplier Report</span>
+                    </a>
+            </div>
     </div>
 
     <div class="reports-export-actions">
@@ -116,62 +166,7 @@
     </div>
 </div>
 
-<!-- Contextual Sub-Navigation Pills for Sales -->
-        @if($activeGroup === 'sales')
-            <div class="reports-sub-nav">
-                <span class="sub-nav-label">Sales Reports:</span>
-                <div class="sub-nav-pills">
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'sales'])) }}" 
-                       class="sub-tab-btn {{ $type === 'sales' ? 'active' : '' }}" 
-                       id="tab_sales">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 6v12"/></svg>
-                        <span>Sales Report</span>
-                    </a>
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'revenue'])) }}" 
-                       class="sub-tab-btn {{ $type === 'revenue' ? 'active' : '' }}" 
-                       id="tab_revenue">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                        <span>Revenue Report</span>
-                    </a>
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'orders'])) }}" 
-                       class="sub-tab-btn {{ $type === 'orders' ? 'active' : '' }}" 
-                       id="tab_orders">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                        <span>Order Report</span>
-                    </a>
-                </div>
-            </div>
-        @elseif($activeGroup === 'inventory')
-            <div class="reports-sub-nav">
-                <span class="sub-nav-label">Inventory Reports:</span>
-                <div class="sub-nav-pills">
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'products'])) }}" 
-                       class="sub-tab-btn {{ $type === 'products' ? 'active' : '' }}" 
-                       id="tab_products">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                        <span>Product Report</span>
-                    </a>
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'inventory'])) }}" 
-                       class="sub-tab-btn {{ $type === 'inventory' ? 'active' : '' }}" 
-                       id="tab_inventory">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        <span>Inventory Report</span>
-                    </a>
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'low-stock'])) }}" 
-                       class="sub-tab-btn {{ $type === 'low-stock' ? 'active' : '' }}" 
-                       id="tab_low_stock">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 1 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        <span>Low Stock Report</span>
-                    </a>
-                    <a href="{{ route('admin.reports', array_merge($tabParams, ['type' => 'purchases'])) }}" 
-                       class="sub-tab-btn {{ $type === 'purchases' ? 'active' : '' }}" 
-                       id="tab_purchases">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        <span>Supplier Report</span>
-                    </a>
-                </div>
-            </div>
-        @endif
+
 
     </div>
 
@@ -1125,3 +1120,74 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const pairs = [['nav_sales', 'sales_report_menu'], ['nav_inventory', 'inventory_report_menu']]
+        .map(function (ids) { return { btn: document.getElementById(ids[0]), menu: document.getElementById(ids[1]) }; })
+        .filter(function (d) { return d.btn && d.menu; });
+    if (!pairs.length) return;
+
+    // Move menus to <body>: ancestors with overflow / backdrop-filter would clip or offset a fixed menu
+    pairs.forEach(function (d) { document.body.appendChild(d.menu); });
+
+    function place(d) {
+        const r = d.btn.getBoundingClientRect();
+        d.menu.style.top = (r.bottom + 8) + 'px';
+        d.menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - d.menu.offsetWidth - 8)) + 'px';
+    }
+    // Liquid pill: slides to the hovered item, rests on the active one (same as the sidebar)
+    function initPill(d) {
+        d.menu.classList.add('has-drop-pill');
+        d.pill = document.createElement('div');
+        d.pill.className = 'report-dropdown-pill';
+        d.menu.prepend(d.pill);
+        d.items = Array.prototype.slice.call(d.menu.querySelectorAll('.report-dropdown-item'));
+        function moveTo(item, instant) {
+            if (!item) { d.pill.style.opacity = '0'; d.items.forEach(function (i) { i.classList.remove('pill-highlighted'); }); return; }
+            if (instant) d.pill.style.transition = 'none';
+            d.pill.style.width = item.offsetWidth + 'px';
+            d.pill.style.height = item.offsetHeight + 'px';
+            d.pill.style.transform = 'translate3d(' + item.offsetLeft + 'px,' + item.offsetTop + 'px,0)';
+            d.pill.style.opacity = '1';
+            d.items.forEach(function (i) { i.classList.toggle('pill-highlighted', i === item); });
+            if (instant) { void d.pill.offsetWidth; d.pill.style.transition = ''; }
+        }
+        d.rest = function (instant) { moveTo(d.menu.querySelector('.report-dropdown-item.active'), instant); };
+        d.items.forEach(function (i) { i.addEventListener('mouseenter', function () { moveTo(i, false); }); i.addEventListener('focus', function () { moveTo(i, false); }); });
+        d.menu.addEventListener('mouseleave', function () { d.rest(false); });
+    }
+    pairs.forEach(initPill);
+
+    function setOpen(d, open) {
+        d.menu.hidden = !open;
+        d.btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        d.btn.classList.toggle('is-open', open);
+        if (open) { place(d); d.rest(true); }
+    }
+    function closeAll(except) {
+        pairs.forEach(function (d) { if (d !== except && !d.menu.hidden) setOpen(d, false); });
+    }
+
+    pairs.forEach(function (d) {
+        d.btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeAll(d);
+            setOpen(d, d.menu.hidden);
+        });
+    });
+    document.addEventListener('click', function (e) {
+        pairs.forEach(function (d) {
+            if (!d.menu.hidden && !d.menu.contains(e.target) && !d.btn.contains(e.target)) setOpen(d, false);
+        });
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+    });
+    window.addEventListener('resize', function () { pairs.forEach(function (d) { if (!d.menu.hidden) place(d); }); });
+    window.addEventListener('scroll', function () { pairs.forEach(function (d) { if (!d.menu.hidden) place(d); }); }, true);
+})();
+</script>
+@endpush

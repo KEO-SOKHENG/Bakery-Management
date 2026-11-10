@@ -28,6 +28,32 @@ RUN apt-get update && apt-get install -y \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
+# PostgreSQL client tools (pg_dump / pg_restore) for Full Backup & Restore.
+# PG_CLIENT_MAJOR is REQUIRED and has no default: it must equal the verified production PostgreSQL server
+# major version (a newer client can write archives that older servers cannot restore, an older one cannot
+# dump a newer server). Verify with `SHOW server_version;` first, then build with
+#   docker build --build-arg PG_CLIENT_MAJOR=<major> .
+# Debian's own package is older than current servers, so the official PostgreSQL (PGDG) repository is used.
+ARG PG_CLIENT_MAJOR
+RUN case "${PG_CLIENT_MAJOR}" in \
+        ''|*[!0-9]*) echo "ERROR: build argument PG_CLIENT_MAJOR is required (digits only), e.g. --build-arg PG_CLIENT_MAJOR=<verified production major>" >&2; exit 1 ;; \
+    esac \
+    && apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+    && install -d /usr/share/postgresql-common/pgdg \
+    && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    && . /etc/os-release \
+    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-${PG_CLIENT_MAJOR} \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/lib/postgresql/${PG_CLIENT_MAJOR}/bin/pg_dump --version \
+    && /usr/lib/postgresql/${PG_CLIENT_MAJOR}/bin/pg_restore --version
+ENV PG_DUMP_PATH=/usr/lib/postgresql/${PG_CLIENT_MAJOR}/bin/pg_dump \
+    PG_RESTORE_PATH=/usr/lib/postgresql/${PG_CLIENT_MAJOR}/bin/pg_restore
+
+# PHP limits needed to upload backup packages and to process media (the stock image allows only 2M uploads).
+COPY docker/php-bakery.ini /usr/local/etc/php/conf.d/zz-bakery.ini
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

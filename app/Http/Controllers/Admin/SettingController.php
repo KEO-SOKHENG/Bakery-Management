@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use App\Services\AuditLogService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StorageDiagnosticsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +25,7 @@ class SettingController extends Controller
     /**
      * Display the System Settings view.
      */
-    public function index(Request $request)
+    public function index(Request $request, StorageDiagnosticsService $storageService)
     {
         if ($request->get('tab') === 'notifications') {
             return app(NotificationController::class)->index($request);
@@ -60,8 +62,9 @@ class SettingController extends Controller
 
         $canManage = $user->hasPermission('settings.manage');
         $isAdmin = $user->isAdmin();
+        $storageDiagnostics = $isAdmin ? $storageService->getDiagnostics() : null;
 
-        return view('admin.settings', compact('settings', 'canManage', 'isAdmin'));
+        return view('admin.settings', compact('settings', 'canManage', 'isAdmin', 'storageDiagnostics'));
     }
 
     /**
@@ -92,14 +95,14 @@ class SettingController extends Controller
                 'new_password_confirmation' => 'required|string|min:6',
             ]);
 
-            if (!Hash::check($request->current_password, $user->password)) {
+            if (!Hash::check($request->input('current_password'), $user->password)) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Current password does not match.'], 422);
                 }
                 return redirect()->back()->withErrors(['current_password' => 'Current password does not match.']);
             }
 
-            $user->password = Hash::make($request->new_password);
+            $user->password = Hash::make($request->input('new_password'));
             $user->must_change_password = false;
             $user->save();
             $passwordUpdated = true;
@@ -128,7 +131,7 @@ class SettingController extends Controller
         }
 
         // 2. Validate configuration input (supports both Profile and Store branding)
-        $validated = $request->validate([
+        $request->validate([
             'name'                     => 'nullable|string|max:255',
             'shop_name'                => 'nullable|string|max:255',
             'phone'                    => 'nullable|string|max:50',
@@ -180,7 +183,7 @@ class SettingController extends Controller
 
         $uploadedLogoUrl = null;
         $uploadedAvatarUrl = null;
-        $diskName = config('filesystems.settings_disk', in_array(config('filesystems.default'), ['s3', 'supabase-s3'], true) ? config('filesystems.default') : 'public');
+        $diskName = config('filesystems.settings_disk', \in_array(config('filesystems.default'), ['s3', 'supabase-s3'], true) ? config('filesystems.default') : 'public');
 
         // Handle shop logo upload if provided
         if ($request->hasFile('shop_logo')) {
@@ -230,8 +233,6 @@ class SettingController extends Controller
                 }
 
                 SettingsService::set('shop_logo', $logoPath);
-                SettingsService::set('user_avatar_' . $user->id, $logoPath);
-                SettingsService::set('admin_avatar', $logoPath);
                 $uploadedLogoUrl = $logoPath;
 
                 // Safely delete previous logo only AFTER the new logo has succeeded
@@ -266,6 +267,33 @@ class SettingController extends Controller
                     ], 422);
                 }
                 return redirect()->back()->withInput()->withErrors(['shop_logo' => $userMessage]);
+            }
+        }
+
+        // Handle removing/resetting shop logo if explicitly requested
+        if ($request->boolean('remove_shop_logo') && !$request->hasFile('shop_logo')) {
+            $previousLogo = SettingsService::getString('shop_logo', '');
+            SettingsService::set('shop_logo', '');
+            $uploadedLogoUrl = '';
+
+            if (!empty($previousLogo)) {
+                try {
+                    $parsedPath = parse_url($previousLogo, PHP_URL_PATH) ?? $previousLogo;
+                    $pos = strpos($parsedPath, 'logos/');
+                    if ($pos !== false) {
+                        $oldKey = substr($parsedPath, $pos);
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                        $disk = Storage::disk($diskName);
+                        if ($disk->exists($oldKey)) {
+                            $disk->delete($oldKey);
+                        }
+                        if ($diskName !== 'public' && Storage::disk('public')->exists($oldKey)) {
+                            Storage::disk('public')->delete($oldKey);
+                        }
+                    }
+                } catch (\Throwable $delEx) {
+                    Log::warning("Failed to remove previous logo on reset: " . $delEx->getMessage());
+                }
             }
         }
 
@@ -353,6 +381,34 @@ class SettingController extends Controller
             }
         }
 
+        // Handle removing/resetting avatar if explicitly requested
+        if ($request->boolean('remove_avatar') && !$request->hasFile('avatar')) {
+            $previousAvatar = SettingsService::getString('user_avatar_' . $user->id, '');
+            SettingsService::set('user_avatar_' . $user->id, '');
+            SettingsService::set('admin_avatar', '');
+            $uploadedAvatarUrl = '';
+
+            if (!empty($previousAvatar)) {
+                try {
+                    $parsedPath = parse_url($previousAvatar, PHP_URL_PATH) ?? $previousAvatar;
+                    $pos = strpos($parsedPath, 'avatars/');
+                    if ($pos !== false) {
+                        $oldKey = substr($parsedPath, $pos);
+                        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                        $disk = Storage::disk($diskName);
+                        if ($disk->exists($oldKey)) {
+                            $disk->delete($oldKey);
+                        }
+                        if ($diskName !== 'public' && Storage::disk('public')->exists($oldKey)) {
+                            Storage::disk('public')->delete($oldKey);
+                        }
+                    }
+                } catch (\Throwable $delEx) {
+                    Log::warning("Failed to remove previous avatar on reset: " . $delEx->getMessage());
+                }
+            }
+        }
+
         $fieldsToUpdate = [
             'shop_name', 'shop_phone', 'shop_email', 'shop_address',
             'tax_rate', 'discount', 'receipt_header', 'receipt_footer',
@@ -395,7 +451,7 @@ class SettingController extends Controller
         }
 
         if ($request->filled('language')) {
-            $lang = strtolower($request->language);
+            $lang = strtolower((string) $request->input('language'));
             Session::put('locale', $lang);
             cookie()->queue(cookie()->forever('locale', $lang));
             app()->setLocale($lang);
@@ -419,8 +475,8 @@ class SettingController extends Controller
                 'user_name' => $user->name,
                 'user_email' => $user->email,
                 'user_phone' => $user->phone,
-                'avatar_url' => $uploadedAvatarUrl ?? $uploadedLogoUrl,
-                'logo_url' => $uploadedLogoUrl ?? $uploadedAvatarUrl,
+                'avatar_url' => $uploadedAvatarUrl,
+                'logo_url' => $uploadedLogoUrl,
             ]);
         }
 
@@ -430,7 +486,7 @@ class SettingController extends Controller
     /**
      * Generate and download a safe system configuration and catalog backup.
      */
-    public function createBackup(Request $request)
+    public function createBackup()
     {
         /** @var User|null $user */
         $user = Auth::user();
@@ -493,7 +549,7 @@ class SettingController extends Controller
         $rawContent = file_get_contents($file->getRealPath());
         $payload = json_decode($rawContent, true);
 
-        if (!is_array($payload) || !isset($payload['settings']) || !is_array($payload['settings'])) {
+        if (!\is_array($payload) || !isset($payload['settings']) || !\is_array($payload['settings'])) {
             return redirect()->back()->withErrors([
                 'backup_file' => 'The uploaded file is not a valid system backup or contains corrupted data.'
             ]);
@@ -508,7 +564,7 @@ class SettingController extends Controller
                 'backup_restored',
                 "Administrator {$user->name} restored system settings from backup file.",
                 null,
-                ['settings_count' => count($payload['settings'])]
+                ['settings_count' => \count($payload['settings'])]
             );
 
             return redirect()->back()->with('success', 'System settings restored successfully from backup!');
@@ -523,5 +579,22 @@ class SettingController extends Controller
                 'backup_file' => 'Failed to restore configuration: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Real-time storage diagnostics and connectivity status endpoint (Admin Only).
+     */
+    public function storageStatus(Request $request, StorageDiagnosticsService $storageService)
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        if (!$user instanceof User || !$user->isAdmin()) {
+            abort(403, 'Unauthorized. Elevated administrator privileges required.');
+        }
+
+        $forceRefresh = $request->boolean('refresh');
+        $diagnostics = $storageService->getDiagnostics($forceRefresh);
+
+        return response()->json($diagnostics);
     }
 }

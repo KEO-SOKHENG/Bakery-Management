@@ -40,6 +40,15 @@ return [
             'report' => false,
         ],
 
+        // Private destination for Full Backup packages (never web-accessible).
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/full-backups'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -47,6 +56,40 @@ return [
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+        ],
+
+        // Dedicated PRIVATE S3-compatible destination for backups (AWS S3, Backblaze B2, Cloudflare R2...).
+        // Separate credentials and bucket from the media bucket. Inert until BACKUP_S3_* are set and BACKUP_DISK=backups-s3.
+        'backups-s3' => [
+            // 's3-noacl': standard S3 client without ACL headers (works on buckets with ACLs disabled, the AWS default).
+            'driver' => 's3-noacl',
+            'key' => env('BACKUP_S3_KEY'),
+            'secret' => env('BACKUP_S3_SECRET'),
+            'region' => env('BACKUP_S3_REGION', 'us-east-1'),
+            'bucket' => env('BACKUP_S3_BUCKET'),
+            'endpoint' => env('BACKUP_S3_ENDPOINT'),
+            'use_path_style_endpoint' => (bool) env('BACKUP_S3_PATH_STYLE', false),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+            'options' => array_filter([
+                // Server-side encryption at rest (AES256 or aws:kms). Packages are also encrypted by the application.
+                'ServerSideEncryption' => env('BACKUP_S3_SSE', 'AES256'),
+            ]),
+            'http' => [
+                'connect_timeout' => 10,
+                'timeout' => 300,
+            ],
+            // Optional S3 Object Lock applied to packages/ uploads (bucket must have Object Lock enabled).
+            // BACKUP_S3_OBJECT_LOCK_MODE = GOVERNANCE | COMPLIANCE (empty = off). Days per retention class tag.
+            'object_lock' => [
+                'mode' => env('BACKUP_S3_OBJECT_LOCK_MODE'),
+                'days' => [
+                    'daily' => (int) env('BACKUP_LOCK_DAYS_DAILY', 7),
+                    'weekly' => (int) env('BACKUP_LOCK_DAYS_WEEKLY', 35),
+                    'monthly' => (int) env('BACKUP_LOCK_DAYS_MONTHLY', 400),
+                ],
+            ],
         ],
 
         's3' => [

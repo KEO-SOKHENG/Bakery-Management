@@ -290,6 +290,12 @@ body.dark-mode .header-sub-action-wrap .sticky-add-product-btn:hover {
     transform: translateY(0) scale(0.96);
 }
 
+/* Notification button: fully round (50%), also beats the mobile header override */
+html body .icon-bell-btn,
+html body .top-header-bar .icon-bell-btn {
+    border-radius: 50% !important;
+}
+
 @keyframes bellSwing {
     0% { transform: rotate(0); }
     20% { transform: rotate(14deg); }
@@ -2591,8 +2597,6 @@ body.theme-dark .recent-orders-table tr:hover td {
 [data-theme="dark"] .stat-trend.up { color: #4ade80 !important; }
 [data-theme="dark"] .stat-trend.warning { color: #fbbf24 !important; }
 [data-theme="dark"] .stat-trend.danger { color: #f87171 !important; }
-[data-theme="dark"] .link-action { color: #a3a3a3 !important; }
-[data-theme="dark"] .link-action:hover { color: #f97316 !important; }
 
 [data-theme="dark"] .progress-bar-bg {
     background-color: #262626 !important;
@@ -2816,7 +2820,6 @@ body.theme-dark .recent-orders-table tr:hover td {
 }
 
 /* Links & Actions */
-[data-theme="glass"] .link-action,
 [data-theme="glass"] .stat-trend {
     color: #ffffff !important;
     text-decoration: underline;
@@ -3016,8 +3019,6 @@ body.theme-dark .recent-orders-table tr:hover td {
 [data-theme="glass"] .stat-trend.up { color: #86efac !important; }
 [data-theme="glass"] .stat-trend.warning { color: #fde047 !important; }
 [data-theme="glass"] .stat-trend.danger { color: #fda4af !important; }
-[data-theme="glass"] .link-action { color: rgba(255, 255, 255, 0.7) !important; }
-[data-theme="glass"] .link-action:hover { color: #ffffff !important; }
 
 [data-theme="glass"] .progress-bar-bg {
     background: rgba(0, 0, 0, 0.35) !important;
@@ -3370,7 +3371,7 @@ body.theme-dark .recent-orders-table tr:hover td {
     line-height: 1.25;
 }
 
-.user-dropdown-role-badge {
+/* .user-dropdown-role-badge {
     font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -3381,7 +3382,7 @@ body.theme-dark .recent-orders-table tr:hover td {
     color: #b45309;
     border: 1px solid rgba(217, 119, 6, 0.28);
     flex-shrink: 0;
-}
+} */
 
 .user-dropdown-email {
     font-size: 0.76rem;
@@ -5517,38 +5518,67 @@ body.dark-mode .confirm-modal-btn.cancel-btn:hover {
    Full Viewport Locked Layout for Products & Categories Pages
    Top headers & action toolbars are always sticky; only card grid scrolls up/down
    ========================================================================== */
-html:has(.is-catalog-page),
-html.is-catalog-page,
-body.is-catalog-page {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
+@media (min-width: 1200px) {
+    html:has(.is-catalog-page),
+    html.is-catalog-page,
+    body.is-catalog-page {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    body.is-catalog-page .bakery-app-layout {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
 }
 
-body.is-catalog-page .bakery-app-layout {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
+@media (min-width: 1200px) {
+    body.is-catalog-page .bakery-sidebar {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow-y: auto !important;
+        position: sticky !important;
+        top: 0 !important;
+        flex-shrink: 0 !important;
+    }
 }
 
-body.is-catalog-page .bakery-sidebar {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-    position: sticky !important;
-    top: 0 !important;
-    flex-shrink: 0 !important;
+@media (max-width: 1199px) {
+    body.is-catalog-page .bakery-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 1060 !important;
+    }
 }
 
-body.is-catalog-page .bakery-main-content {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 1.15rem 1.75rem 1.15rem 1.75rem !important;
-    box-sizing: border-box !important;
-    min-width: 0 !important;
+@media (min-width: 1200px) {
+    body.is-catalog-page .bakery-main-content {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 1.15rem 1.75rem 1.15rem 1.75rem !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (max-width: 1199px) {
+    body.is-catalog-page .bakery-main-content {
+        min-height: 100vh !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0.75rem 1rem 2rem 1rem !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+    }
 }
 
 body.is-catalog-page .top-header-bar {
@@ -5559,13 +5589,15 @@ body.is-catalog-page .top-header-bar {
     z-index: 850 !important;
 }
 
-body.is-catalog-page .main-content-body {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
+@media (min-width: 1200px) {
+    body.is-catalog-page .main-content-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
 }
 
 body.is-catalog-page .products-container,
@@ -5794,4 +5826,64 @@ body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb {
 
 body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb:hover {
     background: rgba(217, 119, 6, 0.55) !important;
+}
+
+/* Header bar: no background behind the menu bar */
+html body .top-header-bar {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+/* Toolbar wrappers (Reports, Staff, header filters): no rectangle behind the buttons */
+html body .header-toolbar-slot,
+html body .header-filter-form,
+html body .dash-filter-bar,
+html body .reports-sticky-toolbar-wrapper,
+html body .reports-toolbar-row,
+html body .reports-nav-container,
+html body .users-header-bar {
+    background: transparent !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+/* ── Print: white page in light theme, black page in dark theme ── */
+@media print {
+    @page {
+        margin: 10mm;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .theme-scenery {
+        display: none !important;
+    }
+
+    html[data-theme="light"],
+    html[data-theme="light"] body {
+        background: #ffffff !important;
+    }
+
+    html[data-theme="dark"],
+    html[data-theme="glass"] {
+        background: #000000 !important;
+    }
+}
+
+/* Filter pill: divider between two custom dropdowns (e.g. All Products | All Statuses) */
+.supplier-filter-pill-card .custom-supplier-dropdown ~ .custom-supplier-dropdown {
+    border-left: 1px solid var(--border-color, #eee9e0);
+    padding-left: 0.65rem;
+}
+
+[data-theme="dark"] .supplier-filter-pill-card .custom-supplier-dropdown ~ .custom-supplier-dropdown {
+    border-left-color: #333;
 }
