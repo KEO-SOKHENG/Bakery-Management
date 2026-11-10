@@ -534,12 +534,11 @@ class BackupPhasesTest extends TestCase
         $this->assertSame('0', (string) ini_get('max_execution_time'));
     }
 
-    public function test_dockerfile_requires_an_explicit_postgresql_client_version_and_raises_php_limits(): void
+    public function test_dockerfile_pins_the_production_postgresql_client_version_and_raises_php_limits(): void
     {
         $docker = file_get_contents(base_path('Dockerfile'));
 
-        $this->assertMatchesRegularExpression('/^ARG PG_CLIENT_MAJOR\s*$/m', $docker, 'PG_CLIENT_MAJOR must be declared without a default');
-        $this->assertDoesNotMatchRegularExpression('/ARG PG_CLIENT_MAJOR\s*=/', $docker);
+        $this->assertMatchesRegularExpression('/^ARG PG_CLIENT_MAJOR=18\s*$/m', $docker, 'PG_CLIENT_MAJOR must default to the Production server major (18)');
         $this->assertStringContainsString("''|*[!0-9]*)", $docker);
         $this->assertStringContainsString('exit 1', $docker);
         $this->assertStringContainsString('postgresql-client-${PG_CLIENT_MAJOR}', $docker);

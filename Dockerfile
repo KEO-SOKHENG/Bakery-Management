@@ -29,12 +29,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # PostgreSQL client tools (pg_dump / pg_restore) for Full Backup & Restore.
-# PG_CLIENT_MAJOR is REQUIRED and has no default: it must equal the verified production PostgreSQL server
-# major version (a newer client can write archives that older servers cannot restore, an older one cannot
-# dump a newer server). Verify with `SHOW server_version;` first, then build with
-#   docker build --build-arg PG_CLIENT_MAJOR=<major> .
+# PG_CLIENT_MAJOR must equal the verified production PostgreSQL server major version (a newer client can
+# write archives that older servers cannot restore, an older one cannot dump a newer server).
+# Default 18 matches the verified Production server (PostgreSQL 18.6); Render does not pass --build-arg.
+# Override with `docker build --build-arg PG_CLIENT_MAJOR=<major> .` if the server major ever changes.
 # Debian's own package is older than current servers, so the official PostgreSQL (PGDG) repository is used.
-ARG PG_CLIENT_MAJOR
+ARG PG_CLIENT_MAJOR=18
 RUN case "${PG_CLIENT_MAJOR}" in \
         ''|*[!0-9]*) echo "ERROR: build argument PG_CLIENT_MAJOR is required (digits only), e.g. --build-arg PG_CLIENT_MAJOR=<verified production major>" >&2; exit 1 ;; \
     esac \

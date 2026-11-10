@@ -16,7 +16,7 @@ Facts verified locally are marked **verified**. Everything about Production is *
 ### Dockerfile (prepared, not deployed)
 
 * Installs `postgresql-client-${PG_CLIENT_MAJOR}` from the official PostgreSQL (PGDG) apt repository (Debian's own package is older than current servers).
-* `PG_CLIENT_MAJOR` is a **required build argument with no default**: the build stops with an error unless it is digits (e.g. `--build-arg PG_CLIENT_MAJOR=<verified production major>`). Do not assume 16 or 17; confirm the Production server major version first.
+* `PG_CLIENT_MAJOR` defaults to **18**, matching the verified Production server (PostgreSQL 18.6), because Render does not pass `--build-arg` to Docker builds. Override with `--build-arg PG_CLIENT_MAJOR=<major>` only if the Production major changes; non-digit values still fail the build.
 * Sets `PG_DUMP_PATH` / `PG_RESTORE_PATH` to `/usr/lib/postgresql/<major>/bin/...` and prints both versions during the build, so a wrong repository fails the build.
 * Copies `docker/php-bakery.ini` (upload 512M, post 520M, memory 512M) so backup packages can be uploaded.
 * **Not built here:** Docker Desktop's engine was not running on this machine, so the image build could not be tested. The snippet follows PostgreSQL's documented apt procedure. Test it once with `docker build --build-arg PG_CLIENT_MAJOR=<major> .` and then run `php artisan backup:doctor` inside the container.
