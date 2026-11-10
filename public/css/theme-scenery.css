@@ -147,6 +147,132 @@
     100% { opacity: 0; transform: translate(-520px, 620px) rotate(35deg); }
 }
 
+/* ── Extra star layers (dense night sky) ── */
+.sky-stars::before,
+.sky-stars::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.sky-stars::before {
+    background-image:
+        radial-gradient(1px 1px at 93.9% 39.7%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 8.1% 53.5%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 58.1% 90.2%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 4.7% 43.5%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 24.6% 55.0%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 82.0% 13.1%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 62.8% 58.1%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 57.6% 39.9%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 5.6% 85.1%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 42.1% 54.0%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 55.9% 67.8%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 58.0% 63.6%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 10.5% 70.8%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 61.7% 49.6%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 77.2% 46.6%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 36.4% 25.3%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 69.5% 24.9%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 52.5% 86.8%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 29.2% 97.1%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 51.2% 17.2%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 15.9% 48.9%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 95.3% 8.6%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 34.3% 35.3%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 57.8% 45.7%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 93.6% 47.5%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 6.9% 69.7%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 28.9% 38.8%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 3.2% 46.2%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 60.9% 49.4%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 76.3% 13.7%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 40.0% 90.8%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 8.9% 45.0%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 87.6% 81.3%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 70.2% 97.7%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 94.9% 15.8%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 15.8% 65.5%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 48.5% 58.7%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 28.6% 15.3%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 60.8% 32.2%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 68.7% 51.5%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 45.8% 86.4%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 40.0% 39.6%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 63.2% 7.1%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 97.5% 44.2%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 34.3% 6.2%, #fff 50%, transparent 51%);
+    animation: stars-twinkle 5.5s ease-in-out infinite reverse;
+}
+
+.sky-stars::after {
+    background-image:
+        radial-gradient(1.5px 1.5px at 56.5% 53.6%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 61.1% 7.9%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 61.2% 15.6%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 94.6% 60.0%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 13.0% 84.2%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 48.1% 31.6%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 11.0% 34.6%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 47.9% 68.8%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 3.3% 94.2%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 36.5% 68.6%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 75.3% 30.2%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 85.6% 69.2%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 51.8% 90.0%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 76.6% 53.2%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 33.3% 22.9%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 80.0% 81.2%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 79.7% 20.6%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 35.8% 3.8%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 78.4% 47.3%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 68.9% 94.7%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 80.2% 71.9%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 94.6% 36.7%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 11.0% 47.1%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 21.0% 62.2%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 83.4% 48.0%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 34.7% 64.0%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 12.8% 39.1%, #fff 50%, transparent 51%),
+        radial-gradient(2.5px 2.5px at 74.5% 47.8%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 43.5% 63.3%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 79.5% 96.2%, #fff 50%, transparent 51%);
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+    animation: stars-twinkle 3.2s ease-in-out 1.2s infinite;
+}
+
+.shooting-star:nth-child(12) { left: 20%; animation-delay: 2.2s; animation-duration: 6.8s; }
+.shooting-star:nth-child(13) { left: 50%; animation-delay: 5s;   animation-duration: 7.2s; }
+.shooting-star:nth-child(14) { left: 76%; animation-delay: 1.3s; animation-duration: 5.8s; }
+.shooting-star:nth-child(15) { left: 98%; animation-delay: 3.9s; animation-duration: 6.4s; }
+
+/* ── Extra falling stars ── */
+.shooting-star:nth-child(16) { left: 47%; top: 12%; animation-delay: 6.5s; animation-duration: 6.1s; }
+.shooting-star:nth-child(17) { left: 52%; top: 13%; animation-delay: 1.3s; animation-duration: 6.3s; }
+.shooting-star:nth-child(18) { left: 64%; top: 22%; animation-delay: 0.7s; animation-duration: 5.6s; }
+.shooting-star:nth-child(19) { left: 12%; top: 22%; animation-delay: 4.9s; animation-duration: 4.6s; }
+.shooting-star:nth-child(20) { left: 98%; top: 29%; animation-delay: 4.6s; animation-duration: 6.7s; }
+.shooting-star:nth-child(21) { left: 18%; top: -9%; animation-delay: 3.7s; animation-duration: 4.7s; }
+.shooting-star:nth-child(22) { left: 21%; top: -0%; animation-delay: 0.2s; animation-duration: 6.1s; }
+.shooting-star:nth-child(23) { left: 46%; top: 24%; animation-delay: 3.6s; animation-duration: 6.7s; }
+.shooting-star:nth-child(24) { left: 51%; top: 16%; animation-delay: 3.2s; animation-duration: 5.5s; }
+.shooting-star:nth-child(25) { left: 100%; top: 30%; animation-delay: 5.9s; animation-duration: 7.0s; }
+.shooting-star:nth-child(26) { left: 34%; top: -1%; animation-delay: 2.0s; animation-duration: 4.7s; }
+.shooting-star:nth-child(27) { left: 77%; top: 6%; animation-delay: 5.9s; animation-duration: 5.9s; }
+.shooting-star:nth-child(28) { left: 96%; top: 24%; animation-delay: 0.0s; animation-duration: 5.2s; }
+.shooting-star:nth-child(29) { left: 91%; top: 9%; animation-delay: 6.9s; animation-duration: 5.9s; }
+.shooting-star:nth-child(30) { left: 10%; top: 15%; animation-delay: 5.4s; animation-duration: 5.4s; }
+.shooting-star:nth-child(31) { left: 11%; top: 3%; animation-delay: 6.7s; animation-duration: 7.2s; }
+.shooting-star:nth-child(32) { left: 14%; top: -0%; animation-delay: 0.7s; animation-duration: 4.7s; }
+.shooting-star:nth-child(33) { left: 80%; top: -3%; animation-delay: 3.9s; animation-duration: 6.1s; }
+.shooting-star:nth-child(34) { left: 21%; top: 19%; animation-delay: 0.9s; animation-duration: 6.8s; }
+.shooting-star:nth-child(35) { left: 14%; top: 7%; animation-delay: 1.5s; animation-duration: 5.4s; }
+.shooting-star:nth-child(36) { left: 97%; top: 22%; animation-delay: 2.1s; animation-duration: 7.6s; }
+.shooting-star:nth-child(37) { left: 23%; top: 6%; animation-delay: 6.0s; animation-duration: 6.7s; }
+.shooting-star:nth-child(38) { left: 13%; top: 30%; animation-delay: 1.5s; animation-duration: 5.4s; }
+.shooting-star:nth-child(39) { left: 78%; top: 3%; animation-delay: 2.1s; animation-duration: 4.8s; }
+
 @media (max-width: 680px) {
     .sky-sun { width: 220px; height: 220px; top: -70px; right: -50px; }
     .sky-moon { width: 76px; height: 76px; right: 36px; top: 40px; box-shadow: inset -20px -6px 0 0 #f6f2dc; }

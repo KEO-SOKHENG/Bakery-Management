@@ -3017,3 +3017,21 @@ body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlig
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
+/* ── Collapsed sidebar: icon colour follows the moving pill ── */
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg {
+    color: #6b7280 !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item.pill-highlighted svg {
+    color: #ffffff !important;
+}
+
+.bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:hover {
+    background: transparent !important;
+}
+
+[data-theme="dark"] .bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg,
+[data-theme="glass"] .bakery-sidebar.sidebar-collapsed .sidebar-nav:has(.nav-pointer-pill[style*="opacity: 1"]) .sidebar-nav-item:not(.pill-highlighted) svg {
+    color: #a1a1aa !important;
+}

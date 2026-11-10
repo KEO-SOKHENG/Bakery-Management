@@ -1614,3 +1614,13 @@ body.theme-dark .bkx-header-icon { color: #e4e4e7; }
     .bkx-header-icon { width: 54px; height: 54px; border-radius: 16px; }
     .bkx-banner { flex-wrap: wrap; }
 }
+
+/* ── Segmented control: text colour follows the moving pill ── */
+html body .apple-detail-body .ios-segmented-control:has(.segmented-pointer-pill[style*="opacity: 1"]) .segmented-option {
+    color: var(--sui-muted) !important;
+    transform: none;
+}
+
+html body .apple-detail-body .ios-segmented-control:has(.segmented-pointer-pill[style*="opacity: 1"]) .segmented-option.pill-highlighted {
+    color: #ffffff !important;
+}

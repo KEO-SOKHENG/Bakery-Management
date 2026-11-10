@@ -77,7 +77,7 @@
 </head>
 <body class="{{ (request()->is('pos*') || request()->is('cashier*')) ? 'is-pos-page' : ((request()->is('admin/products*') || request()->is('admin/categories*') || request()->is('admin/reports*') || request()->is('admin/settings*') || request()->is('admin/notifications*') || request()->is('*dashboard*')) ? 'is-catalog-page is-dashboard-page is-settings-page' : '') }} @yield('body_class')">
     <!-- Theme scenery: sun (light) / moon + falling stars (dark) -->
-    <div class="theme-scenery" aria-hidden="true"><div class="sky-sun"></div><div class="sky-moon"></div><div class="sky-stars"></div><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span></div>
+    <div class="theme-scenery" aria-hidden="true"><div class="sky-sun"></div><div class="sky-moon"></div><div class="sky-stars"></div><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span><span class="shooting-star"></span></div>
 
     <div class="bakery-app-layout">
         <!-- Sidebar Navigation -->
@@ -425,67 +425,25 @@
                             @endif
                         </div>
 
-                        <div class="user-dropdown-menu" id="user_dropdown_menu">
-                            <!-- Executive User Header Card -->
-                            <div class="user-dropdown-header">
-                                <div class="user-dropdown-avatar-wrap">
-                                    @if(!empty($headerAvatar))
-                                        <img src="{{ asset($headerAvatar) }}" alt="{{ auth()->check() ? auth()->user()->name : 'User' }}" class="user-dropdown-avatar-img">
-                                    @else
-                                        <div class="user-dropdown-avatar-placeholder">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                        </div>
-                                    @endif
-                                    <span class="user-online-badge" title="Online"></span>
-                                </div>
-                                <div class="user-dropdown-info">
-                                    <div class="user-dropdown-name-row">
-                                        <span class="user-dropdown-name">{{ auth()->check() ? auth()->user()->name : 'User Account' }}</span>
-                                    </div>
-                                    <div class="user-dropdown-email" title="{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}">{{ auth()->check() ? auth()->user()->email : 'user@bakery.com' }}</div>
-                                </div>
-                            </div>
+                        <div class="user-dropdown-menu profile-menu-card" id="user_dropdown_menu">
+                            <a href="{{ in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']) ? route('admin.settings') . '#profile_info' : route('profile') }}" class="profile-menu-item" id="nav_my_profile">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/></svg>
+                                <span>Profile</span>
+                            </a>
 
-                            <div class="user-dropdown-items-list">
-                                <!-- My Profile -->
-                                <a href="{{ in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']) ? route('admin.settings') . '#profile_info' : route('profile') }}" class="user-dropdown-item" id="nav_my_profile">
-                                    <div class="dropdown-item-icon-box icon-box-profile">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                    </div>
-                                    <div class="dropdown-item-text">
-                                        <div class="dropdown-item-title">My Profile</div>
-                                    </div>
-                                    <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                            @if(in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']))
+                                <a href="{{ route('admin.settings') }}#appearance" class="profile-menu-item">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.25 4.75v9.5L12 21.5l-8.25-4.75v-9.5z"/><circle cx="12" cy="12" r="3.25"/></svg>
+                                    <span>Theme &amp; Language</span>
                                 </a>
+                            @endif
 
-                                <!-- Settings & Theme (Admin / Manager only) -->
-                                @if(in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']))
-                                    <a href="{{ route('admin.settings') }}" class="user-dropdown-item">
-                                        <div class="dropdown-item-icon-box icon-box-settings">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        </div>
-                                        <div class="dropdown-item-text">
-                                            <div class="dropdown-item-title">Settings & Theme</div>
-                                        </div>
-                                        <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                                    </a>
-                                @endif
-                            </div>
+                            <div class="profile-menu-divider"></div>
 
-                            <div class="user-dropdown-divider"></div>
-
-                            <!-- Sign Out -->
-                            <div class="user-dropdown-footer">
-                                <a href="{{ route('logout') }}" class="user-dropdown-item user-dropdown-item-danger">
-                                    <div class="dropdown-item-icon-box icon-box-danger">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                                    </div>
-                                    <div class="dropdown-item-text">
-                                        <div class="dropdown-item-title">Sign Out</div>
-                                    </div>
-                                    <svg class="dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                                </a>
-                            </div>
+                            <a href="{{ route('logout') }}" class="profile-menu-item">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M10 12h10"/><path d="M16 8l4 4-4 4"/></svg>
+                                <span>Sign out</span>
+                            </a>
                         </div>
                     </div>
                 </div>
