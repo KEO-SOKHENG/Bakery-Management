@@ -3094,3 +3094,27 @@ body.theme-dark .sidebar-nav.has-liquid-pill .sidebar-nav-item:not(.pill-highlig
         transition: none !important;
     }
 }
+
+/* ── Mobile/Tablet Drawer Stacking: above all page cards & headers, below modals ── */
+@media (max-width: 1199px) {
+    html body .sidebar-mobile-backdrop {
+        z-index: 10040 !important;
+    }
+
+    html body .bakery-sidebar.bakery-sidebar {
+        z-index: 10050 !important;
+    }
+}
+
+/* ── Modal Open: drop sidebar beneath the modal blur backdrop ── */
+html body:has(
+    .modal-backdrop.is-active, .modal-backdrop.active, .modal-backdrop.show,
+    .pos-modal-backdrop.is-active, .pos-cart-backdrop.is-active,
+    .confirm-modal-backdrop.is-active, .cust-modal-backdrop.is-active,
+    .login-modal-backdrop.is-active, .logout-modal-backdrop.is-active,
+    .notif-modal-backdrop.is-active, .receipt-modal-backdrop.is-active,
+    .user-modal-backdrop.is-active, .user-modal-backdrop.active,
+    .dash-modal-overlay.active, .product-modal-overlay.active
+) .bakery-sidebar.bakery-sidebar {
+    z-index: 0 !important;
+}

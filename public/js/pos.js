@@ -9,6 +9,7 @@
     const CUSTOMER_SEARCH_URL = config.customerSearchUrl || '/pos/customers/search';
     const CUSTOMER_QUICK_STORE_URL = config.customerQuickStoreUrl || '/pos/customers/quick-store';
     const CSRF_TOKEN = config.csrfToken || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    let currentGrandTotal = 0;
 
     let cart = []; // Array of { id, name, price, stock, qty }
     let selectedPaymentMethod = 'cash';
@@ -302,6 +303,7 @@
         const taxable = Math.max(0, subtotal - discount);
         const tax = (taxable * (TAX_PERCENTAGE / 100));
         const grandTotal = taxable + tax;
+        currentGrandTotal = grandTotal;
 
         subtotalDisplay.textContent = `${CURRENCY}${subtotal.toFixed(2)}`;
         taxDisplay.textContent = `${CURRENCY}${tax.toFixed(2)}`;
@@ -540,7 +542,91 @@
     // -------------------------------------------------------------------------
     // 5. Checkout / Process Sale
     // -------------------------------------------------------------------------
-    completeSaleBtn.addEventListener('click', async function() {
+    // ── KHQR / Card confirmation modal ──
+    const payModal = document.getElementById('pos_payment_modal');
+    const payTitle = document.getElementById('pay_modal_title');
+    const payAmount = document.getElementById('pay_modal_amount');
+    const payPanelKhqr = document.getElementById('pay_panel_khqr');
+    const payPanelCard = document.getElementById('pay_panel_card');
+    const payKhqrCode = document.getElementById('pay_khqr_code');
+    const payKhqrRef = document.getElementById('pay_khqr_ref');
+    const payCardLast4 = document.getElementById('pay_card_last4');
+    const payCardApproval = document.getElementById('pay_card_approval');
+    const payError = document.getElementById('pay_modal_error');
+
+    /**
+     * Builds the string encoded in the on-screen QR. Without a registered Bakong
+     * merchant ID this is a display placeholder, not a scannable KHQR payment.
+     */
+    function buildKhqrPayload(amount) {
+        const merchant = config.khqrMerchantId || 'MERCHANT_NOT_SET';
+        return `KHQR|${merchant}|${config.bakeryName || 'Bakery'}|${amount.toFixed(2)}|${CURRENCY}`;
+    }
+
+    function openPaymentModal(method) {
+        payError.style.display = 'none';
+        payAmount.textContent = `${CURRENCY}${currentGrandTotal.toFixed(2)}`;
+        const isQr = method === 'qr_code';
+        payTitle.textContent = isQr ? 'KHQR Payment' : 'Card Payment';
+        payPanelKhqr.style.display = isQr ? 'block' : 'none';
+        payPanelCard.style.display = isQr ? 'none' : 'block';
+
+        if (isQr) {
+            payKhqrRef.value = '';
+            payKhqrCode.innerHTML = '';
+            if (window.QRCode) {
+                new QRCode(payKhqrCode, { text: buildKhqrPayload(currentGrandTotal), width: 200, height: 200 });
+            } else {
+                payKhqrCode.textContent = 'QR library failed to load.';
+            }
+            setTimeout(() => payKhqrRef.focus(), 50);
+        } else {
+            payCardLast4.value = '';
+            payCardApproval.value = '';
+            setTimeout(() => payCardLast4.focus(), 50);
+        }
+        payModal.classList.add('is-active');
+    }
+
+    function closePaymentModal() {
+        payModal.classList.remove('is-active');
+    }
+
+    function showPayError(msg) {
+        payError.textContent = msg;
+        payError.style.display = 'block';
+    }
+
+    document.getElementById('btn_cancel_pay').addEventListener('click', closePaymentModal);
+    payCardLast4.addEventListener('input', () => {
+        payCardLast4.value = payCardLast4.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    document.getElementById('btn_confirm_pay').addEventListener('click', function() {
+        if (selectedPaymentMethod === 'qr_code') {
+            const ref = payKhqrRef.value.trim();
+            if (!ref) return showPayError('Enter the KHQR transaction ID.');
+            closePaymentModal();
+            processCheckout({ payment_reference: ref });
+        } else {
+            const last4 = payCardLast4.value.trim();
+            if (!/^\d{4}$/.test(last4)) return showPayError('Enter the last 4 digits of the card.');
+            const approval = payCardApproval.value.trim();
+            closePaymentModal();
+            processCheckout({ card_last4: last4, payment_reference: approval || null });
+        }
+    });
+
+    completeSaleBtn.addEventListener('click', function() {
+        if (cart.length === 0) return;
+        if (selectedPaymentMethod === 'qr_code' || selectedPaymentMethod === 'card') {
+            openPaymentModal(selectedPaymentMethod);
+            return;
+        }
+        processCheckout({});
+    });
+
+    async function processCheckout(paymentDetails) {
         if (cart.length === 0) return;
 
         const customerName = selectedCustomer ? selectedCustomer.name : (customerInput.value.trim() || 'Walk-in Customer');
@@ -551,6 +637,7 @@
             customer_id: customerId,
             customer_name: customerName,
             payment_method: selectedPaymentMethod,
+            ...paymentDetails,
             discount: discountVal,
             items: cart.map(item => ({
                 product_id: item.id,
@@ -626,7 +713,7 @@
             completeSaleBtn.disabled = false;
             completeSaleText.textContent = originalText;
         }
-    });
+    }
 
     // -------------------------------------------------------------------------
     // 6. Receipt Modal & Printing

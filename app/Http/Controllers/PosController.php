@@ -126,6 +126,8 @@ class PosController extends Controller
             'customer_id'    => 'nullable|exists:customers,id',
             'customer_name'  => 'nullable|string|max:255',
             'payment_method' => 'required|string|in:cash,card,qr_code',
+            'payment_reference' => 'nullable|string|max:64|required_if:payment_method,qr_code',
+            'card_last4'     => 'nullable|digits:4|required_if:payment_method,card',
             'discount'       => 'nullable|numeric|min:0',
             'items'          => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -198,7 +200,13 @@ class PosController extends Controller
                 $grandTotal = round($taxableAmount + $tax, 2);
 
                 $orderNumber = 'ORD-' . strtoupper(uniqid());
-                $paymentRef  = 'PAY-' . strtoupper(uniqid());
+                $externalRef = trim($validated['payment_reference'] ?? '');
+                $paymentRef  = $externalRef !== '' ? $externalRef : 'PAY-' . strtoupper(uniqid());
+                $paymentNote = match ($paymentMethod) {
+                    'qr_code' => ' | KHQR txn: ' . $paymentRef,
+                    'card'    => ' | Card ****' . ($validated['card_last4'] ?? '????'),
+                    default   => '',
+                };
 
                 $pointsEarned = $customer ? (int) floor($grandTotal) : 0;
 
@@ -245,7 +253,7 @@ class PosController extends Controller
                     'payment_status'    => 'completed',
                     'payment_reference' => $paymentRef,
                     'payment_date'      => now(),
-                    'notes'             => "POS In-Store Sale completed by " . (Auth::user()->name ?? 'Cashier'),
+                    'notes'             => "POS In-Store Sale completed by " . (Auth::user()->name ?? 'Cashier') . $paymentNote,
                 ]);
 
                 // 5. Award Customer Loyalty Points if customer attached

@@ -64,6 +64,11 @@ test.describe('POS Terminal Full End-to-End Workflow', () => {
         await expect(completeSaleBtn).toBeEnabled();
         await completeSaleBtn.click();
 
+        // 10.1 Confirm KHQR payment with a transaction ID
+        await expect(page.locator('#pos_payment_modal')).toHaveClass(/is-active/);
+        await page.fill('#pay_khqr_ref', `E2E-${Date.now()}`);
+        await page.click('#btn_confirm_pay');
+
         // 11. Verify Receipt Modal Appears
         const modal = page.locator('#pos_receipt_modal');
         await expect(modal).toHaveClass(/is-active/);

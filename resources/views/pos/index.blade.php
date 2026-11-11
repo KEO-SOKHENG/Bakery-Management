@@ -319,6 +319,57 @@
 </div>
 
 <!-- ==========================================================================
+     PAYMENT CONFIRMATION MODAL (KHQR / Card)
+     ========================================================================== -->
+<div class="pos-modal-backdrop" id="pos_payment_modal">
+    <div class="pos-receipt-modal" style="max-width: 380px; padding: 1.5rem;">
+        <h3 id="pay_modal_title" style="margin: 0 0 1rem; font-size: 1.15rem; font-weight: 800; color: var(--text-title, #29150d);">Payment</h3>
+
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" data-lang-key="grand_total">Amount Due</div>
+            <div id="pay_modal_amount" style="font-size: 1.75rem; font-weight: 800; color: var(--text-title, #29150d);">{{ $currency }}0.00</div>
+        </div>
+
+        <!-- KHQR panel -->
+        <div id="pay_panel_khqr" style="display: none;">
+            <div style="display: flex; justify-content: center; margin-bottom: 0.75rem;">
+                <div style="background: #fff; padding: 12px; border-radius: 12px; border: 2px solid #e1232e;">
+                    <div style="background: #e1232e; color: #fff; font-weight: 800; font-size: 0.8rem; text-align: center; border-radius: 6px; padding: 3px 0; margin-bottom: 8px;">KHQR</div>
+                    <div id="pay_khqr_code" style="width: 200px; height: 200px;"></div>
+                </div>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.75rem;">Ask the customer to scan with any Bakong-member banking app, then enter the transaction ID shown on their screen.</p>
+            <label class="pos-cart-label" for="pay_khqr_ref">Transaction ID *</label>
+            <input type="text" id="pay_khqr_ref" class="pos-cart-input" maxlength="64" placeholder="e.g. 7f3a9c21">
+        </div>
+
+        <!-- Card panel -->
+        <div id="pay_panel_card" style="display: none;">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.75rem;">Charge the amount on the card terminal, then record the result below.</p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div>
+                    <label class="pos-cart-label" for="pay_card_last4">Card last 4 digits *</label>
+                    <input type="text" id="pay_card_last4" class="pos-cart-input" inputmode="numeric" maxlength="4" placeholder="1234">
+                </div>
+                <div>
+                    <label class="pos-cart-label" for="pay_card_approval">Approval code (optional)</label>
+                    <input type="text" id="pay_card_approval" class="pos-cart-input" maxlength="32" placeholder="e.g. 004512">
+                </div>
+            </div>
+        </div>
+
+        <div id="pay_modal_error" style="display: none; color: #dc2626; font-size: 0.8rem; margin-top: 0.6rem;"></div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+            <button type="button" id="btn_cancel_pay" data-lang-key="cancel"
+                style="flex: 1; height: 44px; border-radius: 999px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-weight: 700; font-size: 0.9rem; cursor: pointer;">Cancel</button>
+            <button type="button" id="btn_confirm_pay"
+                style="flex: 1.4; height: 44px; border-radius: 999px; border: none; background: #5a3220; color: #fff; font-weight: 700; font-size: 0.9rem; cursor: pointer;">Confirm Payment</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
      QUICK REGISTER CUSTOMER MODAL (In POS Terminal)
      ========================================================================== -->
 <div class="pos-modal-backdrop" id="pos_quick_customer_modal">
@@ -365,7 +416,10 @@
         customerSearchUrl: @json(route('pos.customers.search')),
         customerQuickStoreUrl: @json(route('pos.customers.quickStore')),
         csrfToken: @json(csrf_token()),
+        bakeryName: @json($bakeryName),
+        khqrMerchantId: @json(\App\Models\Setting::get('khqr_merchant_id', '')),
     };
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="{{ asset('js/pos.js') }}?v={{ @filemtime(public_path('js/pos.js')) ?: '1.0' }}"></script>
 @endpush
