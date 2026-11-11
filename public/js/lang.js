@@ -44,7 +44,7 @@
             "inventory": "Inventory",
             "analytics": "Analytics",
             "system": "System",
-            "users_staff": "Users & Staff",
+            "users_staff": "Staff & Security",
             "notifications": "Notifications",
 
             // Settings Page Labels & Headings
@@ -212,7 +212,7 @@
             "view_details": "View Details",
 
             // User & Staff Management
-            "users_staff": "Staff & Accounts",
+            "users_staff": "Staff & Security",
             "manage_users": "Manage Staff & Accounts",
             "users_management": "Staff & Accounts",
             "users_management_subtitle": "Manage staff accounts, roles, and access.",
@@ -238,9 +238,6 @@
             "save_permissions": "Save Permissions",
             "suspended": "Suspended",
             "role_baker": "Baker",
-            "salary_management": "Salary Management",
-            "attendance_management": "Attendance Management",
-            "work_schedules": "Work Schedules",
 
             // Notification System
             "notifications": "Notifications",
@@ -403,7 +400,7 @@
             "inventory": "សារពើភ័ណ្ឌ",
             "analytics": "ការវិភាគ",
             "system": "ប្រព័ន្ធ",
-            "users_staff": "អ្នកប្រើប្រាស់ និងបុគ្គលិក",
+            "users_staff": "បុគ្គលិក និងសុវត្ថិភាព",
             "notifications": "ការជូនដំណឹង",
 
             // Settings Page Labels & Headings
@@ -571,7 +568,7 @@
             "view_details": "មើលព័ត៌មានលម្អិត",
 
             // User & Staff Management
-            "users_staff": "បុគ្គលិក និងគណនី",
+            "users_staff": "បុគ្គលិក និងសុវត្ថិភាព",
             "manage_users": "គ្រប់គ្រងបុគ្គលិក និងគណនី",
             "users_management": "បុគ្គលិក និងគណនី",
             "users_management_subtitle": "គ្រប់គ្រងគណនីបុគ្គលិក តួនាទី និងសិទ្ធិចូលប្រើប្រាស់។",
@@ -597,9 +594,6 @@
             "save_permissions": "រក្សាទុកសិទ្ធិ",
             "suspended": "បានផ្អាក",
             "role_baker": "អ្នកដុតនំ",
-            "salary_management": "ការគ្រប់គ្រងប្រាក់បៀវត្សរ៍",
-            "attendance_management": "ការគ្រប់គ្រងវត្តមាន",
-            "work_schedules": "កាលវិភាគការងារ",
 
             // Notification System
             "notifications": "ការជូនដំណឹង",

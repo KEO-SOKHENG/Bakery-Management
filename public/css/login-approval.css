@@ -1,0 +1,120 @@
+/* ── Waiting page (login card) ── */
+
+.approval-state > * { display: none; }
+.approval-state[data-state="pending"] .approval-state-pending,
+.approval-state[data-state="approved"] .approval-state-approved,
+.approval-state[data-state="consumed"] .approval-state-approved,
+.approval-state[data-state="rejected"] .approval-state-rejected,
+.approval-state[data-state="expired"] .approval-state-expired,
+.approval-state[data-state="cancelled"] .approval-state-expired {
+    display: flex;
+}
+
+.approval-state-pending {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    margin: 0.5rem 0 1.25rem;
+}
+
+.approval-message {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #3b2a22;
+}
+
+.approval-countdown {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #5b4a42;
+}
+
+.approval-countdown strong {
+    font-variant-numeric: tabular-nums;
+}
+
+.approval-spinner {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid rgba(74, 44, 32, 0.18);
+    border-top-color: #4a2c20;
+    animation: approval-spin 0.9s linear infinite;
+}
+
+@keyframes approval-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .approval-spinner { animation: none; }
+}
+
+.approval-actions { margin-top: 0.5rem; }
+
+/* ── Login approval items inside the header bell dropdown ── */
+
+.notification-item[hidden] { display: none !important; }
+.notification-item.lac-item { cursor: default; align-items: flex-start; }
+.lac-item .lac-expiry { color: #ea580c; font-weight: 600; }
+.lac-item .lac-confirm { margin-top: 6px; font-size: 0.78rem; font-weight: 600; }
+.lac-item .lac-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+.lac-item .lac-actions button {
+    flex: 1;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    border: 1.5px solid transparent;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lac-item .lac-reject { background: transparent; color: #ef4444; border-color: rgba(239, 68, 68, 0.45); }
+.lac-item .lac-reject:hover { background: rgba(239, 68, 68, 0.1); }
+.lac-item .lac-approve { background: #ea580c; color: #fff; }
+.lac-item .lac-approve:hover { background: #c2410c; }
+.lac-item button:disabled { opacity: 0.6; cursor: wait; }
+
+/* ── Login Security tab (extends the Staff & Accounts table styles) ── */
+
+.sec-view-pills .period-pill { display: inline-flex; align-items: center; gap: 6px; }
+
+.sec-pill-count {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
+.sec-pill-count.is-alert { background: #ef4444; color: #fff; }
+#security_table_wrapper { overflow-x: auto !important; overflow-y: auto !important; }
+#security_table_wrapper .orders-table { min-width: 760px; }
+.sec-toolbar-hint { font-size: 0.82rem; color: var(--text-secondary); }
+.sec-expiry { color: #ea580c; font-weight: 600; }
+
+.sec-empty-cell {
+    padding: 2.5rem 1rem !important;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.btn-action-btn.sec-action-approve { background: #ea580c; border-color: #ea580c; color: #fff; }
+.btn-action-btn.sec-action-approve:hover { background: #c2410c; border-color: #c2410c; }
+.btn-action-btn.sec-action-reject { color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
+.btn-action-btn.sec-action-reject:hover { background: rgba(239, 68, 68, 0.1); }
+.btn-action-btn:disabled { opacity: 0.6; cursor: wait; }
+
+@media (max-width: 767px) {
+
+    .sec-toolbar-hint { width: 100%; }
+    .sec-view-pills { overflow-x: auto; max-width: 100%; }
+}

@@ -239,11 +239,10 @@
 
                 <!-- Staff & Accounts (Admin Only) -->
                 @if($role === 'admin')
-                    <a href="{{ route('admin.users.index') }}" class="sidebar-nav-item {{ request()->is('admin/users*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.users.index') }}" class="sidebar-nav-item {{ (request()->is('admin/users*') || request()->is('admin/security*')) ? 'active' : '' }}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>
-                        <span data-lang-key="users_staff">Staff & Accounts</span>
-                    </a>
-                @endif
+                        <span data-lang-key="users_staff">Staff & Security</span>
+                    </a>                @endif
 
                 <!-- ==============================================
                      3. ANALYTICS SECTION (Admin & Manager)
@@ -371,7 +370,7 @@
                                             $isUnread = !$notif->isRead();
                                             $sev = $notif->severity ?? 'info';
                                         @endphp
-                                        <a href="{{ $notif->action_url ?: 'javascript:void(0)' }}" class="notification-item {{ $isUnread ? 'unread' : '' }}" data-id="{{ $notif->id }}" data-read="{{ $isUnread ? '0' : '1' }}">
+                                        <a href="{{ $notif->action_url ?: 'javascript:void(0)' }}" class="notification-item {{ $isUnread ? 'unread' : '' }}" data-id="{{ $notif->id }}" data-read="{{ $isUnread ? '0' : '1' }}" @if($notif->dedup_key) data-dedup="{{ $notif->dedup_key }}" @endif>
                                             <div class="notification-icon-box {{ $sev }}">
                                                 @if($sev === 'danger')
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 1 2 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -499,14 +498,17 @@
                 <button type="button" id="btn_cancel_logout" class="logout-modal-btn cancel-btn">
                     <span>Stay Logged In</span>
                 </button>
-                <a href="{{ route('logout') }}" id="btn_confirm_logout" class="logout-modal-btn confirm-btn">
+                <form method="POST" action="{{ route('logout.post') }}" class="logout-modal-form" style="display: contents;">
+                @csrf
+                <button type="submit" id="btn_confirm_logout" class="logout-modal-btn confirm-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
                     <span>Yes, Log Out</span>
-                </a>
+                </button>
+                </form>
             </div>
         </div>
     </div>
@@ -562,6 +564,19 @@
     </div>
 
     @stack('scripts')
+    @auth
+        @if(\Illuminate\Support\Facades\Schema::hasTable('login_approval_requests') && app(\App\Services\LoginApprovalService::class)->isApprover(auth()->user()))
+            <link rel="stylesheet" href="{{ asset('css/login-approval.css') }}?v={{ @filemtime(public_path('css/login-approval.css')) ?: '1.0' }}">
+            <script>
+                window.LOGIN_APPROVAL_CONFIG = {
+                    pendingUrl: @json(route('login-approvals.pending')),
+                    decideUrl: @json(url('/security/login-approvals/__ID__/__ACTION__')),
+                    idleSeconds: {{ (int) config('login_approval.active_window', 300) }},
+                };
+            </script>
+            <script src="{{ asset('js/login-approval.js') }}?v={{ @filemtime(public_path('js/login-approval.js')) ?: '1.0' }}" defer></script>
+        @endif
+    @endauth
     <script src="{{ asset('js/sidebar.js') }}?v={{ @filemtime(public_path('js/sidebar.js')) ?: '1.0' }}"></script>
     <script src="{{ asset('js/custom-select.js') }}?v={{ @filemtime(public_path('js/custom-select.js')) ?: '1.0' }}"></script>
     <script src="{{ asset('js/lang.js') }}?v={{ @filemtime(public_path('js/lang.js')) ?: '1.0' }}"></script>

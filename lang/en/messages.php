@@ -331,7 +331,7 @@ return [
     'clear_selection' => 'Clear Selection',
 
     // Users & Staff Management Module
-    'users_staff' => 'Staff & Accounts',
+    'users_staff' => 'Staff & Security',
     'manage_users' => 'Manage Staff & Accounts',
     'users_management' => 'Staff & Accounts',
     'users_management_subtitle' => 'Manage staff accounts, roles, and access.',
@@ -434,24 +434,7 @@ return [
     'product_expired' => 'Expired',
     'product_expiring_soon' => 'Expiring Soon',
 
-    // HR & Staff Extensions
-    'attendance' => 'Attendance',
-    'attendance_management' => 'Attendance Management',
-    'work_schedules' => 'Work Schedules',
-    'salaries' => 'Salaries',
-    'salary_management' => 'Salary Management',
+    // Staff & Accounts
     'tab_staff_accounts' => 'Staff & Accounts',
-    'tab_attendance' => 'Attendance',
-    'tab_schedules' => 'Schedules',
-    'tab_salaries' => 'Salaries',
-    'check_in' => 'Check In',
-    'check_out' => 'Check Out',
-    'shift_name' => 'Shift Name',
-    'base_salary' => 'Base Salary',
-    'net_salary' => 'Net Salary',
-    'allowance' => 'Allowance',
-    'deduction' => 'Deduction',
-    'salary_period' => 'Salary Period',
-    'mark_paid' => 'Mark as Paid',
 ];
 

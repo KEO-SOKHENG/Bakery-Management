@@ -117,21 +117,6 @@ class User extends Authenticatable
 
 
 
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class);
-    }
-
-    public function workSchedules()
-    {
-        return $this->hasMany(WorkSchedule::class);
-    }
-
-    public function salaries()
-    {
-        return $this->hasMany(Salary::class);
-    }
-
     public function isActive(): bool
     {
         return $this->status === 'active';

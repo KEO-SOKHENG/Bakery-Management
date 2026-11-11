@@ -21,7 +21,8 @@ use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\HrController;
+use App\Http\Controllers\Admin\SecurityController;
+use App\Http\Controllers\LoginApprovalController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PosController;
@@ -41,8 +42,17 @@ Route::get('/home', function () {
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
+Route::post('/login', [LoginController::class, 'authenticate'])->middleware('throttle:10,1,login')->name('login.post');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout.post');
+
+// Login approval: the waiting device (not yet signed in)
+Route::middleware(['guest'])->prefix('login/approval')->name('login.approval.')->group(function () {
+    Route::get('/', [LoginApprovalController::class, 'wait'])->name('wait');
+    Route::get('/status', [LoginApprovalController::class, 'status'])->middleware('throttle:60,1,login-approval-status')->name('status');
+    Route::post('/complete', [LoginApprovalController::class, 'complete'])->middleware('throttle:10,1,login-approval-complete')->name('complete');
+    Route::post('/cancel', [LoginApprovalController::class, 'cancel'])->name('cancel');
+});
 
 // Password Reset Routes (Guest)
 Route::middleware(['guest'])->group(function () {
@@ -66,12 +76,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // Login approval: the approving (trusted) device; role is checked in the service
+    Route::prefix('security/login-approvals')->name('login-approvals.')->group(function () {
+        Route::get('/pending', [LoginApprovalController::class, 'pending'])->middleware('throttle:30,1,login-approvals-pending')->name('pending');
+        Route::post('/{id}/approve', [LoginApprovalController::class, 'approve'])->middleware('throttle:30,1,login-approvals-decide')->name('approve');
+        Route::post('/{id}/reject', [LoginApprovalController::class, 'reject'])->middleware('throttle:30,1,login-approvals-decide')->name('reject');
+    });
+
     // -------------------------------------------------------------
     // ADMIN EXCLUSIVE ROUTES (Admin Only)
     // -------------------------------------------------------------
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        
+
+        // Login security: devices, revocation and approval history
+        Route::get('/security', [SecurityController::class, 'index'])->name('security');
+        Route::post('/security/devices/{device}/revoke', [SecurityController::class, 'revoke'])->name('security.revoke');
+
         // Users & Staff Management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -160,22 +181,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
         // Order Management (Admin & Manager Safe Deletion)
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
-
-        // HR & Staff Extensions (Attendance, Work Schedules, Salaries)
-        Route::get('/hr/attendance', [HrController::class, 'attendance'])->name('hr.attendance');
-        Route::post('/hr/attendance', [HrController::class, 'storeAttendance'])->name('hr.attendance.store');
-        Route::put('/hr/attendance/{attendance}', [HrController::class, 'updateAttendance'])->name('hr.attendance.update');
-        Route::delete('/hr/attendance/{attendance}', [HrController::class, 'destroyAttendance'])->name('hr.attendance.destroy');
-
-        Route::get('/hr/schedules', [HrController::class, 'schedules'])->name('hr.schedules');
-        Route::post('/hr/schedules', [HrController::class, 'storeSchedule'])->name('hr.schedules.store');
-        Route::put('/hr/schedules/{workSchedule}', [HrController::class, 'updateSchedule'])->name('hr.schedules.update');
-        Route::delete('/hr/schedules/{workSchedule}', [HrController::class, 'destroySchedule'])->name('hr.schedules.destroy');
-
-        Route::get('/hr/salaries', [HrController::class, 'salaries'])->name('hr.salaries');
-        Route::post('/hr/salaries', [HrController::class, 'storeSalary'])->name('hr.salaries.store');
-        Route::post('/hr/salaries/{salary}/pay', [HrController::class, 'markSalaryPaid'])->name('hr.salaries.markPaid');
-        Route::delete('/hr/salaries/{salary}', [HrController::class, 'destroySalary'])->name('hr.salaries.destroy');
     });
 
     // -------------------------------------------------------------

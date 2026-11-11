@@ -12,14 +12,8 @@
         <a href="{{ route('admin.users.index') }}" class="period-pill active">
             <span data-lang-key="tab_staff_accounts">{{ __('messages.tab_staff_accounts') }}</span>
         </a>
-        <a href="{{ route('admin.hr.attendance') }}" class="period-pill">
-            <span data-lang-key="tab_attendance">{{ __('messages.tab_attendance') }}</span>
-        </a>
-        <a href="{{ route('admin.hr.schedules') }}" class="period-pill">
-            <span data-lang-key="tab_schedules">{{ __('messages.tab_schedules') }}</span>
-        </a>
-        <a href="{{ route('admin.hr.salaries') }}" class="period-pill">
-            <span data-lang-key="tab_salaries">{{ __('messages.tab_salaries') }}</span>
+        <a href="{{ route('admin.security') }}" class="period-pill" id="tab_login_security">
+            <span>Login Security</span>
         </a>
     </div>
 @endsection

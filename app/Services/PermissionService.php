@@ -101,15 +101,6 @@ class PermissionService
                     'orders.delete' => 'Delete Orders',
                 ]
             ],
-            'hr' => [
-                'label' => 'Staff & HR Extensions',
-                'description' => 'Staff attendance records, work schedules, and payroll',
-                'permissions' => [
-                    'hr.attendance' => 'View & Record Staff Attendance',
-                    'hr.schedules' => 'Manage Staff Work Schedules',
-                    'hr.salaries' => 'View & Manage Staff Salaries',
-                ]
-            ],
             'pos' => [
                 'label' => 'POS Terminal',
                 'description' => 'Front-of-house point of sale and rapid checkout',
@@ -194,7 +185,6 @@ class PermissionService
                 'purchase_orders.view', 'purchase_orders.create', 'purchase_orders.order', 'purchase_orders.receive', 'purchase_orders.cancel',
                 'production.view', 'production.create', 'production.status',
                 'orders.view', 'orders.create', 'orders.edit', 'orders.status', 'orders.cancel',
-                'hr.attendance', 'hr.schedules',
                 'pos.access', 'pos.checkout',
                 'customers.view', 'customers.create', 'customers.edit',
                 'reports.view', 'reports.export',

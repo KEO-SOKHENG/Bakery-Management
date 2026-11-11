@@ -107,7 +107,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users,username',
-            'email' => 'required|string|email|max:255|unique:users,email',
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', new \App\Rules\ReservedOwnerEmail()],
             'phone' => 'nullable|string|max:50',
             'password' => 'required|string|min:6',
             'role' => ['required', Rule::in(['admin', 'manager', 'cashier', 'baker'])],
@@ -149,7 +149,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => ['required', 'string', 'max:100', Rule::unique('users')->ignore($user->id)],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id), new \App\Rules\ReservedOwnerEmail($user->id)],
             'phone' => 'nullable|string|max:50',
             'role' => ['required', Rule::in(['admin', 'manager', 'cashier', 'baker'])],
             'status' => ['required', Rule::in(['active', 'inactive', 'suspended'])],
@@ -419,10 +419,12 @@ class UserController extends Controller
         \App\Models\PurchaseOrder::where('user_id', $user->id)->update(['user_id' => null]);
         \App\Models\StockMovement::where('user_id', $user->id)->update(['user_id' => null]);
 
-        // Clean up staff personal HR records
-        \App\Models\Attendance::where('user_id', $user->id)->delete();
-        \App\Models\WorkSchedule::where('user_id', $user->id)->delete();
-        \App\Models\Salary::where('user_id', $user->id)->delete();
+        // HR pages were removed but their tables are kept; clear this user's rows so deletion still succeeds
+        foreach (['attendances', 'work_schedules', 'salaries'] as $hrTable) {
+            if (\Illuminate\Support\Facades\Schema::hasTable($hrTable)) {
+                \Illuminate\Support\Facades\DB::table($hrTable)->where('user_id', $user->id)->delete();
+            }
+        }
         \App\Models\Notification::where('user_id', $user->id)->delete();
 
         $username = $user->username;

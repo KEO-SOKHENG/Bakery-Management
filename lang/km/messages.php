@@ -331,7 +331,7 @@ return [
     'clear_selection' => 'សម្អាតការជ្រើសរើស',
 
     // Users & Staff Management Module
-    'users_staff' => 'បុគ្គលិក និងគណនី',
+    'users_staff' => 'បុគ្គលិក និងសុវត្ថិភាព',
     'manage_users' => 'គ្រប់គ្រងបុគ្គលិក និងគណនី',
     'users_management' => 'បុគ្គលិក និងគណនី',
     'users_management_subtitle' => 'គ្រប់គ្រងគណនីបុគ្គលិក តួនាទី និងសិទ្ធិចូលប្រើប្រាស់។',
@@ -433,24 +433,7 @@ return [
     'product_expired' => 'ផុតកំណត់',
     'product_expiring_soon' => 'ជិតផុតកំណត់',
 
-    // HR & Staff Extensions
-    'attendance' => 'វត្តមាន',
-    'attendance_management' => 'ការគ្រប់គ្រងវត្តមាន',
-    'work_schedules' => 'កាលវិភាគការងារ',
-    'salaries' => 'ប្រាក់បៀវត្សរ៍',
-    'salary_management' => 'ការគ្រប់គ្រងប្រាក់បៀវត្សរ៍',
+    // Staff & Accounts
     'tab_staff_accounts' => 'បុគ្គលិក និងគណនី',
-    'tab_attendance' => 'វត្តមាន',
-    'tab_schedules' => 'កាលវិភាគ',
-    'tab_salaries' => 'ប្រាក់បៀវត្សរ៍',
-    'check_in' => 'ចុះឈ្មោះចូល',
-    'check_out' => 'ចុះឈ្មោះចេញ',
-    'shift_name' => 'វេនការងារ',
-    'base_salary' => 'ប្រាក់ខែគោល',
-    'net_salary' => 'ប្រាក់ខែសុទ្ធ',
-    'allowance' => 'ប្រាក់ឧបត្ថម្ភ',
-    'deduction' => 'ការកាត់ប្រាក់',
-    'salary_period' => 'ដំណាក់កាលប្រាក់ខែ',
-    'mark_paid' => 'សម្គាល់ថាបានទូទាត់',
 ];
 

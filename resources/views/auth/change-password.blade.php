@@ -148,10 +148,13 @@
 
             <!-- Logout option -->
             <div style="margin-top: 1rem; text-align: center;">
-                <a href="{{ route('logout') }}" style="color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                <button type="submit" form="change_password_logout_form" style="background: none; border: 0; cursor: pointer; font-family: inherit; color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
                     &larr; Log out and return later
-                </a>
+                </button>
             </div>
+        </form>
+        <form id="change_password_logout_form" method="POST" action="{{ route('logout.post') }}" hidden>
+            @csrf
         </form>
     </div>
 </body>

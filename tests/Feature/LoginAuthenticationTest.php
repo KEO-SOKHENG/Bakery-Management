@@ -250,7 +250,8 @@ class LoginAuthenticationTest extends TestCase
         /** @var StatefulGuard&MockInterface $guard */
         $guard = Mockery::mock(StatefulGuard::class);
         $guard->shouldReceive('check')->andReturn(false);
-        $guard->shouldReceive('attempt')
+        $guard->shouldReceive('user')->andReturn(null); // login rate limiter resolves the user
+        $guard->shouldReceive('validate')
             ->once()
             ->andThrow(new QueryException('pgsql', 'SELECT * FROM users', [], new Exception('Connection refused')));
 
