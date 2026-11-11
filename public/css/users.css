@@ -1344,3 +1344,489 @@ body.dark-mode .hr-nav-tabs:not(.has-liquid-pill) .hr-nav-tab.active {
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
 }
+
+/* ==========================================================================
+   Staff cards (<=767px)
+   Avatar + name + @username / role + status / info box / View + Edit
+   ========================================================================== */
+@media (max-width: 767px) {
+    #users_table_card {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        box-shadow: none !important;
+    }
+
+    #users_table_wrapper {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    #users_table,
+    #users_table tbody {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #users_table thead { display: none !important; }
+
+    #users_table tbody tr.us-row {
+        display: grid !important;
+        grid-template-columns: auto auto minmax(0, 1fr);
+        grid-template-areas:
+            "id id id"
+            "role status ."
+            "contact contact contact"
+            "last last last"
+            "actions actions actions";
+        column-gap: 0.4rem;
+        row-gap: 0;
+        padding: 0.9rem 0.95rem;
+        margin-bottom: 0.75rem;
+        border-radius: 14px;
+        background: var(--card-bg, #ffffff);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+    }
+
+    #users_table tbody tr.us-row > td {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        text-align: left !important;
+    }
+
+    /* ── Identity ── */
+    #users_table td.us-id { grid-area: id; padding-bottom: 0.6rem !important; }
+
+    #users_table td.us-id .user-identity {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        min-width: 0;
+    }
+
+    #users_table td.us-id .user-avatar {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0;
+        font-size: 0.78rem !important;
+        font-weight: 800 !important;
+    }
+
+    #users_table td.us-id .user-name {
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #users_table td.us-id .user-tag-you {
+        font-size: 0.55rem !important;
+        padding: 0.1rem 0.3rem !important;
+        border-radius: 4px !important;
+        flex-shrink: 0;
+    }
+
+    #users_table td.us-id .user-username {
+        font-size: 0.72rem !important;
+        color: #64748b !important;
+    }
+
+    /* ── Role + status pills ── */
+    #users_table td.us-role { grid-area: role; padding-bottom: 0.65rem !important; }
+    #users_table td.us-status { grid-area: status; padding-bottom: 0.65rem !important; }
+
+    #users_table td.us-role .role-pill,
+    #users_table td.us-status .badge {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.6rem !important;
+        font-weight: 800 !important;
+        padding: 0.18rem 0.5rem !important;
+        border-radius: 6px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    #users_table td.us-status .badge { text-transform: none; letter-spacing: 0; border-radius: 50px !important; }
+
+    /* ── Info box: email, phone, joined / last active ── */
+    #users_table tbody tr.us-row > td.us-contact,
+    #users_table tbody tr.us-row > td.us-last {
+        background: rgba(148, 163, 184, 0.06) !important;
+        border: 1px solid rgba(148, 163, 184, 0.16) !important;
+        padding: 0.6rem 0.75rem !important;
+    }
+
+    #users_table tbody tr.us-row > td.us-contact {
+        grid-area: contact;
+        border-bottom: none !important;
+        border-radius: 10px 10px 0 0 !important;
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    #users_table tbody tr.us-row > td.us-last {
+        grid-area: last;
+        border-top: none !important;
+        border-radius: 0 0 10px 10px !important;
+        padding-top: 0.15rem !important;
+        display: flex !important;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #users_table td.us-contact .user-email,
+    #users_table td.us-contact .user-phone {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.7rem !important;
+    }
+
+    #users_table td.us-contact .user-email::before,
+    #users_table td.us-contact .user-phone::before {
+        content: "";
+        width: 11px;
+        height: 11px;
+        flex-shrink: 0;
+        background-color: #94a3b8;
+        -webkit-mask: var(--us-icon) center / contain no-repeat;
+        mask: var(--us-icon) center / contain no-repeat;
+    }
+
+    #users_table td.us-contact .user-email {
+        --us-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpath d='m22 7-10 6L2 7'/%3E%3C/svg%3E");
+    }
+
+    #users_table td.us-contact .user-phone {
+        --us-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Cpath d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z'/%3E%3C/svg%3E");
+    }
+
+    #users_table td.us-last .user-joined-date {
+        font-size: 0.66rem !important;
+        color: #64748b !important;
+        margin: 0 !important;
+    }
+
+    #users_table td.us-last .user-last-login {
+        font-size: 0.66rem !important;
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        white-space: nowrap;
+    }
+
+    #users_table td.us-last .user-last-login::before {
+        content: "Last active: ";
+        color: #64748b;
+    }
+
+    /* ── Actions: two equal buttons ── */
+    #users_table tbody tr.us-row > td.us-actions {
+        grid-area: actions;
+        padding-top: 0.75rem !important;
+    }
+
+    #users_table td.us-actions .user-action-group {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    #users_table td.us-actions .btn-action-btn {
+        width: 100% !important;
+        height: 32px !important;
+        justify-content: center !important;
+        gap: 0.4rem;
+        border-radius: 8px !important;
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+        background: rgba(148, 163, 184, 0.08) !important;
+        border: 1px solid rgba(148, 163, 184, 0.16) !important;
+        box-sizing: border-box !important;
+    }
+
+    #users_table td.us-actions .btn-action-btn svg {
+        width: 13px !important;
+        height: 13px !important;
+    }
+
+    /* ── Own account: orange outline + "Edit Profile" ── */
+    #users_table tbody tr.us-row.us-self {
+        border-color: rgba(234, 88, 12, 0.45) !important;
+    }
+
+    #users_table tr.us-self td.us-actions .btn-edit-user {
+        background: rgba(234, 88, 12, 0.14) !important;
+        border-color: rgba(234, 88, 12, 0.45) !important;
+        color: #fb923c !important;
+    }
+
+    #users_table tr.us-self td.us-actions .btn-edit-user span { display: none; }
+    #users_table tr.us-self td.us-actions .btn-edit-user::after { content: "Edit Profile"; }
+
+    /* Empty-state row */
+    #users_table tbody tr:not(.us-row),
+    #users_table tbody tr:not(.us-row) > td {
+        display: block !important;
+        width: auto !important;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] #users_table tbody tr.us-row,
+    body.dark-mode #users_table tbody tr.us-row {
+        background: #18181c !important;
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] #users_table tbody tr.us-row > td.us-contact,
+    [data-theme="dark"] #users_table tbody tr.us-row > td.us-last,
+    body.dark-mode #users_table tbody tr.us-row > td.us-contact,
+    body.dark-mode #users_table tbody tr.us-row > td.us-last {
+        background: #121215 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [data-theme="dark"] #users_table td.us-id .user-name,
+    body.dark-mode #users_table td.us-id .user-name {
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] #users_table td.us-contact .user-email,
+    [data-theme="dark"] #users_table td.us-contact .user-phone,
+    body.dark-mode #users_table td.us-contact .user-email,
+    body.dark-mode #users_table td.us-contact .user-phone {
+        color: #e2e8f0 !important;
+    }
+}
+
+@media (max-width: 767px) {
+    #users_table td.us-contact .user-phone.is-empty { display: none !important; }
+}
+
+/* ── Staff cards: fixes to match reference ── */
+@media (max-width: 767px) {
+    /* Avatar: visible initials on a soft ring */
+    #users_table td.us-id .user-avatar {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(148, 163, 184, 0.12) !important;
+        border: 1px solid rgba(148, 163, 184, 0.3) !important;
+        color: #475569 !important;
+    }
+
+    [data-theme="dark"] #users_table td.us-id .user-avatar,
+    body.dark-mode #users_table td.us-id .user-avatar {
+        background: #222228 !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        color: #e2e8f0 !important;
+    }
+
+    /* Status: dark tinted pill with dot */
+    #users_table td.us-status .badge .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor !important;
+    }
+
+    #users_table td.us-status .badge.badge-success {
+        background: rgba(16, 185, 129, 0.12) !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        color: #34d399 !important;
+    }
+
+    #users_table td.us-status .badge.badge-danger {
+        background: rgba(239, 68, 68, 0.12) !important;
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        color: #f87171 !important;
+    }
+
+    #users_table td.us-status .badge.badge-warning {
+        background: rgba(245, 158, 11, 0.12) !important;
+        border: 1px solid rgba(245, 158, 11, 0.35) !important;
+        color: #fbbf24 !important;
+    }
+
+    /* Last active: muted, regular weight */
+    #users_table td.us-last .user-last-login,
+    [data-theme="dark"] #users_table td.us-last .user-last-login,
+    body.dark-mode #users_table td.us-last .user-last-login {
+        font-weight: 400 !important;
+        color: #94a3b8 !important;
+    }
+
+    #users_table td.us-last .user-last-login * {
+        font-weight: inherit !important;
+        color: inherit !important;
+    }
+
+    /* Own account: "Last active" value highlighted green */
+    #users_table tr.us-self td.us-last .user-last-login {
+        color: #34d399 !important;
+        font-weight: 600 !important;
+    }
+}
+
+/* ── Staff cards: spacing + uniform "Last active" tone ── */
+@media (max-width: 767px) {
+    #users_table tbody tr.us-row > td.us-id { padding-bottom: 0.8rem !important; }
+
+    #users_table td.us-last .user-last-login,
+    [data-theme="dark"] #users_table td.us-last .user-last-login,
+    body.dark-mode #users_table td.us-last .user-last-login {
+        color: #64748b !important;
+    }
+
+    #users_table tr.us-self td.us-last .user-last-login,
+    [data-theme="dark"] #users_table tr.us-self td.us-last .user-last-login,
+    body.dark-mode #users_table tr.us-self td.us-last .user-last-login {
+        color: #34d399 !important;
+    }
+
+    #users_table tr.us-self td.us-last .user-last-login::before { color: #64748b !important; }
+}
+
+/* ── Staff cards v2: sizes + tones from close-up reference ── */
+@media (max-width: 767px) {
+    #users_table tbody tr.us-row {
+        padding: 1rem 1rem 1.05rem !important;
+        border-radius: 18px !important;
+    }
+
+    /* Identity */
+    #users_table tbody tr.us-row > td.us-id { padding-bottom: 0.95rem !important; }
+
+    #users_table td.us-id .user-identity { gap: 0.85rem !important; align-items: flex-start !important; }
+
+    #users_table td.us-id .user-avatar,
+    [data-theme="dark"] #users_table td.us-id .user-avatar,
+    body.dark-mode #users_table td.us-id .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 0.85rem !important;
+        background: #26211d !important;
+        border: 1px solid rgba(180, 140, 100, 0.28) !important;
+        color: #d6c3ad !important;
+    }
+
+    #users_table td.us-id .user-name {
+        font-size: 1rem !important;
+        line-height: 1.3 !important;
+        padding-top: 0.15rem;
+    }
+
+    #users_table td.us-id .user-username {
+        font-size: 0.82rem !important;
+        color: #94a3b8 !important;
+        margin-top: 0.25rem;
+    }
+
+    /* Pills */
+    #users_table tbody tr.us-row > td.us-role,
+    #users_table tbody tr.us-row > td.us-status { padding-bottom: 0.85rem !important; }
+
+    #users_table td.us-role .role-pill,
+    #users_table td.us-status .badge {
+        font-size: 0.7rem !important;
+        padding: 0.3rem 0.75rem !important;
+        border-radius: 50px !important;
+        gap: 0.4rem !important;
+    }
+
+    #users_table td.us-role .role-pill { border: none !important; }
+
+    #users_table td.us-status .badge { font-weight: 700 !important; }
+
+    #users_table td.us-status .badge .badge-dot { width: 7px !important; height: 7px !important; }
+
+    /* Info box */
+    #users_table tbody tr.us-row > td.us-contact {
+        padding: 0.85rem 0.85rem 0.35rem !important;
+        border-radius: 14px 14px 0 0 !important;
+    }
+
+    #users_table tbody tr.us-row > td.us-last {
+        padding: 0.35rem 0.85rem 0.85rem !important;
+        border-radius: 0 0 14px 14px !important;
+    }
+
+    #users_table td.us-contact .user-email,
+    #users_table td.us-contact .user-phone {
+        font-size: 0.78rem !important;
+        gap: 0.55rem !important;
+    }
+
+    #users_table td.us-contact .user-email::before,
+    #users_table td.us-contact .user-phone::before {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    #users_table td.us-last .user-joined-date {
+        font-size: 0.74rem !important;
+        color: #64748b !important;
+    }
+
+    #users_table td.us-last .user-last-login,
+    [data-theme="dark"] #users_table td.us-last .user-last-login,
+    body.dark-mode #users_table td.us-last .user-last-login {
+        font-size: 0.74rem !important;
+        color: #94a3b8 !important;
+    }
+
+    #users_table td.us-last .user-last-login::before { color: inherit !important; }
+
+    /* Buttons */
+    #users_table tbody tr.us-row > td.us-actions { padding-top: 0.85rem !important; }
+
+    #users_table td.us-actions .user-action-group { gap: 0.6rem !important; }
+
+    #users_table td.us-actions .btn-action-btn {
+        height: 40px !important;
+        border-radius: 12px !important;
+        font-size: 0.82rem !important;
+    }
+
+    #users_table td.us-actions .btn-action-btn svg {
+        width: 15px !important;
+        height: 15px !important;
+    }
+
+    [data-theme="dark"] #users_table td.us-actions .btn-action-btn,
+    body.dark-mode #users_table td.us-actions .btn-action-btn {
+        background: #1c1c22 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] #users_table tr.us-self td.us-actions .btn-edit-user,
+    body.dark-mode #users_table tr.us-self td.us-actions .btn-edit-user {
+        background: rgba(234, 88, 12, 0.14) !important;
+        border-color: rgba(234, 88, 12, 0.45) !important;
+        color: #fb923c !important;
+    }
+}

@@ -28,6 +28,10 @@
     @if(session('success'))
         <x-alert type="success" :message="session('success')" />
     @endif
+    @if($errors->any())
+        {{-- Add/Edit forms live in modals that close on submit, so surface errors here --}}
+        <x-alert type="danger" :message="$errors->first()" />
+    @endif
 
     <!-- Action Toolbar Row (Exact Orders, Users & Ingredients Style) -->
     <div class="products-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0;">

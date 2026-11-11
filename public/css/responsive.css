@@ -1495,3 +1495,180 @@ body.theme-dark .bakery-sidebar:hover {
         padding-left: calc(72px + 12px + 1.25rem) !important;
     }
 }
+
+/* ── Mobile: compact sidebar drawer ── */
+@media (max-width: 767px) {
+    .bakery-sidebar {
+        width: 220px !important;
+        max-width: 70vw !important;
+        border-radius: 0 22px 22px 0 !important;
+    }
+    .bakery-sidebar .sidebar-nav-item,
+    .bakery-sidebar .sidebar-dropdown-btn {
+        padding: 0.55rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        gap: 0.6rem !important;
+        min-height: 38px !important;
+    }
+    .bakery-sidebar .sidebar-nav-item svg,
+    .bakery-sidebar .sidebar-dropdown-btn svg {
+        width: 17px !important;
+        height: 17px !important;
+    }
+    .bakery-sidebar .sidebar-submenu-item {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.76rem !important;
+    }
+}
+
+/* ── Tablet: backdrop starts right of the drawer. Its ::before dims the strip
+   under the drawer, but backdrop-filter makes the backdrop its containing block,
+   so offset it back by the drawer width to reach the viewport's left edge ── */
+@media (min-width: 768px) and (max-width: 1199px) {
+    /* One seamless full-screen backdrop ... */
+    .sidebar-mobile-backdrop.is-active {
+        left: 0 !important;
+    }
+
+    .sidebar-mobile-backdrop.is-active::before {
+        display: none !important;
+    }
+
+    /* ... with the drawer lifted above it so it stays sharp and clickable */
+    body:has(.sidebar-mobile-backdrop.is-active) .bakery-sidebar {
+        z-index: 1100 !important;
+    }
+}
+
+/* ── Mobile: full-screen backdrop behind compact sidebar ── */
+@media (max-width: 767px) {
+    .sidebar-mobile-backdrop.is-active {
+        left: 0 !important;
+        background: rgba(0, 0, 0, 0.45) !important;
+    }
+    .sidebar-mobile-backdrop.is-active::before {
+        display: none !important;
+    }
+}
+
+/* ── Mobile: native-style app header ── */
+@media (max-width: 767px) {
+    body .top-header-bar,
+    body .top-header-bar:has(.header-toolbar-slot) {
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        grid-template-areas:
+            "burger notif profile"
+            "search search search"
+            "toolbar toolbar toolbar" !important;
+        column-gap: 0.5rem !important;
+        row-gap: 0.6rem !important;
+    }
+    body .top-header-bar .header-actions-primary { display: contents !important; }
+    body .top-header-bar .header-search-box { grid-area: search !important; width: 100% !important; }
+    body .top-header-bar .header-notification-wrapper { grid-area: notif !important; }
+    body .top-header-bar .user-profile-wrapper { grid-area: profile !important; }
+    body .top-header-bar .mobile-header-brand { display: flex !important; min-width: 0 !important; }
+    body .top-header-bar .header-toolbar-slot { grid-area: toolbar !important; }
+}
+
+/* ── Tablet: period toolbar gets its own full-width row ── */
+@media (min-width: 768px) and (max-width: 1199px) {
+    body .top-header-bar:has(.header-toolbar-slot) { flex-wrap: wrap !important; row-gap: 0.65rem !important; }
+    body .top-header-bar .header-toolbar-slot {
+        order: 10 !important;
+        flex: 1 0 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    body .top-header-bar .header-toolbar-slot .period-pill-group { width: 100%; justify-content: space-between; }
+    body .top-header-bar .header-toolbar-slot .period-pill { flex: 1 1 0; justify-content: center; }
+}
+
+/* ── Mobile: header always visible on every page; only content scrolls ── */
+@media (max-width: 767px) {
+    html:has(body:not(.is-pos-page)),
+    body:not(.is-pos-page) {
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+    body:not(.is-pos-page) .bakery-app-layout,
+    body:not(.is-pos-page) .bakery-main-content {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    body:not(.is-pos-page) .top-header-bar {
+        flex-shrink: 0 !important;
+        position: relative !important;
+    }
+    body:not(.is-pos-page):not(:has(.dash-scrollable-body)) .main-content-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 2rem !important;
+    }
+}
+@media (max-width: 767px) {
+    body.is-reports-page .reports-page-container,
+    body.is-reports-page .reports-scrollable-body {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
+
+/* ── iPad Mini: header actions (search, bell, profile) always pinned right ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .top-header-bar > .header-actions {
+        margin-left: auto !important;
+        justify-self: end !important;
+        justify-content: flex-end !important;
+    }
+}
+
+/* ── iPad Mini: header always visible on every page; only content scrolls
+   (tablet twin of the mobile block — keeps the sidebar rail beside content) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    html:has(body:not(.is-pos-page)),
+    body:not(.is-pos-page) {
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+    body:not(.is-pos-page) .bakery-app-layout {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important;
+    }
+    body:not(.is-pos-page) .bakery-main-content {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+    }
+    body:not(.is-pos-page) .top-header-bar {
+        flex-shrink: 0 !important;
+        position: relative !important;
+    }
+    body:not(.is-pos-page):not(:has(.dash-scrollable-body)) .main-content-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 2rem !important;
+    }
+    body.is-reports-page .reports-page-container,
+    body.is-reports-page .reports-scrollable-body {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}

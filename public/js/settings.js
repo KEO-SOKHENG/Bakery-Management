@@ -1167,3 +1167,15 @@ document.addEventListener('DOMContentLoaded', function() {
     handleInitialHash();
     window.addEventListener('hashchange', handleInitialHash);
 });
+
+// ── Upload drop areas: show the chosen file name ──
+document.addEventListener('change', function (e) {
+    const input = e.target;
+    if (!input.classList || !input.classList.contains('sui-dropzone-input')) return;
+    const zone = input.closest('.sui-dropzone');
+    const label = zone && zone.querySelector('.sui-dropzone-name');
+    if (!label) return;
+    const file = input.files && input.files[0];
+    label.textContent = file ? file.name : label.getAttribute('data-empty');
+    zone.classList.toggle('has-file', !!file);
+});

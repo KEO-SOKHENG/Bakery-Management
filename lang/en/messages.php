@@ -225,6 +225,7 @@ return [
     'expiring_soon' => 'Expiring Soon',
     'expired' => 'Expired',
     'procurement_production_overview' => 'Procurement & Operations Overview',
+    'view_all_orders' => 'View all orders',
     'view_all_stock' => 'View all stock',
     'no_recent_orders' => 'No recent orders found.',
     'no_low_stock' => 'All stock levels are optimal! No low stock alerts.',

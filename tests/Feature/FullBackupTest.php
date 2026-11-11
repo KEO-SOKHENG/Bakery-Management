@@ -378,6 +378,161 @@ class FullBackupTest extends TestCase
         $this->assertArrayNotHasKey('verification_steps', $list[0]);
     }
 
+    public function test_status_polling_does_not_use_up_the_create_backup_rate_limit(): void
+    {
+        Bus::fake();
+        $unknownId = '00000000-0000-4000-8000-000000000000';
+
+        // A running backup polls status every 1.5s and the page reloads history; none of this may block Create.
+        for ($i = 0; $i < 40; $i++) {
+            $this->actingAs($this->admin)->getJson(route('admin.backups.status', $unknownId))->assertStatus(404);
+        }
+        for ($i = 0; $i < 5; $i++) {
+            $this->actingAs($this->admin)->getJson(route('admin.backups.index'))->assertOk();
+        }
+
+        $this->actingAs($this->admin)->postJson(route('admin.backups.store'))->assertStatus(202);
+    }
+
+    public function test_create_backup_is_still_limited_to_three_requests_per_minute(): void
+    {
+        Bus::fake();
+
+        for ($i = 0; $i < 3; $i++) {
+            $this->actingAs($this->admin)->postJson(route('admin.backups.store'))->assertStatus(202);
+        }
+
+        $this->actingAs($this->admin)->postJson(route('admin.backups.store'))
+            ->assertStatus(429)
+            ->assertHeader('Retry-After');
+    }
+
+    public function test_tool_failure_output_is_kept_readable_and_redacted(): void
+    {
+        $method = new \ReflectionMethod(DatabaseBackupService::class, 'readableOutput');
+
+        // Windows-1252 bytes (not UTF-8), CRLF line breaks and a control character, as a localised pg_dump prints them
+        $raw = "pg_dump: error: connexion au serveur \xE0 \xAB127.0.0.1\xBB a \xE9chou\xE9\r\n"
+            . "pg_dump: detail: password=SuperSecret1\x07\r\n";
+        $text = BackupRedactor::redact($method->invoke(null, $raw));
+
+        $this->assertTrue(mb_check_encoding($text, 'UTF-8'));
+        $this->assertStringContainsString('connexion au serveur', $text);
+        $this->assertStringContainsString('échoué', $text);
+        $this->assertStringContainsString('pg_dump: detail:', $text);
+        $this->assertStringNotContainsString('SuperSecret1', $text);
+        $this->assertNotFalse(json_encode(['error' => $text]));
+    }
+
+    /** Secrets planted in every place Symfony Process reads inherited variables from. */
+    private const PLANTED_SECRETS = [
+        'APP_KEY' => 'base64:planted-app-key',
+        'MAIL_PASSWORD' => 'planted-mail-pass',
+        'AWS_SECRET_ACCESS_KEY' => 'planted-aws-secret',
+        'DB_PASSWORD' => 'planted-unrelated-db-pass',
+        'REDIS_PASSWORD' => 'planted-redis-pass',
+    ];
+
+    /** Runs $callback with the planted secrets in getenv(), $_ENV and $_SERVER, then restores everything. */
+    private function withPlantedSecrets(callable $callback): mixed
+    {
+        $saved = [];
+        foreach (self::PLANTED_SECRETS as $name => $value) {
+            $saved[$name] = [getenv($name), $_ENV[$name] ?? null, $_SERVER[$name] ?? null,
+                array_key_exists($name, $_ENV), array_key_exists($name, $_SERVER)];
+            putenv("{$name}={$value}");
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+        try {
+            return $callback();
+        } finally {
+            foreach ($saved as $name => [$env, $envVal, $serverVal, $inEnv, $inServer]) {
+                $env === false ? putenv($name) : putenv("{$name}={$env}");
+                if ($inEnv) { $_ENV[$name] = $envVal; } else { unset($_ENV[$name]); }
+                if ($inServer) { $_SERVER[$name] = $serverVal; } else { unset($_SERVER[$name]); }
+            }
+        }
+    }
+
+    /** Starts a real child process with the tool environment and returns the variables it actually received. */
+    private function childEnvironment(array $env): array
+    {
+        $script = 'echo json_encode(getenv());';
+        $process = new \Symfony\Component\Process\Process([PHP_BINARY, '-r', $script], null, $env);
+        $process->mustRun();
+
+        return array_change_key_case(json_decode($process->getOutput(), true) ?: [], CASE_UPPER);
+    }
+
+    public function test_tool_environment_is_an_allowlist_with_postgres_settings(): void
+    {
+        $envFor = new \ReflectionMethod(DatabaseBackupService::class, 'envFor');
+
+        $env = $this->withPlantedSecrets(fn () => $envFor->invoke(new DatabaseBackupService(), ['password' => 'db-secret', 'sslmode' => 'require']));
+        $upper = array_change_key_case($env, CASE_UPPER);
+
+        // Required: PostgreSQL connection settings and the OS basics, with real string values
+        $this->assertSame('db-secret', $upper['PGPASSWORD']);
+        $this->assertSame('require', $upper['PGSSLMODE']);
+        $this->assertIsString($upper['PATH'] ?? null);
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->assertIsString($upper['SYSTEMROOT'] ?? null);
+            $this->assertIsString($upper['TEMP'] ?? null);
+        }
+
+        // Excluded: every planted secret is explicitly removed (false), never passed with a value
+        foreach (array_keys(self::PLANTED_SECRETS) as $secret) {
+            $this->assertArrayHasKey($secret, $upper, "{$secret} must be explicitly removed");
+            $this->assertFalse($upper[$secret], "{$secret} must not be passed to PostgreSQL tools");
+        }
+
+        // Every value that is passed on is either allowlisted or a PG* setting
+        foreach ($upper as $name => $value) {
+            if ($value !== false) {
+                $this->assertTrue(in_array($name, DatabaseBackupService::OS_ENV_ALLOWLIST, true) || str_starts_with($name, 'PG'),
+                    "{$name} is not an allowed tool variable");
+            }
+        }
+    }
+
+    public function test_a_real_tool_process_receives_required_variables_and_no_secrets(): void
+    {
+        $child = $this->withPlantedSecrets(fn () => $this->childEnvironment(DatabaseBackupService::toolEnv(['PGPASSWORD' => 'db-secret'])));
+
+        $this->assertSame('db-secret', $child['PGPASSWORD'] ?? null);
+        $this->assertArrayHasKey('PATH', $child);
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->assertArrayHasKey('SYSTEMROOT', $child);
+        }
+        foreach (array_keys(self::PLANTED_SECRETS) as $secret) {
+            $this->assertArrayNotHasKey($secret, $child, "{$secret} leaked into the tool process");
+        }
+    }
+
+    public function test_tool_process_keeps_os_variables_when_server_globals_lack_them(): void
+    {
+        // Reproduces `php artisan serve`: $_SERVER holds request data, so SYSTEMROOT/PATH are not in it
+        $removed = [];
+        foreach (array_keys($_SERVER) as $key) {
+            if (in_array(strtoupper((string) $key), ['SYSTEMROOT', 'PATH', 'TEMP', 'TMP'], true)) {
+                $removed[$key] = $_SERVER[$key];
+                unset($_SERVER[$key]);
+            }
+        }
+        try {
+            $child = $this->childEnvironment(DatabaseBackupService::toolEnv());
+        } finally {
+            $_SERVER = $removed + $_SERVER;
+        }
+
+        $this->assertArrayHasKey('PATH', $child);
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->assertArrayHasKey('SYSTEMROOT', $child, 'pg_dump cannot open a socket on Windows without SYSTEMROOT');
+            $this->assertArrayHasKey('TEMP', $child);
+        }
+    }
+
     public function test_download_requires_a_valid_signature_and_admin(): void
     {
         $record = $this->makePackage();

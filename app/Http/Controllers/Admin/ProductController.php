@@ -8,11 +8,21 @@ use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Rules\UniqueProductName;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+    // ── Duplicate-name guard: names are checked and saved without outer whitespace ──
+
+    private function trimName(Request $request): void
+    {
+        if (is_string($request->input('name'))) {
+            $request->merge(['name' => trim($request->input('name'))]);
+        }
+    }
+
     public function index(Request $request)
     {
         $query = Product::with(['category', 'recipe.recipeIngredients.ingredient']);
@@ -57,9 +67,11 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $this->trimName($request);
+
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new UniqueProductName()],
             'sku' => 'nullable|string|max:100|unique:products,sku',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
@@ -153,9 +165,11 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $this->trimName($request);
+
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new UniqueProductName($product->id)],
             'sku' => 'nullable|string|max:100|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',

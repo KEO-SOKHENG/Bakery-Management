@@ -48,7 +48,7 @@
     @endif
 
     <!-- 1. 4 Core KPI Stat Cards Grid (Exact Orders / Dashboard Page Style) -->
-    <div class="dash-stat-row prod-stats-grid">
+    <div class="m-stat-row dash-stat-row prod-stats-grid">
         <div class="stat-card">
             <div class="stat-icon-box orange">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
@@ -107,9 +107,9 @@
     </div>
 
     <!-- 2. Action & Filter Toolbar Row (Exact Orders & Ingredients Style) -->
-    <div class="ingredients-toolbar-row" id="production_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: transparent !important; padding: 0 !important; border: none !important;">
+    <div class="ingredients-toolbar-row m-toolbar" id="production_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: transparent !important; padding: 0 !important; border: none !important;">
         <!-- Left: Filters Form -->
-        <form method="GET" action="{{ route('admin.production') }}" id="prod_filter_form" class="prod-toolbar-card" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0; background: transparent !important; border: none !important; padding: 0 !important;">
+        <form method="GET" action="{{ route('admin.production') }}" id="prod_filter_form" data-mfilter class="prod-toolbar-card" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0; background: transparent !important; border: none !important; padding: 0 !important;">
             <input type="hidden" name="tab" value="{{ $tab }}">
 
             @if(request('search'))
@@ -135,7 +135,6 @@
                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
                 </select>
 
-                <button type="submit" class="btn" style="border-radius: 50px; padding: 0.35rem 1rem; font-weight: 700; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.825rem;">Filter</button>
 
                 @if(request()->hasAny(['search', 'status', 'product_id', 'baker_id']) && (request('search') || (request('status') && request('status') !== 'all') || (request('product_id') && request('product_id') !== 'all') || (request('baker_id') && request('baker_id') !== 'all')))
                     <a href="{{ route('admin.production', ['tab' => $tab]) }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.35rem 0.85rem; font-weight: 600; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">Clear</a>
@@ -146,7 +145,7 @@
         <!-- Right: Action Button -->
         @if(in_array(auth()->user()->role, ['admin', 'manager']))
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <button type="button" class="btn" id="btn_open_prod_modal" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
+                <button type="button" class="btn m-icon-btn" id="btn_open_prod_modal" title="{{ __('messages.schedule_production_batch') }}" aria-label="{{ __('messages.schedule_production_batch') }}" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     <span>{{ __('messages.schedule_production_batch') }}</span>
                 </button>
@@ -155,9 +154,9 @@
     </div>
 
     <!-- 3. Production Batches Table Card (Full Viewport Height with internal scrolling) -->
-    <div class="orders-card prod-table-card" id="production_table_card">
+    <div class="orders-card prod-table-card m-card-wrap" id="production_table_card">
         <div class="orders-table-wrapper" id="production_table_wrapper">
-            <table class="orders-table prod-table" id="production_batches_table">
+            <table class="orders-table prod-table m-card-table" id="production_batches_table">
                 <thead>
                     <tr>
                         <th style="width: 14%;">{{ __('messages.batch_number') }}</th>
@@ -216,16 +215,16 @@
                                 'update_url' => route('admin.production.updateStatus', $batch->id),
                             ];
                         @endphp
-                        <tr class="prod-batch-row" data-batch-id="{{ $batch->id }}" data-status="{{ $statusClass }}" data-batch="{{ json_encode($batchData) }}">
+                        <tr data-tiles="3" class="m-card-row prod-batch-row" data-batch-id="{{ $batch->id }}" data-status="{{ $statusClass }}" data-batch="{{ json_encode($batchData) }}">
                             <!-- Batch Number -->
-                            <td>
+                            <td class="mc-title" data-label="Batch">
                                 <button type="button" class="batch-code-pill" onclick="openBatchDetailModal(this)" title="View Details">
                                     {{ $batch->batch_number ?? ('PROD-' . str_pad($batch->id, 4, '0', STR_PAD_LEFT)) }}
                                 </button>
                             </td>
 
                             <!-- Product -->
-                            <td>
+                            <td class="mc-wide" data-label="Product & Recipe">
                                 <div>
                                     <div class="prod-product-name">{{ $batch->product->name ?? 'Unknown Product' }}</div>
                                     <div class="prod-recipe-sub">
@@ -239,13 +238,24 @@
                             </td>
 
                             <!-- Quantity -->
-                            <td>
+                            <td class="mc-tile" data-label="Qty">
                                 <span class="prod-qty-num">{{ $batch->quantity }}</span>
                                 <span class="prod-qty-unit">units</span>
+                                <span class="prod-qty-note {{ $statusClass }}">
+                                    @if($statusClass === 'completed')
+                                        {{ $batch->duration ? 'Duration: ' . $batch->duration : 'Done' }}
+                                    @elseif($statusClass === 'in_progress')
+                                        Baking Stage
+                                    @elseif($statusClass === 'cancelled')
+                                        Cancelled
+                                    @else
+                                        Queue: #{{ $loop->iteration }}
+                                    @endif
+                                </span>
                             </td>
 
                             <!-- Assigned Baker -->
-                            <td>
+                            <td class="mc-tile" data-label="Baker">
                                 @if($batch->baker)
                                     <div class="baker-pill" title="{{ $batch->baker->name }}">
                                         <span class="baker-avatar">
@@ -259,7 +269,7 @@
                             </td>
 
                             <!-- Schedule & Timeline -->
-                            <td>
+                            <td class="mc-tile" data-label="Scheduled">
                                 <div class="prod-schedule-date">
                                     {{ $batch->scheduled_at ? $batch->scheduled_at->format('M d, Y h:i A') : ($batch->production_date ? $batch->production_date->format('M d, Y') : '-') }}
                                 </div>
@@ -271,12 +281,12 @@
                             </td>
 
                             <!-- Status Badge -->
-                            <td>
+                            <td class="mc-status" data-label="Status">
                                 <x-badge :status="$batch->status" class="badge-status {{ $statusClass }}" />
                             </td>
 
                             <!-- Actions -->
-                            <td style="text-align: right;">
+                            <td class="mc-action" data-label="Actions" style="text-align: right;">
                                 <div class="prod-actions-row">
                                     <!-- Start Production Button (Scheduled -> In Progress) -->
                                     @if($canStart && $isAssignedToUser)

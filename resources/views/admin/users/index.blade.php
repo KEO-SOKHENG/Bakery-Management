@@ -53,7 +53,7 @@
 @endif
 
 <!-- Summary Metric Cards (Exact Orders / Dashboard Page Style) -->
-<div class="dash-stat-row">
+<div class="m-stat-row dash-stat-row">
     <div class="stat-card user-stat-card">
         <div class="stat-icon-box blue">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -112,9 +112,9 @@
 </div>
 
 <!-- 2. Action & Filter Toolbar Row (Exact Orders & Ingredients Style) -->
-<div class="ingredients-toolbar-row" id="users_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+<div class="ingredients-toolbar-row m-toolbar" id="users_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
     <!-- Left: Filters without toolbar search input -->
-    <form action="{{ route('admin.users.index') }}" method="GET" id="users_filter_form" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;">
+    <form action="{{ route('admin.users.index') }}" method="GET" id="users_filter_form" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;" data-mfilter>
         @if(request('search'))
             <input type="hidden" name="search" id="user_search_input" value="{{ request('search') }}">
         @endif
@@ -134,7 +134,6 @@
                 @endforeach
             </select>
 
-            <button type="submit" class="btn" style="border-radius: 50px; padding: 0.35rem 1rem; font-weight: 700; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.825rem;">Filter</button>
 
             @if(request()->hasAny(['search', 'role', 'status']) && (request('search') || request('role') || request('status')))
                 <a href="{{ route('admin.users.index') }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.35rem 0.85rem; font-weight: 600; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">Clear</a>
@@ -144,7 +143,7 @@
 
     <!-- Right: Add Staff Button -->
     <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <button type="button" class="btn" id="btn_open_create_user_modal" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
+        <button type="button" class="btn m-icon-btn" id="btn_open_create_user_modal" title="{{ __('messages.add_staff') }}" aria-label="{{ __('messages.add_staff') }}" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span data-lang-key="add_staff">{{ __('messages.add_staff') }}</span>
         </button>
@@ -171,8 +170,8 @@
                         $initials = strtoupper(substr($user->name, 0, 2));
                         $roleClass = 'role-' . strtolower($user->role);
                     @endphp
-                    <tr id="user_row_{{ $user->id }}">
-                        <td>
+                    <tr id="user_row_{{ $user->id }}" class="us-row {{ $user->id === auth()->id() ? 'us-self' : '' }}">
+                        <td class="us-id">
                             <div class="user-identity">
                                 <div class="user-avatar">{{ $initials }}</div>
                                 <div>
@@ -186,21 +185,21 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td class="us-contact">
                             <div class="user-email">{{ $user->email }}</div>
-                            <div class="user-phone">{{ $user->phone ?? '—' }}</div>
+                            <div class="user-phone {{ $user->phone ? '' : 'is-empty' }}">{{ $user->phone ?? '—' }}</div>
                         </td>
-                        <td>
+                        <td class="us-role">
                             <span class="role-pill {{ $roleClass }}">
                                 {{ ucfirst($user->role) }}
                             </span>
                         </td>
-                        <td>
+                        <td class="us-status">
                             <x-badge :variant="$user->status === 'active' ? 'success' : ($user->status === 'suspended' ? 'danger' : 'warning')">
                                 {{ ucfirst($user->status) }}
                             </x-badge>
                         </td>
-                        <td>
+                        <td class="us-last">
                             <div class="user-last-login">
                                 {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never' }}
                             </div>
@@ -208,7 +207,7 @@
                                 Joined {{ $user->created_at ? $user->created_at->format('M d, Y') : '—' }}
                             </div>
                         </td>
-                        <td class="user-actions-cell" style="text-align: right;">
+                        <td class="us-actions user-actions-cell" style="text-align: right;">
                             <div class="user-action-group">
                                 <!-- View Details & Audit Button -->
                                 <button

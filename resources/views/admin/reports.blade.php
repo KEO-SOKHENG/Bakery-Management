@@ -151,15 +151,15 @@
     </div>
 
     <div class="reports-export-actions">
-        <button type="button" class="btn btn-secondary sticky-add-product-btn" id="btn_print_report" onclick="window.print();" title="Print Layout">
+        <button type="button" class="btn btn-secondary sticky-add-product-btn m-icon-btn" id="btn_print_report" aria-label="Print" onclick="window.print();" title="Print Layout">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span>Print</span>
         </button>
-        <a href="{{ route('admin.reports.export.pdf', request()->all()) }}" class="btn btn-secondary sticky-add-product-btn" id="btn_export_pdf" title="Export PDF">
+        <a href="{{ route('admin.reports.export.pdf', request()->all()) }}" class="btn btn-secondary sticky-add-product-btn m-icon-btn" id="btn_export_pdf" aria-label="Export PDF" title="Export PDF">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             <span>PDF</span>
         </a>
-        <a href="{{ route('admin.reports.export.excel', request()->all()) }}" class="btn btn-secondary sticky-add-product-btn" id="btn_export_excel" title="Export Excel / CSV">
+        <a href="{{ route('admin.reports.export.excel', request()->all()) }}" class="btn btn-secondary sticky-add-product-btn m-icon-btn" id="btn_export_excel" aria-label="Export Excel" title="Export Excel / CSV">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
             <span>Excel</span>
         </a>
@@ -1123,6 +1123,21 @@
 
 @push('scripts')
 <script>
+    // ── Mobile report cards: label each cell with its column header ──
+    document.querySelectorAll('.report-table').forEach(function (table) {
+        const headers = Array.from(table.querySelectorAll('thead th')).map(function (th) {
+            return th.textContent.trim();
+        });
+        table.querySelectorAll('tbody tr').forEach(function (row) {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 2) return;
+            row.classList.add('rpt-card-row');
+            cells.forEach(function (td, i) {
+                if (headers[i]) td.setAttribute('data-label', headers[i]);
+            });
+        });
+    });
+
 (function () {
     const pairs = [['nav_sales', 'sales_report_menu'], ['nav_inventory', 'inventory_report_menu']]
         .map(function (ids) { return { btn: document.getElementById(ids[0]), menu: document.getElementById(ids[1]) }; })
@@ -1186,6 +1201,12 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeAll(null);
     });
+    // Close report menus when the sidebar opens/collapses (its toggle stops click propagation)
+    const sidebarEl = document.querySelector('.bakery-sidebar');
+    if (sidebarEl && 'MutationObserver' in window) {
+        new MutationObserver(function () { closeAll(null); })
+            .observe(sidebarEl, { attributes: true, attributeFilter: ['class'] });
+    }
     window.addEventListener('resize', function () { pairs.forEach(function (d) { if (!d.menu.hidden) place(d); }); });
     window.addEventListener('scroll', function () { pairs.forEach(function (d) { if (!d.menu.hidden) place(d); }); }, true);
 })();

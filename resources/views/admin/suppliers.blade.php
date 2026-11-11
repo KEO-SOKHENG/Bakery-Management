@@ -119,7 +119,7 @@
     @endif
 
     <!-- 1. 4 Core KPI Stat Cards Grid (Exact Orders / Dashboard Page Style) -->
-    <div class="dash-stat-row">
+    <div class="m-stat-row dash-stat-row">
         <div class="stat-card">
             <div class="stat-icon-box orange">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
@@ -178,9 +178,9 @@
     </div>
 
     <!-- 2. Action & Filter Toolbar Row (Exact Orders & Ingredients Style) -->
-    <div class="ingredients-toolbar-row" id="suppliers_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div class="ingredients-toolbar-row m-toolbar" id="suppliers_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
         <!-- Left: Search and Status Filters -->
-        <form method="GET" action="{{ route('admin.suppliers') }}" id="suppliers_filter_form" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;">
+        <form method="GET" action="{{ route('admin.suppliers') }}" id="suppliers_filter_form" data-mfilter style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;">
             @if(request('search'))
                 <input type="hidden" name="search" id="suppliers_search_input" value="{{ request('search') }}">
             @endif
@@ -193,7 +193,6 @@
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
 
-                <button type="submit" class="btn" style="border-radius: 50px; padding: 0.35rem 1rem; font-weight: 700; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.825rem;">Filter</button>
 
                 @if(request()->hasAny(['search', 'status']) && (request('search') || (request('status') && request('status') !== 'all')))
                     <a href="{{ route('admin.suppliers') }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.35rem 0.85rem; font-weight: 600; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">Clear</a>
@@ -203,11 +202,11 @@
 
         <!-- Right: Purchase Orders & Add Supplier Buttons -->
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <a href="{{ route('admin.purchase-orders.index') }}" class="btn btn-secondary" style="border-radius: 50px; height: 36px; padding: 0 1rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.825rem;">
+            <a href="{{ route('admin.purchase-orders.index') }}" class="btn btn-secondary m-icon-btn" title="Purchase Orders" aria-label="Purchase Orders" style="border-radius: 50px; height: 36px; padding: 0 1rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.825rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 <span>Purchase Orders</span>
             </a>
-            <button type="button" class="btn" id="btn_open_supplier_modal" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
+            <button type="button" class="btn m-icon-btn" id="btn_open_supplier_modal" title="Add Supplier" aria-label="Add Supplier" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Add Supplier</span>
             </button>
@@ -215,9 +214,9 @@
     </div>
 
     <!-- 3. Suppliers Table Card (Full Viewport Height with internal scrolling) -->
-    <div class="orders-card" id="suppliers_table_card">
+    <div class="orders-card m-card-wrap" id="suppliers_table_card">
         <div class="orders-table-wrapper" id="suppliers_table_wrapper">
-            <table class="orders-table" id="suppliers_table">
+            <table class="orders-table m-card-table m-card-v2" id="suppliers_table">
                 <thead>
                     <tr>
                         <th style="width: 22%;">Vendor / Company</th>
@@ -232,9 +231,9 @@
                 </thead>
                 <tbody>
                     @forelse($suppliers as $supplier)
-                        <tr>
+                        <tr data-tiles="3" class="m-card-row">
                             <!-- Vendor / Company -->
-                            <td>
+                            <td class="mc-title" data-label="Vendor">
                                 <div style="display: flex; align-items: center; gap: 0.65rem;">
                                     <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(234, 88, 12, 0.1); display: flex; align-items: center; justify-content: center; color: #ea580c; font-weight: 800; font-size: 0.95rem; flex-shrink: 0;">
                                         {{ strtoupper(substr($supplier->name, 0, 1)) }}
@@ -251,17 +250,17 @@
                             </td>
 
                             <!-- Contact Person -->
-                            <td style="font-weight: 600; color: inherit; font-size: 0.85rem;">
+                            <td class="mc-meta mc-inline-label" data-label="Contact" style="font-weight: 600; color: inherit; font-size: 0.85rem;">
                                 {{ $supplier->contact_person ?? '—' }}
                             </td>
 
                             <!-- Phone -->
-                            <td style="font-size: 0.825rem; font-weight: 600; color: var(--text-muted, #a1a1aa);">
+                            <td class="mc-tile mc-inline-label" data-label="Phone" style="font-size: 0.825rem; font-weight: 600; color: var(--text-muted, #a1a1aa);">
                                 {{ $supplier->phone ?? '—' }}
                             </td>
 
                             <!-- Email -->
-                            <td style="font-size: 0.825rem;">
+                            <td class="mc-wide mc-inline-label" data-label="Email" style="font-size: 0.825rem;">
                                 @if($supplier->email)
                                     <a href="mailto:{{ $supplier->email }}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">
                                         {{ $supplier->email }}
@@ -272,28 +271,28 @@
                             </td>
 
                             <!-- Supplied Ingredients -->
-                            <td>
+                            <td class="mc-tile" data-label="Items">
                                 <span style="background: rgba(234, 88, 12, 0.08); color: #ea580c; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 6px;">
                                     {{ $supplier->ingredients_count }} items
                                 </span>
                             </td>
 
                             <!-- Purchase Orders -->
-                            <td>
+                            <td class="mc-tile" data-label="Orders">
                                 <span style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 6px;">
                                     {{ $supplier->purchase_orders_count }} orders
                                 </span>
                             </td>
 
                             <!-- Status -->
-                            <td>
+                            <td class="mc-status" data-label="Status">
                                 <span class="status-badge {{ $supplier->status === 'active' ? 'status-completed' : 'status-cancelled' }}">
                                     {{ ucfirst($supplier->status) }}
                                 </span>
                             </td>
 
                             <!-- Actions -->
-                            <td style="text-align: right;">
+                            <td class="mc-action" data-label="Actions" style="text-align: right;">
                                 <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4rem;">
                                     <button type="button" class="table-icon-btn btn-view-supplier" title="View Supplier Details"
                                         data-id="{{ $supplier->id }}"

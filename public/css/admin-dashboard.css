@@ -1648,3 +1648,696 @@ body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb {
 body.is-dashboard-page .dash-scrollable-body::-webkit-scrollbar-thumb:hover {
     background: rgba(217, 119, 6, 0.55) !important;
 }
+
+/* ==========================================================================
+   Dashboard Responsive — Tablet (768–1199px) & Mobile (<768px)
+   ========================================================================== */
+@media (max-width: 1199px) {
+    .dash-stat-row { gap: 1rem !important; }
+    .dash-chart-card { padding: 1.25rem !important; }
+    .dash-chart-kpi-row { gap: 0.75rem; }
+    .dash-kpi-chip { padding: 0.8rem 0.9rem; min-width: 0; }
+    .kpi-chip-value { font-size: 1.15rem; }
+    .dash-two-col-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 767px) {
+    /* Let the whole page scroll naturally instead of a nested locked scroller */
+    body.is-dashboard-page .dash-page-container {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    body.is-dashboard-page .dash-scrollable-body {
+        height: auto !important;
+        overflow: visible !important;
+        padding-right: 0 !important;
+        padding-bottom: 1.5rem !important;
+    }
+
+    /* Header period pills: single swipeable row */
+    .header-toolbar-slot .period-pill-group {
+        overflow-x: auto;
+        scrollbar-width: none;
+        max-width: 100%;
+    }
+    .header-toolbar-slot .period-pill-group::-webkit-scrollbar { display: none; }
+    .period-pill { padding: 0.4rem 0.75rem !important; font-size: 0.75rem !important; flex-shrink: 0; }
+
+    /* Stat cards: 2 compact columns */
+    .dash-stat-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+    .dash-stat-row .stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 1rem !important;
+        border-radius: 18px;
+        min-width: 0;
+    }
+    .dash-stat-row .stat-icon-box { width: 40px !important; height: 40px !important; }
+    .dash-stat-row .stat-info { min-width: 0; width: 100%; }
+    .dash-stat-row .stat-label {
+        font-size: 0.68rem !important;
+        white-space: normal;
+        line-height: 1.25;
+    }
+    .dash-stat-row .stat-value {
+        font-size: 1.35rem !important;
+        overflow-wrap: anywhere;
+    }
+    .dash-stat-row .stat-trend { font-size: 0.68rem !important; }
+
+    /* Quick actions */
+    .quick-actions-section .section-title { font-size: 1.05rem; }
+    .quick-actions-grid { gap: 0.65rem; }
+    .quick-action-btn { padding: 0.75rem 1rem; font-size: 0.85rem; }
+
+    /* Chart card */
+    .dash-chart-card { padding: 1rem !important; border-radius: 18px !important; }
+    .dash-chart-header { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+    .dash-chart-title-group { align-items: flex-start; }
+    .dash-chart-badge-icon { width: 38px; height: 38px; }
+    .dash-chart-main-title { font-size: 1.02rem; }
+    .dash-chart-subtitle { font-size: 0.74rem; }
+    .dash-period-switch { display: flex; width: 100%; }
+    .dash-period-btn { flex: 1; text-align: center; padding: 0.45rem 0.5rem; }
+    .dash-chart-kpi-row { grid-template-columns: 1fr; gap: 0.6rem; }
+    .dash-chart-svg-container { min-height: 200px; }
+    .chart-axis-text, .chart-x-label { font-size: 14px; }
+
+    /* Cards & tables */
+    .bakery-card { padding: 1rem !important; }
+    .card-header-flex { flex-wrap: wrap; gap: 0.5rem; }
+    .status-dist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .table-responsive-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .recent-orders-table { min-width: 560px; }
+}
+
+@media (max-width: 380px) {
+    .dash-stat-row { grid-template-columns: 1fr !important; }
+    .dash-stat-row .stat-card { flex-direction: row; align-items: center; }
+}
+
+/* Mobile header: period pills match the search bar width */
+@media (max-width: 767px) {
+    .top-header-bar .header-toolbar-slot,
+    .top-header-bar .header-toolbar-slot .header-filter-form {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+    }
+    .top-header-bar .header-toolbar-slot .period-pill-group {
+        display: flex !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        gap: 2px !important;
+    }
+    .top-header-bar .header-toolbar-slot .period-pill {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        justify-content: center !important;
+        padding: 0.45rem 0.25rem !important;
+        font-size: clamp(0.62rem, 2.6vw, 0.78rem) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+
+/* Mobile header: compact search box, smaller than the period pill bar */
+@media (max-width: 767px) {
+    .top-header-bar .header-search-input {
+        height: 34px !important;
+        font-size: 0.78rem !important;
+        padding: 0.3rem 0.7rem 0.3rem 2.1rem !important;
+    }
+    .top-header-bar .header-search-box svg {
+        width: 15px !important;
+        height: 15px !important;
+    }
+}
+
+/* Mobile stat cards: left-aligned icon + text, equal heights */
+@media (max-width: 767px) {
+    .dash-stat-row { align-items: stretch !important; }
+    .dash-stat-row .stat-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        height: 100% !important;
+        margin: 0 !important;
+        transform: none !important;
+        gap: 0.6rem !important;
+    }
+    .dash-stat-row .stat-icon-box { margin: 0 !important; align-self: flex-start !important; }
+    .dash-stat-row .stat-info {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.3rem !important;
+    }
+    .dash-stat-row .stat-label { min-height: 2.5em; display: flex; align-items: flex-end; }
+}
+@media (max-width: 380px) {
+    .dash-stat-row .stat-card { flex-direction: row !important; align-items: center !important; }
+    .dash-stat-row .stat-label { min-height: 0; }
+}
+
+/* Mobile stat cards v2: icon + label header, value and badge below */
+@media (max-width: 767px) {
+    .dash-stat-row .stat-card {
+        display: grid !important;
+        grid-template-columns: 32px minmax(0, 1fr) !important;
+        grid-template-areas:
+            "icon label"
+            "value value"
+            "trend trend" !important;
+        align-items: center !important;
+        column-gap: 0.55rem !important;
+        row-gap: 0.45rem !important;
+        padding: 0.85rem 0.9rem !important;
+        border-radius: 16px !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    .dash-stat-row .stat-info { display: contents !important; }
+    .dash-stat-row .stat-icon-box {
+        grid-area: icon !important;
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 10px !important;
+    }
+    .dash-stat-row .stat-icon-box svg { width: 16px !important; height: 16px !important; }
+    .dash-stat-row .stat-label {
+        grid-area: label !important;
+        min-height: 0 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 0.64rem !important;
+        letter-spacing: 0.03em;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+    }
+    .dash-stat-row .stat-value {
+        grid-area: value !important;
+        font-size: 1.45rem !important;
+        line-height: 1.1 !important;
+        margin: 0.15rem 0 0 !important;
+    }
+    .dash-stat-row .stat-trend {
+        grid-area: trend !important;
+        justify-self: start !important;
+        align-self: end !important;
+        margin: 0 !important;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+@media (max-width: 380px) {
+    .dash-stat-row .stat-card { flex-direction: initial !important; }
+}
+
+/* Mobile quick actions: 3 compact tiles, icon above label */
+@media (max-width: 767px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.6rem !important;
+    }
+    .quick-action-btn {
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 0.45rem !important;
+        padding: 0.85rem 0.4rem !important;
+        border-radius: 16px !important;
+        font-size: 0.72rem !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+        min-width: 0 !important;
+    }
+    .quick-action-btn span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    .quick-action-icon-circle {
+        width: 34px !important;
+        height: 34px !important;
+        margin: 0 !important;
+    }
+    .quick-action-icon-circle svg { width: 17px !important; height: 17px !important; }
+}
+
+/* Mobile recent orders: each row becomes a compact card */
+@media (max-width: 767px) {
+    .recent-orders-table { min-width: 0 !important; width: 100% !important; }
+    .recent-orders-table,
+    .recent-orders-table tbody { display: block !important; }
+    .recent-orders-table thead { display: none !important; }
+    .recent-orders-table tbody tr {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        grid-template-areas:
+            "id status action"
+            "customer total action"
+            "type type action" !important;
+        align-items: center !important;
+        gap: 0.35rem 0.6rem !important;
+        padding: 0.8rem 0.9rem !important;
+        margin-bottom: 0.6rem !important;
+        border: 1px solid var(--border-color, rgba(238, 233, 224, 0.85)) !important;
+        border-radius: 14px !important;
+        background: var(--bg-muted, rgba(250, 246, 240, 0.6)) !important;
+    }
+    .recent-orders-table tbody td {
+        display: block !important;
+        padding: 0 !important;
+        border: none !important;
+        background: none !important;
+        min-width: 0 !important;
+        font-size: 0.8rem !important;
+    }
+    .recent-orders-table td[data-label="Order ID"] { grid-area: id; font-size: 0.9rem !important; }
+    .recent-orders-table td[data-label="Status"] { grid-area: status; justify-self: end; }
+    .recent-orders-table td[data-label="Customer"] {
+        grid-area: customer;
+        color: var(--text-muted, #71717a);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .recent-orders-table td[data-label="Total"] { grid-area: total; justify-self: end; font-size: 0.9rem !important; }
+    .recent-orders-table td[data-label="Type"] { grid-area: type; }
+    .recent-orders-table td:last-child:not([data-label]) { grid-area: action; align-self: center; }
+    .recent-orders-table tbody tr td[colspan]:not([data-label]) { grid-area: auto; grid-column: 1 / -1; text-align: center; }
+    .recent-orders-table .type-pill,
+    .recent-orders-table .status-pill { font-size: 0.62rem !important; padding: 0.2rem 0.55rem !important; }
+    .card-bottom-action-container .btn-card-outline { width: 100%; text-align: center; }
+}
+
+/* Mobile recent orders: fit width + theme-aware colors */
+@media (max-width: 767px) {
+    .bakery-card .table-responsive-wrapper {
+        overflow: visible !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .recent-orders-table tbody tr {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: #faf8f5 !important;
+        border-color: rgba(238, 233, 224, 0.9) !important;
+        color: #29150d !important;
+    }
+    .recent-orders-table td[data-label="Customer"] { color: #71717a !important; }
+
+    [data-theme="dark"] .recent-orders-table tbody tr,
+    [data-theme="glass"] .recent-orders-table tbody tr,
+    body.dark-mode .recent-orders-table tbody tr,
+    body.theme-dark .recent-orders-table tbody tr {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        color: #f4f4f5 !important;
+    }
+    [data-theme="dark"] .recent-orders-table tbody tr:hover,
+    [data-theme="glass"] .recent-orders-table tbody tr:hover,
+    body.dark-mode .recent-orders-table tbody tr:hover,
+    body.theme-dark .recent-orders-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.07) !important;
+    }
+    [data-theme="dark"] .recent-orders-table td,
+    [data-theme="glass"] .recent-orders-table td,
+    body.dark-mode .recent-orders-table td,
+    body.theme-dark .recent-orders-table td { color: #f4f4f5 !important; }
+    [data-theme="dark"] .recent-orders-table td[data-label="Customer"],
+    [data-theme="glass"] .recent-orders-table td[data-label="Customer"],
+    body.dark-mode .recent-orders-table td[data-label="Customer"],
+    body.theme-dark .recent-orders-table td[data-label="Customer"] { color: #a1a1aa !important; }
+}
+
+/* ── Mobile recent orders: match Orders page card layout ── */
+.recent-orders-table .ro-mobile-only,
+.recent-orders-table .ro-pay-badge { display: none; }
+
+@media (max-width: 767px) {
+    .recent-orders-table tbody td[data-label="Customer"] {
+        text-align: left !important;
+        justify-self: start !important;
+        width: 100% !important;
+    }
+    .recent-orders-table td[data-label="Type"] .type-pill { display: none !important; }
+    .recent-orders-table .ro-pay-badge {
+        display: inline-flex;
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+    .recent-orders-table .ro-pay-badge.paid { background: #dcfce7; color: #15803d; }
+    .recent-orders-table .ro-pay-badge.unpaid { background: #fee2e2; color: #b91c1c; }
+
+    /* Status pill → Orders page badge style */
+    .recent-orders-table td[data-label="Status"] .status-pill {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.35rem 0.85rem !important;
+        border-radius: 50px !important;
+        font-size: 0.75rem !important;
+        font-weight: 800 !important;
+        background: #f0fdf4 !important;
+        color: #15803d !important;
+        border: 1px solid rgba(22, 163, 74, 0.25) !important;
+    }
+    .recent-orders-table td[data-label="Status"] .status-pill.completed::before { content: "✓"; }
+    .recent-orders-table td[data-label="Status"] .status-pill.pending {
+        background: #fffbeb !important; color: #b45309 !important; border-color: rgba(245, 158, 11, 0.25) !important;
+    }
+    .recent-orders-table td[data-label="Status"] .status-pill.inprogress {
+        background: #eff6ff !important; color: #1d4ed8 !important; border-color: rgba(59, 130, 246, 0.25) !important;
+    }
+    .recent-orders-table td[data-label="Status"] .status-pill.danger {
+        background: #fef2f2 !important; color: #dc2626 !important; border-color: rgba(220, 38, 38, 0.25) !important;
+    }
+
+    [data-theme="dark"] .recent-orders-table td[data-label="Status"] .status-pill.completed,
+    [data-theme="glass"] .recent-orders-table td[data-label="Status"] .status-pill.completed,
+    body.dark-mode .recent-orders-table td[data-label="Status"] .status-pill.completed {
+        background: rgba(16, 185, 129, 0.15) !important; color: #34d399 !important; border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="dark"] .recent-orders-table td[data-label="Status"] .status-pill.pending,
+    [data-theme="glass"] .recent-orders-table td[data-label="Status"] .status-pill.pending,
+    body.dark-mode .recent-orders-table td[data-label="Status"] .status-pill.pending {
+        background: rgba(234, 179, 8, 0.15) !important; color: #facc15 !important; border-color: rgba(234, 179, 8, 0.3) !important;
+    }
+    [data-theme="dark"] .recent-orders-table td[data-label="Status"] .status-pill.inprogress,
+    [data-theme="glass"] .recent-orders-table td[data-label="Status"] .status-pill.inprogress,
+    body.dark-mode .recent-orders-table td[data-label="Status"] .status-pill.inprogress {
+        background: rgba(245, 158, 11, 0.15) !important; color: #fbbf24 !important; border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    [data-theme="dark"] .recent-orders-table td[data-label="Status"] .status-pill.danger,
+    [data-theme="glass"] .recent-orders-table td[data-label="Status"] .status-pill.danger,
+    body.dark-mode .recent-orders-table td[data-label="Status"] .status-pill.danger {
+        background: rgba(239, 68, 68, 0.15) !important; color: #f87171 !important; border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="dark"] .recent-orders-table .ro-pay-badge.paid,
+    [data-theme="glass"] .recent-orders-table .ro-pay-badge.paid,
+    body.dark-mode .recent-orders-table .ro-pay-badge.paid {
+        background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    [data-theme="dark"] .recent-orders-table .ro-pay-badge.unpaid,
+    [data-theme="glass"] .recent-orders-table .ro-pay-badge.unpaid,
+    body.dark-mode .recent-orders-table .ro-pay-badge.unpaid {
+        background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+}
+
+@media (max-width: 767px) {
+    .recent-orders-table tbody tr {
+        grid-template-columns: max-content max-content minmax(0, 1fr) auto !important;
+        grid-template-areas:
+            "id customer customer status"
+            "items items items items"
+            "total total type date" !important;
+        gap: 0.7rem 0.55rem !important;
+        padding: 0.9rem !important;
+        margin-bottom: 0.75rem !important;
+        border-radius: 16px !important;
+    }
+    .recent-orders-table tbody td.ro-mobile-only { display: block !important; }
+
+    .recent-orders-table td[data-label="Order ID"] {
+        color: #f59e0b !important;
+        font-size: 1rem !important;
+        font-weight: 900 !important;
+    }
+    .recent-orders-table tbody td[data-label="Customer"] {
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        color: inherit !important;
+    }
+    .recent-orders-table tbody td[data-label="Items"] {
+        grid-area: items;
+        padding: 0.65rem 0.8rem !important;
+        border-radius: 12px !important;
+        background: rgba(148, 163, 184, 0.08) !important;
+        border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    }
+    .recent-orders-table .ro-items-text {
+        font-weight: 600;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .recent-orders-table .ro-items-count {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    .recent-orders-table td[data-label="Total"] {
+        justify-self: start !important;
+        font-size: 0.925rem !important;
+        font-weight: 800 !important;
+    }
+    .recent-orders-table td[data-label="Type"] { grid-area: type; justify-self: start; }
+    .recent-orders-table tbody td[data-label="Date"] {
+        grid-area: date;
+        justify-self: end;
+        text-align: right;
+        font-size: 0.7rem !important;
+        color: #64748b !important;
+        white-space: nowrap;
+    }
+    .recent-orders-table td:last-child:not([data-label]) { display: none !important; }
+
+    [data-theme="dark"] .recent-orders-table tbody tr,
+    [data-theme="glass"] .recent-orders-table tbody tr,
+    body.dark-mode .recent-orders-table tbody tr,
+    body.theme-dark .recent-orders-table tbody tr {
+        background: #18181c !important;
+    }
+    [data-theme="dark"] .recent-orders-table tbody td[data-label="Items"],
+    [data-theme="glass"] .recent-orders-table tbody td[data-label="Items"],
+    body.dark-mode .recent-orders-table tbody td[data-label="Items"],
+    body.theme-dark .recent-orders-table tbody td[data-label="Items"] {
+        background: #121215 !important;
+        border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    [data-theme="dark"] .recent-orders-table td[data-label="Order ID"],
+    body.dark-mode .recent-orders-table td[data-label="Order ID"],
+    body.theme-dark .recent-orders-table td[data-label="Order ID"] { color: #f59e0b !important; }
+    [data-theme="dark"] .recent-orders-table tbody td[data-label="Customer"],
+    [data-theme="glass"] .recent-orders-table tbody td[data-label="Customer"],
+    body.dark-mode .recent-orders-table tbody td[data-label="Customer"],
+    body.theme-dark .recent-orders-table tbody td[data-label="Customer"] { color: #ffffff !important; }
+}
+
+/* Mobile status / procurement boxes: 2-col tiles, label above value */
+@media (max-width: 767px) {
+    .procurement-stat-grid,
+    .status-dist-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.6rem !important;
+    }
+    .status-dist-box {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        text-align: left !important;
+        gap: 0.35rem !important;
+        padding: 0.8rem 0.85rem !important;
+        border-radius: 14px !important;
+        min-width: 0 !important;
+    }
+    .status-dist-label {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.04em !important;
+        line-height: 1.25 !important;
+        min-height: 2.5em;
+        display: flex;
+        align-items: flex-end;
+    }
+    .status-dist-val {
+        font-size: 1.25rem !important;
+        line-height: 1.1 !important;
+        overflow-wrap: anywhere;
+    }
+    .dash-loyalty-box { padding: 0.85rem !important; }
+    .dash-loyalty-box > div > div { font-size: 0.82rem !important; }
+    .dash-loyalty-box .btn-card-outline { flex-shrink: 0; white-space: nowrap; }
+}
+
+/* Mobile: higher-specificity overrides (responsive.css loads after this file) */
+@media (max-width: 767px) {
+    body.is-dashboard-page .quick-actions-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.6rem !important;
+    }
+    body.is-dashboard-page .quick-action-btn {
+        flex-direction: column !important;
+        padding: 0.85rem 0.4rem !important;
+        border-radius: 16px !important;
+        font-size: 0.72rem !important;
+        gap: 0.45rem !important;
+    }
+    body.is-dashboard-page .procurement-stat-grid,
+    body.is-dashboard-page .status-dist-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    body.is-dashboard-page .table-responsive-wrapper {
+        overflow: visible !important;
+    }
+    body.is-dashboard-page .table-responsive-wrapper table.recent-orders-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    body.is-dashboard-page .recent-orders-table tbody td {
+        padding: 0 !important;
+    }
+}
+
+/* Mobile: bestseller name truncation + odd last status tile spans full row */
+@media (max-width: 767px) {
+    body.is-dashboard-page .bestseller-info-row { gap: 0.6rem; }
+    body.is-dashboard-page .bestseller-info-row > *:first-child {
+        min-width: 0; flex: 1 1 auto; overflow: hidden;
+    }
+    body.is-dashboard-page .bestseller-info-row > *:first-child * {
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    body.is-dashboard-page .bestseller-info-row > *:last-child { flex-shrink: 0; text-align: right; }
+    body.is-dashboard-page .status-dist-grid > .status-dist-box:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Tablet: chart KPI chips side by side */
+@media (min-width: 768px) and (max-width: 1199px) {
+    body.is-dashboard-page .dash-chart-kpi-row { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+/* Mobile: header always visible — only the dashboard body scrolls */
+@media (max-width: 767px) {
+    html:has(body.is-dashboard-page),
+    body.is-dashboard-page {
+        height: 100dvh !important;
+        overflow: hidden !important;
+    }
+    body.is-dashboard-page .bakery-app-layout,
+    body.is-dashboard-page .bakery-main-content {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    body.is-dashboard-page .top-header-bar { flex-shrink: 0 !important; margin-bottom: 0.5rem !important; }
+    body.is-dashboard-page .main-content-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    body.is-dashboard-page .dash-page-container {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    body.is-dashboard-page .dash-scrollable-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 2rem !important;
+    }
+}
+
+/* ── Mobile recent orders: flat wrapper like the Orders page ── */
+.ro-mobile-header { display: none; }
+
+@media (max-width: 767px) {
+    .bakery-card.recent-orders-card,
+    [data-theme="dark"] .bakery-card.recent-orders-card,
+    [data-theme="glass"] .bakery-card.recent-orders-card,
+    body.dark-mode .bakery-card.recent-orders-card {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .ro-mobile-header {
+        display: block;
+        margin: 0.25rem 0 0.75rem;
+    }
+
+    .ro-mobile-header h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--text-title, #0f172a);
+    }
+
+    .ro-mobile-header p {
+        margin: 0.1rem 0 0;
+        font-size: 0.72rem;
+        color: #64748b;
+    }
+
+    .recent-orders-card .recent-orders-table tbody tr {
+        border-radius: 16px !important;
+    }
+}
+
+/* iPad Mini: header pinned (see responsive.css), dashboard body scrolls inside */
+@media (min-width: 768px) and (max-width: 1023px) {
+    body.is-dashboard-page .main-content-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    body.is-dashboard-page .dash-page-container {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    body.is-dashboard-page .dash-scrollable-body {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 2rem !important;
+    }
+}

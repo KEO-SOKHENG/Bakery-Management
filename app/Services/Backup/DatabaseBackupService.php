@@ -57,7 +57,7 @@ class DatabaseBackupService
     /** @return array{version: string, major: int} */
     public function clientInfo(string $tool = 'pg_dump'): array
     {
-        $process = new Process([$this->binary($tool), '--version']);
+        $process = new Process([$this->binary($tool), '--version'], null, self::toolEnv());
         $process->run();
         if (!$process->isSuccessful() || !preg_match('/(\d+)(?:\.(\d+))?/', $process->getOutput(), $m)) {
             throw new RuntimeException("Unable to read the {$tool} version.");
@@ -195,7 +195,7 @@ class DatabaseBackupService
     /** Verifies the custom-format archive with pg_restore --list. Returns TOC entry count. */
     public function listArchive(string $archive): int
     {
-        $process = new Process([$this->binary('pg_restore'), '--list', $archive]);
+        $process = new Process([$this->binary('pg_restore'), '--list', $archive], null, self::toolEnv());
         $process->setTimeout(300);
         $process->run();
         if (!$process->isSuccessful()) {
@@ -233,17 +233,74 @@ class DatabaseBackupService
 
     // ── Internals ──
 
-    private function envFor(array $cfg): array
+    /** OS variables the PostgreSQL tools need (Windows needs SYSTEMROOT for sockets, TEMP/TMP for scratch files). */
+    public const OS_ENV_ALLOWLIST = ['SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'PATH', 'PATHEXT', 'COMSPEC',
+        'APPDATA', 'LOCALAPPDATA', 'USERPROFILE', 'HOME', 'LANG', 'LC_ALL', 'TZ'];
+
+    /**
+     * The complete environment for a PostgreSQL tool: an explicit allowlist, nothing else.
+     *
+     * Symfony Process merges inherited variables (getenv() ∩ $_SERVER, plus $_ENV, which holds every .env key)
+     * into the child unless a name is set to false. Two problems follow: under `php artisan serve` on Windows
+     * $_SERVER holds request data, so SYSTEMROOT/TEMP/PATH were dropped and libpq failed with an empty
+     * "pg_dump: error:"; and every Laravel secret (APP_KEY, DB_PASSWORD, MAIL_PASSWORD, AWS_*) was passed on.
+     * Here the allowlisted OS values are copied from the real process environment, $pg adds the connection
+     * settings, and every other inherited name is set to false so Symfony removes it.
+     *
+     * @param  array<string,string>  $pg  PostgreSQL variables to pass (e.g. PGPASSWORD, PGSSLMODE)
+     * @return array<string,string|false>
+     */
+    public static function toolEnv(array $pg = []): array
     {
+        $os = getenv();
         $env = [];
-        if (!empty($cfg['password'])) {
-            $env['PGPASSWORD'] = (string) $cfg['password'];
+
+        // 1. Remove everything a child would otherwise inherit
+        $inherited = array_merge(array_keys($os), array_keys($_ENV), array_keys(array_filter($_SERVER, 'is_string')));
+        foreach ($inherited as $name) {
+            $name = (string) $name;
+            if ($name !== '' && !str_contains($name, '=')) {
+                $env[$name] = false;
+            }
         }
-        if (!empty($cfg['sslmode'])) {
-            $env['PGSSLMODE'] = (string) $cfg['sslmode'];
+
+        // 2. Re-allow the OS basics, using the real process values (matched case-insensitively for Windows)
+        foreach (self::OS_ENV_ALLOWLIST as $wanted) {
+            foreach ($os as $key => $value) {
+                if (strcasecmp((string) $key, $wanted) === 0) {
+                    unset($env[$key]);
+                    if ($value !== '') {
+                        $env[$key] = $value;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // 3. PostgreSQL connection settings
+        foreach ($pg as $key => $value) {
+            foreach (array_keys($env) as $existing) {
+                if (strcasecmp((string) $existing, (string) $key) === 0) {
+                    unset($env[$existing]);
+                }
+            }
+            $env[$key] = (string) $value;
         }
 
         return $env;
+    }
+
+    private function envFor(array $cfg): array
+    {
+        $pg = [];
+        if (!empty($cfg['password'])) {
+            $pg['PGPASSWORD'] = (string) $cfg['password'];
+        }
+        if (!empty($cfg['sslmode'])) {
+            $pg['PGSSLMODE'] = (string) $cfg['sslmode'];
+        }
+
+        return self::toolEnv($pg);
     }
 
     private function run(array $command, array $env): void
@@ -259,8 +316,27 @@ class DatabaseBackupService
         }
 
         if (!$process->isSuccessful()) {
-            $message = BackupRedactor::redact(trim($process->getErrorOutput() ?: $process->getOutput()));
+            $message = BackupRedactor::redact(self::readableOutput($process->getErrorOutput() ?: $process->getOutput()));
+            if ($message === '') {
+                $message = 'exit code ' . $process->getExitCode();
+            }
             throw new RuntimeException(basename($command[0]) . ' failed: ' . mb_substr($message, 0, 500));
         }
+    }
+
+    /**
+     * Makes tool output safe to store and show: valid UTF-8 (Windows builds print localised messages in the
+     * system code page), no control characters, and multi-line output joined so no part of the reason is lost.
+     */
+    private static function readableOutput(string $raw): string
+    {
+        if (!mb_check_encoding($raw, 'UTF-8')) {
+            $converted = @mb_convert_encoding($raw, 'UTF-8', 'Windows-1252');
+            $raw = is_string($converted) ? $converted : mb_scrub($raw, 'UTF-8');
+        }
+        $raw = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $raw) ?? $raw;
+        $lines = array_filter(array_map('trim', preg_split('/\R/u', $raw) ?: []), fn ($l) => $l !== '');
+
+        return implode(' | ', $lines);
     }
 }

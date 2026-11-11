@@ -191,27 +191,4 @@ test.describe('Settings Management End-to-End Suite', () => {
         // CheckRole redirects cashier to their dashboard
         await expect(page).toHaveURL(/\/cashier\/dashboard/);
     });
-
-    test('11. Admin Backup generation button downloads JSON backup', async ({ page }) => {
-        await loginAsAdmin(page);
-        await page.goto('/admin/settings');
-
-        const downloadPromise = page.waitForEvent('download');
-        await page.click('#btn_create_backup');
-        const download = await downloadPromise;
-
-        expect(download.suggestedFilename()).toMatch(/bakery_backup_.*\.json/);
-    });
-
-    test('12. Restore requires confirmation checkbox', async ({ page }) => {
-        await loginAsAdmin(page);
-        await page.goto('/admin/settings');
-
-        const checkbox = page.locator('#checkbox_confirm_restore');
-        await expect(checkbox).not.toBeChecked();
-
-        // Restore button should require confirm checkbox before submission
-        const isRequired = await checkbox.getAttribute('required');
-        expect(isRequired).not.toBeNull();
-    });
 });

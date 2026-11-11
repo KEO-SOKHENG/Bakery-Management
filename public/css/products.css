@@ -1394,3 +1394,156 @@ body.dark-mode .product-status-btn-group {
     border-color: #cbd5e1;
     color: #334155;
 }
+
+/* ==========================================================================
+   Mobile Product Cards (<=767px) - compact horizontal layout
+   ========================================================================== */
+@media (max-width: 767px) {
+    .products-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+
+    .product-card {
+        display: grid !important;
+        grid-template-columns: 60px minmax(0, 1fr);
+        grid-template-areas:
+            "visual main"
+            "visual header"
+            "tags tags"
+            "footer footer";
+        column-gap: 0.8rem;
+        row-gap: 0.35rem;
+        align-items: center;
+        min-height: 0 !important;
+        padding: 0.9rem !important;
+        border-radius: 16px !important;
+    }
+
+    .product-card:hover { transform: none; }
+
+    .product-card-visual-wrap {
+        grid-area: visual;
+        margin: 0 !important;
+        align-self: start;
+    }
+
+    .product-card-visual,
+    .product-card-visual img {
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 14px !important;
+    }
+
+    .product-card-main-info {
+        grid-area: main;
+        text-align: left !important;
+        margin: 0 !important;
+        min-width: 0;
+    }
+
+    .product-card-title {
+        font-size: 0.95rem !important;
+        margin: 0 0 0.1rem !important;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+    }
+
+    .product-card-sku-code { font-size: 0.7rem !important; }
+
+    .product-card-header {
+        grid-area: header;
+        justify-content: flex-start !important;
+        margin: 0 !important;
+        flex-wrap: wrap;
+    }
+
+    .product-category-chip,
+    .product-status-pill {
+        font-size: 0.64rem !important;
+        padding: 0.15rem 0.5rem !important;
+    }
+
+    .product-card-tags-area {
+        grid-area: tags;
+        margin: 0.2rem 0 0 !important;
+        min-height: 0 !important;
+    }
+
+    .product-card-tags-area:not(:has(*)) { display: none; }
+
+    .product-meta-pill { font-size: 0.7rem !important; padding: 0.25rem 0.55rem !important; }
+
+    .product-card-footer {
+        grid-area: footer;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0.4rem !important;
+        padding-top: 0.65rem !important;
+        gap: 0.5rem !important;
+    }
+
+    .product-card-pricing-row {
+        gap: 0.55rem;
+        justify-content: flex-start !important;
+    }
+
+    .product-price-val { font-size: 1.05rem !important; }
+
+    .product-stock-tag {
+        font-size: 0.68rem !important;
+        padding: 0.18rem 0.55rem !important;
+        white-space: nowrap;
+    }
+
+    .product-card-actions-row .btn-icon-action {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+/* ==========================================================================
+   iPad Mini (768–1023px): 3 compact product cards per row
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .products-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    .products-grid .product-card {
+        min-width: 0 !important;
+        padding: 0.75rem !important;
+    }
+
+    .products-grid .product-card-header {
+        gap: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    .products-grid .product-card-visual {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    .products-grid .product-card-title {
+        font-size: 0.88rem !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .products-grid .product-card-sku-code {
+        font-size: 0.68rem !important;
+    }
+
+    .products-grid .product-card-tags-area:empty {
+        display: none !important;
+    }
+
+    .products-grid .product-card-pricing-row {
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+}

@@ -610,7 +610,7 @@
                             <div style="max-width: 50%;">
                                 <x-select name="language" id="language_select" data-styled-select label="System Language" label-key="system_language" :disabled="!$canManage">
                                     <option value="EN" {{ strtoupper($settings['language'] ?? 'EN') === 'EN' ? 'selected' : '' }}>English</option>
-                                    <option value="KM" {{ strtoupper($settings['language'] ?? '') === 'KM' ? 'selected' : '' }}>Khmer (ភាសាខ្មែរ)</option>
+                                    <option value="KM" {{ strtoupper($settings['language'] ?? '') === 'KM' ? 'selected' : '' }}>ភាសាខ្មែរ</option>
                                 </x-select>
                             </div>
                         </div>
@@ -767,7 +767,7 @@
                                 </div>
                                 <div class="bkx-header-text">
                                     <h2 class="bkx-title" data-lang-key="system_backup">Backup &amp; Restore</h2>
-                                    <p class="bkx-subtitle">Manage your database backups and restore when needed.</p>
+                                    <p class="bkx-subtitle">Create backups and safely restore your database.</p>
                                 </div>
                             </div>
 
@@ -789,14 +789,14 @@
 
                             <!-- Actions -->
                             <div class="bkx-actions" id="bk_create_card">
-                                <div class="bkx-action">
+                                <div class="bkx-action is-primary">
                                     <span class="bkx-action-icon is-orange"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg></span>
                                     <div class="bkx-action-body">
                                         <strong>Create Backup</strong>
-                                        <span>Create a new full backup of your database.</span>
+                                        <span>Make a new backup of your database.</span>
                                         <button type="button" class="bkx-btn-primary" id="btn_create_full_backup" title="Saved to {{ app(\App\Services\Backup\BackupHistoryService::class)->destinationLabel() }}. Encrypted and verified automatically.">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            <span>Create Full Backup</span>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                            <span>Create Backup Now</span>
                                         </button>
                                     </div>
                                     <ul class="bk-components" id="bk_components" hidden>
@@ -809,167 +809,81 @@
                                     <p class="bk-message" id="bk_create_message" hidden></p>
                                 </div>
 
-                                <div class="bkx-action">
-                                    <span class="bkx-action-icon is-rust"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg></span>
+                                <div class="bkx-action is-restore">
+                                    <span class="bkx-action-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg></span>
                                     <div class="bkx-action-body">
                                         <strong>Restore Backup</strong>
-                                        <span>Restore your database from a backup file.</span>
+                                        <span>Restore from a backup file.</span>
                                         <button type="button" class="bkx-btn-secondary" id="bkx_open_restore">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                            <span>Restore from Backup</span>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            <span>Select Backup &amp; Restore</span>
                                         </button>
                                     </div>
                                 </div>
+
                             </div>
 
                             <!-- Backup History -->
                             <div class="bkx-section-head">
-                                <h3>Backup History</h3>
+                                <h3 class="bkx-history-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg><span>Backup History</span></h3>
                                 <button type="button" class="bkx-viewall" id="bkx_view_all" hidden>
-                                    <span id="bk_history_destination">View All Backups</span>
+                                    <span id="bk_history_destination">View All</span>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                                 </button>
                             </div>
                             <div class="bkx-table-card">
                                 <div class="bkx-table-head" aria-hidden="true">
-                                    <span>Backup Name</span><span>Type</span><span>Size</span><span>Date &amp; Time</span><span>Status</span><span>Actions</span>
+                                    <span>#</span><span>Backup File</span><span>Size</span><span>Date &amp; Time</span><span>Status</span><span>Actions</span>
                                 </div>
                                 <div id="bk_history_list">
                                     <div class="storage-empty">Loading...</div>
                                 </div>
                             </div>
 
-                            <!-- Advanced Details -->
-                            <details class="bkx-advanced" id="bkx_advanced">
-                                <summary>
-                                    <span class="bkx-advanced-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                                    <span class="bkx-advanced-text"><strong>Advanced Details</strong><span>Backup settings, production restore authorization, and system information.</span></span>
-                                    <span class="bkx-advanced-chevron"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-                                </summary>
-                                <div class="bkx-advanced-body" id="bk_restore_section">
-
-
-                            <!-- 3. Restore System -->
-                            <div class="storage-section-head">
-                                <h3>Restore System</h3>
-                                <span>Verify first, rehearse in a sandbox, never overwrite by accident</span>
-                            </div>
-                            <div class="sp-card bk-steps">
-
-                                <div class="bk-step" data-step="1">
-                                    <div class="bk-step-head"><span class="bk-step-no">1</span><strong>Select Backup</strong></div>
-                                    <div class="bk-step-body">
-                                        <div class="apple-field-wrap">
-                                            <label class="apple-field-label" for="bk_select_existing">From history</label>
-                                            <select id="bk_select_existing" class="apple-input"><option value="">Choose a saved backup</option></select>
+                            <!-- Restore pop-up (opened by "Select Backup & Restore") -->
+                            <div class="bkr-modal" id="bkr_modal" hidden>
+                                <div class="bkr-backdrop" data-bkr-close></div>
+                                <div class="bkr-dialog" role="dialog" aria-modal="true" aria-labelledby="bkr_title">
+                                    <div class="bkr-head">
+                                        <span class="bkr-head-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/><polyline points="12 7 12 12 15 14"/></svg></span>
+                                        <div class="bkr-head-text">
+                                            <h3 id="bkr_title">Restore Backup</h3>
+                                            <p>Verify the package, then rehearse it in a sandbox.</p>
                                         </div>
-                                        <div class="apple-field-wrap">
-                                            <label class="apple-field-label" for="bk_upload_file">Or upload a package (.bkp)</label>
-                                            <input type="file" id="bk_upload_file" class="apple-input" accept=".bkp">
-                                        </div>
+                                        <button type="button" class="bkr-close" data-bkr-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                                     </div>
-                                </div>
 
-                                <div class="bk-step" data-step="2">
-                                    <div class="bk-step-head"><span class="bk-step-no">2</span><strong>Verify Package</strong></div>
-                                    <div class="bk-step-body">
-                                        <button type="button" class="btn-apple-secondary" id="btn_bk_verify">Verify Package</button>
+                                    <div class="bkr-body">
+                                        <label class="bkr-label" for="bk_select_existing">From history</label>
+                                        <select id="bk_select_existing" class="apple-input bkr-select"><option value="">Choose a saved backup</option></select>
+
+                                        <div class="bkr-or"><span>or</span></div>
+
+                                        <div class="sui-dropzone bkr-dropzone">
+                                            <input type="file" id="bk_upload_file" class="apple-input sui-dropzone-input" accept=".bkp" aria-label="Upload a package (.bkp)">
+                                            <span class="sui-dropzone-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg></span>
+                                            <span class="sui-dropzone-text"><strong>Upload a package</strong><span class="sui-dropzone-name" data-empty="Choose or drop a .bkp file">Choose or drop a .bkp file</span></span>
+                                            <span class="sui-dropzone-badge">.BKP</span>
+                                        </div>
+
                                         <ul class="bk-checks" id="bk_verify_steps" hidden></ul>
-                                    </div>
-                                </div>
-
-                                <div class="bk-step" data-step="3">
-                                    <div class="bk-step-head"><span class="bk-step-no">3</span><strong>Preview</strong></div>
-                                    <div class="bk-step-body">
-                                        <p class="bk-muted" id="bk_preview_empty">Verify a package to see what it contains. Nothing is restored in this step.</p>
+                                        <p class="bk-muted bkr-hint" id="bk_preview_empty">Verify a package to see what it contains. Nothing is restored yet.</p>
                                         <dl class="storage-advanced-list bk-preview" id="bk_preview" hidden></dl>
-                                    </div>
-                                </div>
-
-                                <div class="bk-step" data-step="4">
-                                    <div class="bk-step-head"><span class="bk-step-no">4</span><strong>Restore to Sandbox</strong></div>
-                                    <div class="bk-step-body">
-                                        <p class="bk-muted">A rehearsal in a separate test database and test folder. Your live data and files are not touched.</p>
-                                        <button type="button" class="btn-apple-secondary" id="btn_bk_sandbox" disabled>Restore to Sandbox</button>
                                         <ul class="bk-checks" id="bk_sandbox_steps" hidden></ul>
-                                    </div>
-                                </div>
 
-                                <div class="bk-step is-locked" data-step="5">
-                                    <div class="bk-step-head"><span class="bk-step-no">5</span><strong>Production Restore Authorization</strong><em class="bk-pill is-fail">Disabled</em></div>
-                                    <div class="bk-step-body">
-                                        <p class="bk-muted">Restoring into the live system is turned off. It needs separate, explicit approval from the system owner.</p>
-                                        <ul class="bk-checks" id="bk_gate_list"></ul>
-                                        <button type="button" class="btn-apple-danger" id="btn_bk_production" disabled>Restore to Production</button>
+                                        <p class="bkr-locked"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Restoring to the live system needs separate approval from the system owner.</span></p>
+                                    </div>
+
+                                    <div class="bkr-actions">
+                                        <button type="button" class="bkr-btn bkr-btn-ghost" id="btn_bk_verify"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg><span>Verify Package</span></button>
+                                        <button type="button" class="bkr-btn bkr-btn-primary" id="btn_bk_sandbox" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span>Restore to Sandbox</span></button>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- 4. Settings Backup -->
-                            <div class="storage-section-head">
-                                <h3>Settings Backup</h3>
-                                <span>A small JSON file with your settings only</span>
-                            </div>
-                            <div class="sui-action-row">
-                                <div class="sui-action-text">
-                                    <strong>Settings backup file</strong>
-                                    <span>Store details, tax rates and preferences. No passwords or secrets.</span>
-                                </div>
-                                <form action="{{ route('admin.settings.backup') }}" method="POST" id="form_backup" style="margin: 0;">
-                                    @csrf
-                                    <button type="submit" class="btn-apple-accent" id="btn_create_backup">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                        <span data-lang-key="backup_download">Download Backup</span>
-                                    </button>
-                                </form>
-                            </div>
 
-                            <form action="{{ route('admin.settings.restore') }}" method="POST" enctype="multipart/form-data" id="form_restore" class="sui-restore-box">
-                                @csrf
-                                <div class="sui-warning">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                    <div>
-                                        <strong>Restoring settings replaces your current settings.</strong>
-                                        <span>Store details, tax, receipt and alert settings will be overwritten by the file. This cannot be undone.</span>
-                                    </div>
-                                </div>
-
-                                <div class="apple-field-wrap">
-                                    <label class="apple-field-label" for="input_backup_file" data-lang-key="restore_file">Backup file (.json)</label>
-                                    <input type="file" name="backup_file" id="input_backup_file" accept=".json,application/json" class="apple-input" required>
-                                </div>
-
-                                <label class="sui-confirm-check" for="checkbox_confirm_restore">
-                                    <input type="checkbox" name="confirm_restore" id="checkbox_confirm_restore" value="1" required>
-                                    <span data-lang-key="restore_warning">I understand my current settings will be replaced.</span>
-                                </label>
-
-                                <div class="sui-restore-actions">
-                                    <button type="submit" class="btn-apple-danger" id="btn_restore_settings">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span data-lang-key="restore_now">Restore Settings</span>
-                                    </button>
-                                </div>
-                            </form>
-                                </div>
-                            </details>
                         </div>
 
-                        <!-- Restore confirmation dialog -->
-                        <div class="sui-modal" id="restore_confirm_modal" hidden>
-                            <div class="sui-modal-backdrop" data-close="1"></div>
-                            <div class="sui-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="restore_confirm_title">
-                                <div class="sui-modal-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                </div>
-                                <h3 id="restore_confirm_title">Restore these settings?</h3>
-                                <p>Your current settings will be replaced with the contents of <strong id="restore_confirm_filename">the selected file</strong>. This cannot be undone.</p>
-                                <div class="sui-modal-actions">
-                                    <button type="button" class="btn-apple-secondary" id="btn_restore_cancel">Cancel</button>
-                                    <button type="button" class="btn-apple-danger" id="btn_restore_confirm">Yes, restore</button>
-                                </div>
-                            </div>
-                        </div>
                     </section>
                 @endif
             </div>

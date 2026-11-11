@@ -90,14 +90,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/restore', [SettingController::class, 'restoreBackup'])->name('settings.restore');
 
         // Full Backup & Restore (database + media + settings). Production restore is disabled.
-        Route::get('/backups', [BackupController::class, 'index'])->middleware('throttle:30,1')->name('backups.index');
-        Route::post('/backups', [BackupController::class, 'store'])->middleware('throttle:3,1')->name('backups.store');
-        Route::get('/backups/production-gate', [BackupController::class, 'productionGate'])->middleware('throttle:30,1')->name('backups.productionGate');
-        Route::post('/backups/verify', [BackupController::class, 'verify'])->middleware('throttle:6,1')->name('backups.verify');
-        Route::post('/backups/production-restore', [BackupController::class, 'productionRestore'])->middleware('throttle:6,1')->name('backups.productionRestore');
-        Route::get('/backups/{id}/status', [BackupController::class, 'status'])->whereUuid('id')->middleware('throttle:120,1')->name('backups.status');
+        Route::get('/backups', [BackupController::class, 'index'])->middleware('throttle:30,1,backups-index')->name('backups.index');
+        Route::post('/backups', [BackupController::class, 'store'])->middleware('throttle:3,1,backups-store')->name('backups.store');
+        Route::get('/backups/production-gate', [BackupController::class, 'productionGate'])->middleware('throttle:30,1,backups-gate')->name('backups.productionGate');
+        Route::post('/backups/verify', [BackupController::class, 'verify'])->middleware('throttle:6,1,backups-verify')->name('backups.verify');
+        Route::post('/backups/production-restore', [BackupController::class, 'productionRestore'])->middleware('throttle:6,1,backups-production-restore')->name('backups.productionRestore');
+        Route::get('/backups/{id}/status', [BackupController::class, 'status'])->whereUuid('id')->middleware('throttle:120,1,backups-status')->name('backups.status');
         Route::get('/backups/{id}/download', [BackupController::class, 'download'])->whereUuid('id')->middleware('signed')->name('backups.download');
-        Route::post('/backups/{id}/sandbox-restore', [BackupController::class, 'sandboxRestore'])->whereUuid('id')->middleware('throttle:3,1')->name('backups.sandboxRestore');
+        Route::post('/backups/{id}/sandbox-restore', [BackupController::class, 'sandboxRestore'])->whereUuid('id')->middleware('throttle:3,1,backups-sandbox')->name('backups.sandboxRestore');
 
         // Orders Purge & Data Maintenance (Admin Exclusive)
         Route::get('/orders/purge-preview', [OrderController::class, 'purgePreview'])->name('orders.purgePreview');

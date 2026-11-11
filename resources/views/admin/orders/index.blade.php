@@ -95,12 +95,17 @@
 
     <!-- Header Actions -->
     <div class="orders-header" style="justify-content: flex-end;">
+        <div class="orders-mobile-title">
+            <h3>Recent Orders</h3>
+            <p>Real-time bakery transactions</p>
+        </div>
         <!-- Action Buttons -->
         <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
             @if(Auth::user() && Auth::user()->isAdmin())
                 <button type="button" class="btn btn-purge-orders" id="btn_open_purge_modal" onclick="openPurgeModal()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                    <span>Clear All Orders</span>
+                    <span class="purge-label-full">Clear All Orders</span>
+                    <span class="purge-label-short">Clear All</span>
                 </button>
             @endif
         </div>
@@ -168,7 +173,7 @@
                         ];
                     @endphp
                     <tr id="order_row_{{ $order->id }}" data-status="{{ $normStatus }}" data-order-code="{{ $order->order_number }}" class="order-clickable-row" onclick="openOrderDetailModal(this)" data-order='@json($orderModalData)'>
-                        <td>
+                        <td class="td-order">
                             <span class="order-number-pill">
                                 #{{ $order->id }}
                             </span>
@@ -178,7 +183,7 @@
                                 </div>
                             @endif
                         </td>
-                        <td>
+                        <td class="td-customer">
                             <div style="font-weight: 700; color: var(--text-title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $order->customer_name }}">
                                 {{ $order->customer_name }}
                             </div>
@@ -186,7 +191,7 @@
                                 <div style="font-size: 0.75rem; color: #64748b;">{{ $order->customer->phone }}</div>
                             @endif
                         </td>
-                        <td>
+                        <td class="td-items">
                             <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $order->items_summary }}">
                                 {{ $order->items_summary }}
                             </div>
@@ -194,7 +199,7 @@
                                 {{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }}
                             </div>
                         </td>
-                        <td>
+                        <td class="td-total">
                             <div style="font-weight: 800; font-size: 0.925rem; color: var(--text-title);">
                                 {{ $currency }}{{ number_format($order->total, 2) }}
                             </div>
@@ -204,12 +209,12 @@
                                 </span>
                             </div>
                         </td>
-                        <td>
+                        <td class="td-status">
                             {!! $statusBadge !!}
                         </td>
                         <td class="col-date" style="font-size: 0.8rem; color: #64748b; white-space: nowrap;">
                             <div>{{ $order->created_at ? $order->created_at->format('M d, Y') : 'N/A' }}</div>
-                            <div style="font-size: 0.725rem;">{{ $order->created_at ? $order->created_at->format('h:i A') : '' }}</div>
+                            <div class="date-time" style="font-size: 0.725rem;">{{ $order->created_at ? $order->created_at->format('h:i A') : '' }}</div>
                         </td>
                     </tr>
                 @empty

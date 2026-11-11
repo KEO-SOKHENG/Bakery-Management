@@ -79,7 +79,7 @@
 <div class="orders-container">
 
 <!-- KPI Metrics Grid (Exact Orders / Dashboard Page Style) -->
-<div class="dash-stat-row">
+<div class="dash-stat-row" id="ingredients_stat_row">
     <div class="stat-card">
         <div class="stat-icon-box orange">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
@@ -151,7 +151,7 @@
         @endphp
         <div class="supplier-filter-pill-card">
             <!-- Hidden native select for form submission & backward compatibility -->
-            <select name="supplier_id" id="supplier_select" style="display: none;">
+            <select name="supplier_id" id="supplier_select" style="display: none;" onchange="this.form.submit()">
                 <option value="all">All Suppliers</option>
                 @foreach($suppliers as $supplier)
                     <option value="{{ $supplier->id }}" {{ $currentSupplierId == $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
@@ -193,7 +193,6 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn" style="border-radius: 50px; padding: 0.45rem 1.35rem; font-weight: 700; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem;">Filter</button>
             @if(request()->filled('supplier_id') && request('supplier_id') !== 'all')
                 <a href="{{ route('admin.ingredients', request('stock_status') ? ['stock_status' => request('stock_status')] : []) }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-weight: 600; height: 34px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.825rem;">Clear</a>
             @endif
@@ -202,7 +201,7 @@
 
     <!-- Right: Action Buttons (Purchase Order & Add Ingredient) -->
     <div class="ingredients-action-group" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-        <button type="button" class="btn" id="btn_open_ingredient_modal" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #f59e0b; border: 1px solid #f59e0b; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);">
+        <button type="button" class="btn m-icon-btn" id="btn_open_ingredient_modal" title="Add Ingredient" aria-label="Add Ingredient" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #f59e0b; border: 1px solid #f59e0b; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Add Ingredient</span>
         </button>
@@ -234,8 +233,8 @@
                         $isOut = $qty <= 0;
                         $isLow = $qty > 0 && $qty <= $min;
                     @endphp
-                    <tr>
-                        <td>
+                    <tr class="ing-row">
+                        <td class="ing-name" data-label="Ingredient">
                             <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title, #ffffff);">
                                 {{ $ing->name }}
                             </div>
@@ -243,23 +242,23 @@
                                 In {{ $ing->recipes_count }} recipes | {{ $ing->purchase_order_items_count }} PO items
                             </div>
                         </td>
-                        <td>
+                        <td class="ing-stock" data-label="Stock">
                             <span class="ingredient-stock-qty {{ $isOut ? 'is-out' : ($isLow ? 'is-low' : '') }}" style="font-weight: 800; font-size: 1.05rem; {{ $isOut ? 'color: #ef4444;' : ($isLow ? 'color: #f59e0b;' : 'color: var(--text-title, #ffffff);') }}">
                                 {{ number_format($ing->quantity, 2) }}
                             </span>
                         </td>
-                        <td>
+                        <td class="ing-unit" data-label="Unit">
                             <span class="ingredient-unit-badge">
                                 {{ strtoupper($ing->unit) }}
                             </span>
                         </td>
-                        <td style="font-weight: 700; color: var(--text-title, #ffffff);">
+                        <td class="ing-cost" data-label="Cost" style="font-weight: 700; color: var(--text-title, #ffffff);">
                             ${{ number_format($ing->cost, 2) }}
                         </td>
-                        <td style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
+                        <td class="ing-min" data-label="Reorder Min" style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
                             {{ number_format($ing->minimum_quantity, 2) }} {{ $ing->unit }}
                         </td>
-                        <td>
+                        <td class="ing-supplier" data-label="Supplier">
                             @if($ing->supplier)
                                 <a href="{{ route('admin.suppliers.show', $ing->supplier->id) }}" class="ingredient-supplier-link">
                                     {{ $ing->supplier->name }}
@@ -268,10 +267,10 @@
                                 <span style="color: var(--text-muted, #a1a1aa); font-size: 0.85rem;">Unassigned</span>
                             @endif
                         </td>
-                        <td style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
+                        <td class="ing-expiry" data-label="Expiry" style="font-size: 0.85rem; color: var(--text-muted, #a1a1aa);">
                             {{ $ing->expiry_date ? $ing->expiry_date->format('M d, Y') : '—' }}
                         </td>
-                        <td>
+                        <td class="ing-status" data-label="Status">
                             @if($isOut)
                                 <span class="status-badge status-cancelled">Out of Stock</span>
                             @elseif($isLow)
@@ -280,7 +279,7 @@
                                 <span class="status-badge status-completed">In Stock</span>
                             @endif
                         </td>
-                        <td style="text-align: right;">
+                        <td class="ing-action" data-label="Action" style="text-align: right;">
                             <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4rem;">
                                 <button type="button" class="table-icon-btn btn-edit-ing" title="Edit Ingredient"
                                     data-id="{{ $ing->id }}"

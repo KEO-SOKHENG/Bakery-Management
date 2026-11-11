@@ -77,3 +77,39 @@ body.dark-mode .category-info h3 {
 body.dark-mode .category-info p {
     color: #a1a1aa;
 }
+
+/* ==========================================================================
+   iPad Mini (768–1023px): two category cards per row
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .categories-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    .categories-grid .category-card {
+        min-width: 0;
+        padding: 1rem 4.5rem 1rem 1rem !important;
+    }
+
+    .categories-grid .category-info h3 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* iPad Mini: the lone "All Categories" pill keeps its natural size */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .top-header-bar .header-toolbar-slot .period-pill-group:has(> .period-pill:only-child) {
+        display: inline-flex !important;
+        width: auto !important;
+        max-width: 100%;
+    }
+
+    .top-header-bar .header-toolbar-slot .period-pill-group > .period-pill:only-child {
+        flex: 0 0 auto !important;
+        padding-left: 1.1rem !important;
+        padding-right: 1.1rem !important;
+    }
+}

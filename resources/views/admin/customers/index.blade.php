@@ -104,9 +104,9 @@
     </div>
 
     <!-- 2. Action & Filter Toolbar Row (Exact Orders & Ingredients Style) -->
-    <div class="ingredients-toolbar-row" id="customers_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div class="ingredients-toolbar-row m-toolbar" id="customers_toolbar" style="margin-bottom: 0.75rem; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
         <!-- Left: Filters without toolbar search input -->
-        <form method="GET" action="{{ route('admin.customers.index') }}" id="customers_filter_form" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;">
+        <form method="GET" action="{{ route('admin.customers.index') }}" id="customers_filter_form" data-mfilter style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0;">
             @if(request('search'))
                 <input type="hidden" name="search" id="customer_search_input" value="{{ request('search') }}">
             @endif
@@ -127,7 +127,6 @@
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
 
-                <button type="submit" class="btn" style="border-radius: 50px; padding: 0.35rem 1rem; font-weight: 700; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.825rem;">Filter</button>
 
                 @if(request()->hasAny(['search', 'tier', 'status']) && (request('search') || (request('tier') && request('tier') !== 'all') || (request('status') && request('status') !== 'all')))
                     <a href="{{ route('admin.customers.index') }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.35rem 0.85rem; font-weight: 600; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">Clear</a>
@@ -137,7 +136,7 @@
 
         <!-- Right: Add Customer Button -->
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <button type="button" class="btn" id="btn_open_add_customer_modal" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
+            <button type="button" class="btn m-icon-btn" id="btn_open_add_customer_modal" title="{{ __('messages.add_customer') }}" aria-label="{{ __('messages.add_customer') }}" style="border-radius: 50px; height: 36px; padding: 0 1.15rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span data-lang-key="add_customer">{{ __('messages.add_customer') }}</span>
             </button>
@@ -170,9 +169,9 @@
                                 default => '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
                             };
                         @endphp
-                        <tr id="customer_row_{{ $customer->id }}">
+                        <tr id="customer_row_{{ $customer->id }}" class="cu-row">
                             <!-- Customer Name & Address -->
-                            <td>
+                            <td class="cu-name">
                                 <div style="display: flex; align-items: center; gap: 0.65rem;">
                                     <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #563020 0%, #ea580c 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);">
                                         {{ $initials }}
@@ -201,6 +200,7 @@
                                         >
                                             {{ $customer->name }}
                                         </button>
+                                        <span class="cu-inline-status status-badge {{ $customer->status === 'active' ? 'status-completed' : 'status-cancelled' }}">{{ ucfirst($customer->status) }}</span>
                                         <div style="font-size: 0.725rem; color: var(--text-muted, #71717a); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                             {{ $customer->address ?? 'No address registered' }}
                                         </div>
@@ -209,13 +209,13 @@
                             </td>
 
                             <!-- Contact Info -->
-                            <td>
+                            <td class="cu-contact">
                                 <div style="font-weight: 700; font-size: 0.875rem; color: var(--text-primary, #0f172a);">{{ $customer->phone ?? '—' }}</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted, #71717a);">{{ $customer->email ?? '—' }}</div>
                             </td>
 
                             <!-- Loyalty Points & Tier -->
-                            <td>
+                            <td class="cu-loyalty">
                                 <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                     <span class="tier-pill tier-{{ $tier }}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 2px 8px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
                                         {!! $tierSvg !!} <span>{{ strtoupper($tier) }}</span>
@@ -227,21 +227,21 @@
                             </td>
 
                             <!-- Orders -->
-                            <td>
+                            <td class="cu-orders">
                                 <span style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 6px;">
                                     {{ $customer->orders_count }} Orders
                                 </span>
                             </td>
 
                             <!-- Status -->
-                            <td>
+                            <td class="cu-status">
                                 <span class="status-badge {{ $customer->status === 'active' ? 'status-completed' : 'status-cancelled' }}">
                                     {{ ucfirst($customer->status) }}
                                 </span>
                             </td>
 
                             <!-- Actions -->
-                            <td style="text-align: right;">
+                            <td class="cu-actions" style="text-align: right;">
                                 <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4rem;">
                                     <!-- View Customer Profile & History Modal Button -->
                                     <button

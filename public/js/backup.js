@@ -77,7 +77,11 @@
         let data = {};
         try { data = await res.json(); } catch (e) { /* non-JSON */ }
         if (!res.ok && !data.conditions) {
-            throw new Error(data.message || ('Request failed (' + res.status + ')'));
+            const err = new Error(data.message || ('Request failed (' + res.status + ')'));
+            err.status = res.status;
+            const retry = parseInt(res.headers.get('Retry-After') || '', 10);
+            err.retryAfter = Number.isFinite(retry) && retry > 0 ? retry : null;
+            throw err;
         }
         return data;
     }
@@ -113,7 +117,7 @@
 
     function statusPill(r) {
         if (r.status === 'running') return '<em class="bk-pill is-run">Running</em>';
-        if (r.status === 'failed') return '<em class="bk-pill is-fail">Failed</em>';
+        if (r.status === 'failed') return '<em class="bk-pill is-fail" title="' + esc(r.error || 'Backup failed') + '">Failed</em>';
         if (r.verified && r.warnings && r.warnings.length) return '<em class="bk-pill is-warn" title="' + esc(r.warnings.join(' ')) + '">Verified · warnings</em>';
         if (r.verified) return '<em class="bk-pill is-ok">Verified</em>';
         return '<em class="bk-pill is-pending">Not verified</em>';
@@ -127,7 +131,7 @@
             if (viewAll) viewAll.title = data.destination || '';
             allRows = list;
 
-            el.select.innerHTML = '<option value="">Choose a saved backup</option>' + list
+            if (el.select) el.select.innerHTML = '<option value="">Choose a saved backup</option>' + list
                 .filter(r => r.status === 'completed' && r.verified)
                 .map(r => '<option value="' + esc(r.id) + '">' + esc(when(r.created_at)) + ' · ' + esc(bytes(r.package_size)) + '</option>').join('');
 
@@ -143,7 +147,7 @@
 
             if (viewAll) {
                 viewAll.hidden = list.length <= HISTORY_PREVIEW;
-                el.destination.textContent = showAll ? 'Show Less' : 'View All Backups';
+                el.destination.textContent = showAll ? 'Show Less' : 'View All';
             }
             const rows = showAll ? list : list.slice(0, HISTORY_PREVIEW);
 
@@ -155,7 +159,7 @@
                     : '<span class="bkx-dl is-off">' + (r.status === 'running' ? 'In progress' : 'Unavailable') + '</span>';
                 const rehearsal = r.rehearsal && !r.rehearsal.ok ? '<span class="bk-tag is-fail">Sandbox failed</span>' : '';
                 const usable = r.status === 'completed' && r.verified;
-                const more = usable ? '<button type="button" class="bkx-more" data-use-backup="' + esc(r.id) + '" title="Use this backup for restore" aria-label="Use this backup for restore">&middot;&middot;&middot;</button>' : '';
+                const more = (usable && el.select) ? '<button type="button" class="bkx-more" data-use-backup="' + esc(r.id) + '" title="Use this backup for restore" aria-label="Use this backup for restore">&middot;&middot;&middot;</button>' : '';
                 return '<div class="bkx-row">' +
                     '<div class="bkx-name" title="' + esc(name) + '">' + dbIcon + '<span>' + esc(name) + '</span></div>' +
                     '<span class="bkx-chip">' + type + '</span>' +
@@ -196,20 +200,85 @@
         set('bkx_banner_badge', badge);
     }
 
+    function setLabel(btn, text) {
+        if (!btn) return;
+        (btn.querySelector('span') || btn).textContent = text;
+    }
+
+    // ── Restore pop-up ──
+    const restoreModal = $('bkr_modal');
+    let lastFocus = null;
+
+    function closeRestore() {
+        if (!restoreModal || restoreModal.hidden) return;
+        restoreModal.hidden = true;
+        document.body.classList.remove('bkr-open');
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
     function openRestore(backupId) {
-        const details = $('bkx_advanced');
-        if (details) details.open = true;
+        if (!restoreModal) return;
+        lastFocus = document.activeElement;
+        restoreModal.hidden = false;
+        document.body.classList.add('bkr-open');
         if (backupId) {
             el.select.value = backupId;
-            if (el.select.value === backupId) el.upload.value = '';
+            if (el.select.value === backupId) { el.upload.value = ''; el.upload.dispatchEvent(new Event('change', { bubbles: true })); }
         }
-        const target = $('bk_restore_section');
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        (el.select || restoreModal).focus();
+    }
+
+    if (restoreModal) {
+        // Live under <body> so blurred/transformed settings containers cannot trap the fixed overlay
+        document.body.appendChild(restoreModal);
+        restoreModal.addEventListener('click', e => { if (e.target.closest('[data-bkr-close]')) closeRestore(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRestore(); });
     }
 
     // ── Create full backup ──
-    async function createBackup() {
+    let creating = false;
+    let cooldownTimer = null;
+
+    function setCreateBusy(busy) {
+        el.btnCreate.disabled = busy;
+        el.btnCreate.classList.toggle('is-busy', busy);
+        el.btnCreate.setAttribute('aria-busy', busy ? 'true' : 'false');
+        setLabel(el.btnCreate, busy ? 'Creating backup...' : 'Create Backup Now');
+    }
+
+    function showCreateMessage(text, ok) {
+        el.createMsg.hidden = false;
+        el.createMsg.className = 'bk-message ' + (ok ? 'is-ok' : 'is-fail');
+        el.createMsg.textContent = text;
+    }
+
+    // Keeps the button locked until the server's rate-limit window has passed
+    function startCooldown(seconds) {
+        clearInterval(cooldownTimer);
+        let left = Math.max(1, Math.ceil(seconds));
         el.btnCreate.disabled = true;
+        setLabel(el.btnCreate, 'Try again in ' + left + 's');
+        cooldownTimer = setInterval(() => {
+            left--;
+            if (left <= 0) {
+                clearInterval(cooldownTimer);
+                cooldownTimer = null;
+                setCreateBusy(false);
+                return;
+            }
+            setLabel(el.btnCreate, 'Try again in ' + left + 's');
+        }, 1000);
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    async function createBackup() {
+        // One backup at a time: ignore extra clicks while one is starting or running
+        if (creating || cooldownTimer) return;
+        creating = true;
+        let retryAfter = null;
+
+        setCreateBusy(true);
         el.components.hidden = false;
         el.createMsg.hidden = true;
         ['database', 'media', 'settings', 'package', 'verification'].forEach(n => setComponent(n, 'pending'));
@@ -220,28 +289,48 @@
             let done = false;
             let guard = 0;
             while (!done && guard < 1800) {
-                await new Promise(r => setTimeout(r, 1500));
+                await wait(1500);
                 guard++;
                 let s;
-                try { s = await api(urls.status(id)); } catch (e) { continue; }
+                try {
+                    s = await api(urls.status(id));
+                } catch (e) {
+                    // Status checks are rate-limited too: back off instead of hammering the server
+                    if (e.status === 429) await wait((e.retryAfter || 5) * 1000);
+                    continue;
+                }
                 const p = s.progress || (s.record || {});
                 renderComponents(p.components || (s.record && s.record.components));
                 const status = (s.record && s.record.status) || p.status;
                 if (status === 'completed' || status === 'failed') {
                     done = true;
                     const ok = status === 'completed' && ((s.record && s.record.verified) || p.verified);
-                    el.createMsg.hidden = false;
-                    el.createMsg.className = 'bk-message ' + (ok ? 'is-ok' : 'is-fail');
-                    el.createMsg.textContent = ok ? 'Backup created and verified.' : ('Backup failed: ' + ((s.record && s.record.error) || p.error || 'unknown error'));
+                    showCreateMessage(ok ? 'Backup created and verified.'
+                        : ('Backup failed: ' + ((s.record && s.record.error) || p.error || 'unknown error')), ok);
                     toast(ok ? 'Full backup created and verified' : 'Full backup failed');
                 }
             }
+            if (!done) {
+                showCreateMessage('The backup is still running in the background. Check Backup History in a moment.', false);
+            }
         } catch (err) {
-            el.createMsg.hidden = false;
-            el.createMsg.className = 'bk-message is-fail';
-            el.createMsg.textContent = err.message || 'Could not start the backup.';
+            if (err.status === 429) {
+                retryAfter = err.retryAfter || 60;
+                showCreateMessage('Too many backup requests. Please wait ' + retryAfter + ' seconds before creating another backup.', false);
+            } else if (err.status === 409) {
+                showCreateMessage('A backup is already running. Wait for it to finish, then try again.', false);
+            } else {
+                showCreateMessage(err.message || 'Could not start the backup.', false);
+            }
+            // Nothing was started, so hide the empty progress tiles
+            el.components.hidden = true;
         } finally {
-            el.btnCreate.disabled = false;
+            creating = false;
+            if (retryAfter) {
+                startCooldown(retryAfter);
+            } else {
+                setCreateBusy(false);
+            }
             loadHistory();
         }
     }
@@ -287,7 +376,7 @@
         }
 
         el.btnVerify.disabled = true;
-        el.btnVerify.textContent = 'Verifying...';
+        setLabel(el.btnVerify, 'Verifying...');
         try {
             const data = await api(urls.verify, { method: 'POST', body: form });
             renderChecks(el.verifySteps, data.steps || []);
@@ -304,14 +393,14 @@
             renderChecks(el.verifySteps, [{ name: 'Verification', status: 'fail', message: err.message }]);
         } finally {
             el.btnVerify.disabled = false;
-            el.btnVerify.textContent = 'Verify Package';
+            setLabel(el.btnVerify, 'Verify Package');
         }
     }
 
     async function sandboxRestore() {
         if (!verifiedBackupId) return;
         el.btnSandbox.disabled = true;
-        el.btnSandbox.textContent = 'Rehearsing...';
+        setLabel(el.btnSandbox, 'Rehearsing...');
         try {
             const data = await api(urls.sandbox(verifiedBackupId), { method: 'POST' });
             renderChecks(el.sandboxSteps, (data.report && data.report.steps) || []);
@@ -321,7 +410,7 @@
             renderChecks(el.sandboxSteps, [{ name: 'Sandbox restore', status: 'fail', message: err.message }]);
         } finally {
             el.btnSandbox.disabled = false;
-            el.btnSandbox.textContent = 'Restore to Sandbox';
+            setLabel(el.btnSandbox, 'Restore to Sandbox');
         }
     }
 
@@ -333,19 +422,25 @@
     }
 
     el.btnCreate.addEventListener('click', createBackup);
-    el.btnVerify.addEventListener('click', verifyPackage);
-    el.btnSandbox.addEventListener('click', sandboxRestore);
-    el.upload.addEventListener('change', () => { if (el.upload.files.length) el.select.value = ''; });
-    el.select.addEventListener('change', () => { if (el.select.value) el.upload.value = ''; });
+    // Restore steps are optional on the page: only wire them when present
+    const hasRestore = !!(el.select && el.upload && el.btnVerify && el.btnSandbox);
+    if (hasRestore) {
+        el.btnVerify.addEventListener('click', verifyPackage);
+        el.btnSandbox.addEventListener('click', sandboxRestore);
+        el.upload.addEventListener('change', () => { if (el.upload.files.length) el.select.value = ''; });
+        el.select.addEventListener('change', () => { if (el.select.value) { el.upload.value = ''; el.upload.dispatchEvent(new Event('change', { bubbles: true })); } });
+    }
 
     if (viewAll) viewAll.addEventListener('click', () => { showAll = !showAll; loadHistory(); });
     const btnOpenRestore = $('bkx_open_restore');
     if (btnOpenRestore) btnOpenRestore.addEventListener('click', () => openRestore());
-    el.history.addEventListener('click', e => {
-        const b = e.target.closest('[data-use-backup]');
-        if (b) openRestore(b.getAttribute('data-use-backup'));
-    });
+    if (hasRestore) {
+        el.history.addEventListener('click', e => {
+            const b = e.target.closest('[data-use-backup]');
+            if (b) openRestore(b.getAttribute('data-use-backup'));
+        });
+    }
 
     loadHistory();
-    loadGate();
+    if (el.gateList) loadGate();
 })();

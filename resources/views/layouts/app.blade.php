@@ -426,22 +426,38 @@
                         </div>
 
                         <div class="user-dropdown-menu profile-menu-card" id="user_dropdown_menu">
+                            @auth
+                                <div class="profile-menu-head">
+                                    <div class="profile-menu-avatar">
+                                        @if(!empty($headerAvatar))
+                                            <img src="{{ asset($headerAvatar) }}" alt="">
+                                        @else
+                                            {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    <div class="profile-menu-identity">
+                                        <span class="profile-menu-name">{{ auth()->user()->name }}</span>
+                                        <span class="profile-menu-role">{{ ucfirst(auth()->user()->role) }}</span>
+                                    </div>
+                                </div>
+                                <div class="profile-menu-divider"></div>
+                            @endauth
                             <a href="{{ in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']) ? route('admin.settings') . '#profile_info' : route('profile') }}" class="profile-menu-item" id="nav_my_profile">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/></svg>
+                                <span class="profile-menu-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 20v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/></svg></span>
                                 <span>Profile</span>
                             </a>
 
                             @if(in_array(auth()->check() ? strtolower(auth()->user()->role) : 'admin', ['admin', 'manager']))
                                 <a href="{{ route('admin.settings') }}#appearance" class="profile-menu-item">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.25 4.75v9.5L12 21.5l-8.25-4.75v-9.5z"/><circle cx="12" cy="12" r="3.25"/></svg>
+                                    <span class="profile-menu-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8.25 4.75v9.5L12 21.5l-8.25-4.75v-9.5z"/><circle cx="12" cy="12" r="3.25"/></svg></span>
                                     <span>Theme &amp; Language</span>
                                 </a>
                             @endif
 
                             <div class="profile-menu-divider"></div>
 
-                            <a href="{{ route('logout') }}" class="profile-menu-item">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M10 12h10"/><path d="M16 8l4 4-4 4"/></svg>
+                            <a href="{{ route('logout') }}" class="profile-menu-item profile-menu-signout">
+                                <span class="profile-menu-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M10 12h10"/><path d="M16 8l4 4-4 4"/></svg></span>
                                 <span>Sign out</span>
                             </a>
                         </div>

@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="procurement-stat-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.25rem;">
             <div class="status-dist-box">
                 <span class="status-dist-label">Active Suppliers</span>
                 <span class="status-dist-val" style="color: var(--text-title);">{{ number_format($suppliersCount) }}</span>
@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- VIP Customers & Loyalty -->
-        <div class="dash-loyalty-box" style="padding: 1rem; background: #faf6f0; border-radius: 12px; border: 1px solid rgba(238, 233, 224, 0.8); display: flex; justify-content: space-between; align-items: center;">
+        <div class="dash-loyalty-box" style="gap: 0.75rem; padding: 1rem; background: #faf6f0; border-radius: 12px; border: 1px solid rgba(238, 233, 224, 0.8); display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div style="font-weight: 700; color: var(--text-title); font-size: 0.9rem;">Customer Loyalty Program</div>
             </div>
@@ -717,7 +717,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- Recent Orders Table -->
-<div class="bakery-card">
+<div class="bakery-card recent-orders-card">
+    <div class="ro-mobile-header">
+        <h3>Recent Orders</h3>
+        <p>Real-time bakery transactions</p>
+    </div>
 
 
     <div class="table-responsive-wrapper">
@@ -745,12 +749,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         };
                         $custName = $order->customer ? $order->customer->name : ($order->customer_name ?: 'Walk-in Customer');
                     @endphp
-                    <tr>
-                        <td style="font-weight: 800;">#{{ $order->id }}</td>
-                        <td><span class="type-pill walkin">{{ strtoupper($order->payment_type ?? $order->order_type ?? 'POS') }}</span></td>
-                        <td>{{ $custName }}</td>
-                        <td style="font-weight: 700;">{{ $currency }}{{ number_format($order->total, 2) }}</td>
-                        <td>{!! $statusBadge !!}</td>
+                    <tr onclick="if (window.innerWidth < 768 && !event.target.closest('.btn-view-order')) this.querySelector('.btn-view-order')?.click()">
+                        <td data-label="Order ID" style="font-weight: 800;">#{{ $order->id }}</td>
+                        @php
+                            $roPayLabel = match($order->payment_method) { 'qr_code' => 'KHQR', 'card' => 'CARD', default => 'CASH' };
+                            $roPaid = ($order->payment_status ?? 'unpaid') === 'paid';
+                        @endphp
+                        <td data-label="Type">
+                            <span class="type-pill walkin">{{ strtoupper($order->payment_type ?? $order->order_type ?? 'POS') }}</span>
+                            <span class="ro-pay-badge {{ $roPaid ? 'paid' : 'unpaid' }}">{{ $roPayLabel }} • {{ $roPaid ? 'PAID' : 'UNPAID' }}</span>
+                        </td>
+                        <td data-label="Customer">{{ $custName }}</td>
+                        <td data-label="Items" class="ro-mobile-only">
+                            <div class="ro-items-text">{{ $order->items_summary }}</div>
+                            <div class="ro-items-count">{{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }}</div>
+                        </td>
+                        <td data-label="Date" class="ro-mobile-only">{{ $order->created_at ? $order->created_at->format('M d, Y, h:i A') : '' }}</td>
+                        <td data-label="Total" style="font-weight: 700;">{{ $currency }}{{ number_format($order->total, 2) }}</td>
+                        <td data-label="Status">{!! $statusBadge !!}</td>
                         <td>
                             <div class="action-btn-group">
                                 <button type="button" class="table-icon-btn btn-view-order" 

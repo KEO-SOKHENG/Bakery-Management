@@ -247,7 +247,7 @@ class DashboardController extends Controller
         // =====================================================================
         // 9. RECENT ORDERS TABLE
         // =====================================================================
-        $recentOrders = Order::with(['user', 'customer'])
+        $recentOrders = Order::with(['user', 'customer', 'items.product'])
             ->orderBy('id', 'desc')
             ->limit(6)
             ->get();

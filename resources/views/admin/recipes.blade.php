@@ -35,7 +35,7 @@
     @endif
 
     <!-- 4 Core KPI Stat Cards Grid (Exact Orders / Dashboard Page Style) -->
-    <div class="dash-stat-row">
+    <div class="dash-stat-row" id="recipes_stat_row">
         <div class="stat-card">
             <div class="stat-icon-box orange">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
@@ -101,13 +101,12 @@
                 <input type="hidden" name="status" value="{{ request('status') }}">
             @endif
             <div class="supplier-filter-pill-card">
-                <select name="product_id" id="recipe_product_select">
+                <select name="product_id" id="recipe_product_select" onchange="this.form.submit()">
                     <option value="all">All Products</option>
                     @foreach($products as $product)
                         <option value="{{ $product->id }}" {{ request('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="btn" style="border-radius: 50px; padding: 0.45rem 1.35rem; font-weight: 700; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: #ea580c; border: 1px solid #ea580c; color: #ffffff; cursor: pointer; font-size: 0.875rem;">Filter</button>
                 @if(request()->filled('product_id') && request('product_id') !== 'all')
                     <a href="{{ route('admin.recipes', request('status') ? ['status' => request('status')] : []) }}" class="btn btn-secondary" style="border-radius: 50px; padding: 0.45rem 0.9rem; font-weight: 600; height: 34px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.825rem;">Clear</a>
                 @endif
@@ -116,7 +115,7 @@
 
         <!-- Right: Add Recipe Action Button -->
         <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <button type="button" class="btn" id="btn_open_recipe_modal" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #f59e0b; border: 1px solid #f59e0b; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);">
+            <button type="button" class="btn m-icon-btn" id="btn_open_recipe_modal" title="Add Recipe" aria-label="Add Recipe" style="border-radius: 50px; height: 38px; padding: 0 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; background: #f59e0b; border: 1px solid #f59e0b; color: #ffffff; cursor: pointer; font-size: 0.875rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Add Recipe</span>
             </button>
@@ -142,8 +141,8 @@
                 </thead>
                 <tbody>
                     @forelse($recipes as $recipe)
-                        <tr>
-                            <td>
+                        <tr class="rcp-row">
+                            <td class="rcp-name" data-label="Formula">
                                 <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary, #0f172a);">
                                     {{ $recipe->recipe_name }}
                                 </div>
@@ -153,7 +152,7 @@
                                     </div>
                                 @endif
                             </td>
-                            <td>
+                            <td class="rcp-product" data-label="Product">
                                 <div style="font-weight: 700; font-size: 0.9rem; color: #ea580c;">
                                     {{ $recipe->product_name }}
                                 </div>
@@ -161,7 +160,7 @@
                                     {{ $recipe->product && $recipe->product->category ? $recipe->product->category->name : 'Bakery Item' }}
                                 </div>
                             </td>
-                            <td>
+                            <td class="rcp-time" data-label="Bake Time">
                                 <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; font-weight: 600;">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     <span>{{ $recipe->formatted_production_time }}</span>
@@ -171,12 +170,12 @@
                                     <span>{{ $recipe->bake_temp }}</span>
                                 </div>
                             </td>
-                            <td>
+                            <td class="rcp-yield" data-label="Yield">
                                 <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 50px; padding: 3px 10px; font-weight: 700; font-size: 0.8rem; white-space: nowrap;">
                                     {{ $recipe->yield_quantity }} pcs
                                 </span>
                             </td>
-                            <td>
+                            <td class="rcp-ings" data-label="Ingredients">
                                 <div style="font-size: 0.825rem; color: var(--text-body, #334155); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;" title="{{ $recipe->ingredients_summary }}">
                                     {{ $recipe->ingredients_summary }}
                                 </div>
@@ -184,22 +183,22 @@
                                     {{ $recipe->ingredients->count() }} ingredients used
                                 </div>
                             </td>
-                            <td>
+                            <td class="rcp-unit" data-label="Cost / Unit">
                                 <div style="font-weight: 800; font-size: 0.95rem; color: #10b981;">
                                     ${{ number_format($recipe->cost_per_unit, 2) }}
                                 </div>
                             </td>
-                            <td>
+                            <td class="rcp-total" data-label="Total Cost">
                                 <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-title, #29150d);">
                                     ${{ number_format($recipe->total_cost, 2) }}
                                 </div>
                             </td>
-                            <td>
+                            <td class="rcp-status" data-label="Status">
                                 <span class="badge" style="border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; font-weight: 700; {{ $recipe->status === 'active' ? 'background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);' : 'background: rgba(100, 116, 139, 0.12); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25);' }}">
                                     {{ ucfirst($recipe->status ?? 'active') }}
                                 </span>
                             </td>
-                            <td style="text-align: right;">
+                            <td class="rcp-action" data-label="Action" style="text-align: right;">
                                 <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.45rem;">
                                     <!-- Edit Button -->
                                     <button type="button" class="btn-icon-action btn-edit-recipe"

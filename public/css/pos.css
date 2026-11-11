@@ -1767,6 +1767,35 @@ body.is-pos-page .pos-grid-container {
     scrollbar-color: rgba(217, 119, 6, 0.35) transparent;
 }
 
+/* ── Tablet portrait (iPad Mini/Air): 2-column catalog, slimmer cart ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+    body.is-pos-page .pos-screen-layout {
+        grid-template-columns: minmax(0, 1fr) 300px !important;
+        gap: 0.75rem !important;
+    }
+
+    body.is-pos-page .pos-grid-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.65rem !important;
+        padding-right: 4px !important;
+    }
+
+    body.is-pos-page .pos-grid-container > * {
+        min-width: 0 !important;
+        padding: 0.75rem 0.6rem !important;
+    }
+
+    body.is-pos-page .pos-cart-panel {
+        padding: 0.9rem 0.95rem !important;
+    }
+
+    /* Items list shrinks first so totals + Complete Sale always stay visible */
+    body.is-pos-page .pos-cart-items-container {
+        flex: 1 1 0 !important;
+        min-height: 60px !important;
+    }
+}
+
 body.is-pos-page .pos-grid-container::-webkit-scrollbar {
     width: 6px !important;
     display: block !important;
@@ -1846,4 +1875,329 @@ body.is-pos-page .btn-complete-sale,
 body.is-pos-page #btn_complete_sale {
     flex-shrink: 0 !important;
     margin-top: 0 !important;
+}
+
+/* ==========================================================================
+   Mobile (<768px): restore app layout over the desktop full-viewport lock
+   ========================================================================== */
+@media (max-width: 767px) {
+    body.is-pos-page .bakery-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        z-index: 1100 !important;
+    }
+    body.is-pos-page .bakery-main-content {
+        padding: 0.75rem 1rem 0 !important;
+        width: 100% !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+    }
+    body.is-pos-page .pos-screen-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        width: 100% !important;
+    }
+    body.is-pos-page .pos-catalog-panel {
+        width: 100% !important;
+        flex: 1 1 auto !important;
+    }
+    body.is-pos-page .pos-grid-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.7rem !important;
+        padding-right: 0 !important;
+        padding-bottom: 5.5rem !important;
+    }
+    /* Cart becomes a bottom sheet */
+    body.is-pos-page .pos-cart-panel {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 86dvh !important;
+        border-radius: 24px 24px 0 0 !important;
+        z-index: 1060 !important;
+        transform: translateY(105%) !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        padding: 0.85rem 1.15rem 1.5rem !important;
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease !important;
+    }
+    body.is-pos-page .pos-cart-panel.mobile-drawer-open,
+    body.is-pos-page .pos-cart-panel.mobile-open {
+        transform: translateY(0) !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* Mobile cart sheet polish: single title, scrolling items, pinned checkout */
+@media (max-width: 767px) {
+    body.is-pos-page .pos-cart-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        padding-top: 0.5rem !important;
+    }
+    body.is-pos-page .pos-cart-mobile-drawer-top {
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        margin: 0 0 0.35rem !important;
+        border: none !important;
+    }
+    body.is-pos-page .pos-cart-mobile-bar-title > span { display: none !important; }
+    body.is-pos-page .pos-cart-mobile-bar-title {
+        position: absolute !important;
+        top: 0.85rem !important;
+        right: 1rem !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        width: auto !important;
+    }
+    body.is-pos-page .btn-close-cart-drawer {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1.15rem !important;
+    }
+    body.is-pos-page .pos-cart-header {
+        flex-shrink: 0 !important;
+        padding: 0.25rem 2.75rem 0.65rem 0 !important;
+        margin-bottom: 0.65rem !important;
+    }
+    body.is-pos-page .pos-cart-title { font-size: 1.05rem !important; }
+
+    /* Only the item list scrolls */
+    body.is-pos-page .pos-cart-items-container {
+        flex: 1 1 auto !important;
+        min-height: 60px !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        gap: 0.5rem !important;
+        padding-right: 0 !important;
+        margin-bottom: 0.75rem !important;
+    }
+    body.is-pos-page .pos-cart-items-container > * {
+        padding: 0.65rem 0.75rem !important;
+        border-radius: 14px !important;
+    }
+    body.is-pos-page .pos-cart-form-group,
+    body.is-pos-page .pos-totals-table,
+    body.is-pos-page .btn-complete-sale { flex-shrink: 0 !important; }
+    body.is-pos-page .pos-cart-form-group { margin-bottom: 0.6rem !important; }
+    body.is-pos-page .pos-totals-table { gap: 0.4rem !important; padding-top: 0.6rem !important; }
+    body.is-pos-page .btn-complete-sale {
+        min-height: 50px !important;
+        border-radius: 16px !important;
+        margin-top: 0.5rem !important;
+    }
+}
+
+/* Mobile cart sheet: no close (×) button — tap backdrop to dismiss */
+@media (max-width: 767px) {
+    body.is-pos-page .pos-cart-mobile-bar-title,
+    body.is-pos-page .btn-close-cart-drawer { display: none !important; }
+    body.is-pos-page .pos-cart-header { padding-right: 0 !important; }
+}
+
+/* ==========================================================================
+   iPad Mini (768–1023px): phone-style cart — full-width catalog,
+   floating bottom bar, cart opens as a centred bottom sheet
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* Catalog takes the whole width */
+    body.is-pos-page .pos-screen-layout {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    body.is-pos-page .pos-grid-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+        padding-bottom: 6rem !important;
+    }
+
+    /* Cart panel → bottom sheet */
+    body.is-pos-page .pos-cart-panel {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 50% !important;
+        right: auto !important;
+        width: min(560px, calc(100vw - 32px)) !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: 82dvh !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        border-radius: 24px 24px 0 0 !important;
+        background: var(--card-bg, #ffffff) !important;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.28) !important;
+        z-index: 1060 !important;
+        transform: translate(-50%, 105%) !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease !important;
+        padding: 0.6rem 1.25rem 1.25rem !important;
+        box-sizing: border-box !important;
+    }
+
+    body.is-pos-page .pos-cart-panel.mobile-drawer-open,
+    body.is-pos-page .pos-cart-panel.mobile-open {
+        transform: translate(-50%, 0) !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /* Drawer top: drag handle + close button */
+    body.is-pos-page .pos-cart-mobile-drawer-top {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        margin: 0 0 0.35rem !important;
+        padding: 0 !important;
+        border: none !important;
+        width: 100% !important;
+    }
+    body.is-pos-page .pos-cart-drag-handle {
+        width: 42px !important;
+        height: 5px !important;
+        border-radius: 5px !important;
+        background: rgba(0, 0, 0, 0.18) !important;
+    }
+    body.is-pos-page .pos-cart-mobile-bar-title > span { display: none !important; }
+    body.is-pos-page .pos-cart-mobile-bar-title {
+        display: flex !important;
+        position: absolute !important;
+        top: 0.85rem !important;
+        right: 1rem !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    body.is-pos-page .btn-close-cart-drawer {
+        width: 32px !important;
+        height: 32px !important;
+        border: none !important;
+        border-radius: 50% !important;
+        background: rgba(0, 0, 0, 0.06) !important;
+        color: var(--text-title, #29150d) !important;
+        font-size: 1.15rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+    }
+
+    /* Header on one line, room for the close button */
+    body.is-pos-page .pos-cart-header {
+        flex-shrink: 0 !important;
+        padding: 0.25rem 2.75rem 0.65rem 0 !important;
+        margin-bottom: 0.65rem !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+    }
+
+    /* Only the items list scrolls; empty state stays compact */
+    body.is-pos-page .pos-cart-items-container {
+        flex: 1 1 auto !important;
+        min-height: 60px !important;
+        max-height: 40dvh !important;
+        overflow-y: auto !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Floating bottom bar, beside the sidebar rail */
+    body.is-pos-page .pos-mobile-cart-bar {
+        position: fixed !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        left: 104px !important;
+        right: 16px !important;
+        bottom: 16px !important;
+        height: 60px !important;
+        padding: 0 0.6rem 0 1.1rem !important;
+        border-radius: 18px !important;
+        background: linear-gradient(135deg, #563020 0%, #3b2118 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 10px 30px rgba(41, 21, 13, 0.35) !important;
+        z-index: 1045 !important;
+        box-sizing: border-box !important;
+        cursor: pointer !important;
+    }
+    body.is-pos-page .pos-mobile-cart-summary {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
+    }
+    body.is-pos-page .pos-mobile-cart-count-badge {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+    }
+    body.is-pos-page .pos-mobile-cart-total-val {
+        font-size: 1.2rem !important;
+        font-weight: 800 !important;
+        color: #4ade80 !important;
+    }
+    body.is-pos-page .btn-pos-mobile-view-cart {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+        padding: 0.6rem 1.2rem !important;
+        border: none !important;
+        border-radius: 50px !important;
+        background: #f59e0b !important;
+        color: #18181c !important;
+        font-weight: 800 !important;
+        font-size: 0.88rem !important;
+        cursor: pointer !important;
+    }
+
+    /* Backdrop */
+    body.is-pos-page .pos-cart-backdrop {
+        display: block !important;
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(5px) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        z-index: 1055 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    }
+    body.is-pos-page .pos-cart-backdrop.is-active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /* Dark mode */
+    [data-theme="dark"] body.is-pos-page .pos-cart-panel {
+        background: #18181c !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-bottom: none !important;
+        box-shadow: 0 -12px 45px rgba(0, 0, 0, 0.65) !important;
+    }
+    [data-theme="dark"] body.is-pos-page .pos-cart-drag-handle { background: rgba(255, 255, 255, 0.25) !important; }
+    [data-theme="dark"] body.is-pos-page .btn-close-cart-drawer {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    [data-theme="dark"] body.is-pos-page .pos-mobile-cart-bar {
+        background: linear-gradient(135deg, #27272a 0%, #18181b 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
 }
